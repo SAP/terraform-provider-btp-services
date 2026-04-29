@@ -1,4 +1,4 @@
-// btpservices/provider/services/cicd/credentials/types.go
+// btpservices/provider/cicd/credentials/types.go
 
 package cicdcredentials
 

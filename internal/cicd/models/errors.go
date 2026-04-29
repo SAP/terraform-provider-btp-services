@@ -1,4 +1,4 @@
-// internal/services/cicd/models/errors.go
+// internal/cicd/models/errors.go
 
 package cicdmodels
 

@@ -1,4 +1,4 @@
-// internal/services/cicd/client/client_config.go
+// internal/cicd/client/client_config.go
 
 package cicdclient
 

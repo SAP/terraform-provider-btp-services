@@ -1,4 +1,4 @@
-// internal/services/cicd/client/facade.go
+// internal/cicd/client/facade.go
 
 package cicdclient
 

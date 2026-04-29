@@ -1,4 +1,4 @@
-// btpservices/provider/services/cicd/credentials/datasource_basic_auth.go
+// btpservices/provider/cicd/credentials/datasource_basic_auth.go
 
 package cicdcredentials
 

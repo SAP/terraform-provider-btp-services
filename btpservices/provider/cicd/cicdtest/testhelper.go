@@ -1,4 +1,4 @@
-// btpservices/provider/services/cicd/cicdtest/testhelper.go
+// btpservices/provider/cicd/cicdtest/testhelper.go
 
 package cicdtest
 

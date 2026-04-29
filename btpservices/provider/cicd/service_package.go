@@ -1,4 +1,4 @@
-// btpservices/provider/services/cicd/service_package.go
+// btpservices/provider/cicd/service_package.go
 
 package cicd
 

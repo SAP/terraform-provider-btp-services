@@ -1,4 +1,4 @@
-// internal/services/cicd/models/credential.go
+// internal/cicd/models/credential.go
 
 package cicdmodels
 
