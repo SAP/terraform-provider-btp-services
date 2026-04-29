@@ -1,7 +1,7 @@
 // main.go
 
 // Run "make generate" to regenerate provider documentation.
-//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name sapbtp --provider-dir .
+//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name btpservice --provider-dir .
 
 package main
 
