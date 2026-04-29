@@ -12,12 +12,12 @@ import (
 	"github.com/SAP/terraform-provider-sap-btp-services/internal/shared"
 )
 
-// providerFactoryDev returns a provider factory using New("dev") — the normal
+// providerFactoryDev returns a provider factory using New() — the normal
 // production code path (no pre-injected clients).
 func providerFactoryDev() map[string]func() (tfprotov6.ProviderServer, error) {
 	return map[string]func() (tfprotov6.ProviderServer, error){
 		"btpservice": providerserver.NewProtocol6WithError(
-			New("dev")(),
+			New()(),
 		),
 	}
 }
@@ -26,7 +26,7 @@ func providerFactoryDev() map[string]func() (tfprotov6.ProviderServer, error) {
 // clients — simulates the acceptance-test path without real credentials.
 func providerFactoryWithClients() map[string]func() (tfprotov6.ProviderServer, error) {
 	return map[string]func() (tfprotov6.ProviderServer, error){
-		"sapbtp": providerserver.NewProtocol6WithError(
+		"btpservice": providerserver.NewProtocol6WithError(
 			NewWithClients(&shared.ProviderClients{}),
 		),
 	}

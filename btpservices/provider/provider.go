@@ -22,9 +22,9 @@ import (
 var _ provider.Provider = &btpServicesProvider{}
 
 // New returns a constructor for the provider — called by main.go.
-func New(version string) func() provider.Provider {
+func New() func() provider.Provider {
 	return func() provider.Provider {
-		return &btpServicesProvider{version: version}
+		return &btpServicesProvider{}
 	}
 }
 
@@ -35,7 +35,6 @@ func NewWithClients(clients *shared.ProviderClients) provider.Provider {
 }
 
 type btpServicesProvider struct {
-	version         string
 	prebuiltClients *shared.ProviderClients
 }
 
@@ -54,7 +53,6 @@ type cicdProviderModel struct {
 
 func (p *btpServicesProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "btpservice"
-	resp.Version = p.version
 }
 
 func (p *btpServicesProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {

@@ -15,20 +15,18 @@ import (
 	btpservicesprovider "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider"
 )
 
-// version is set by goreleaser at build time via -ldflags.
-var version = "dev"
-
 func main() {
 	var debug bool
 	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers")
 	flag.Parse()
 
 	opts := providerserver.ServeOpts{
-		Address: "registry.terraform.io/SAP/sap-btp-services",
-		Debug:   debug,
+		Address:         "registry.terraform.io/SAP/sap-btp-services",
+		Debug:           debug,
+		ProtocolVersion: 6,
 	}
 
-	if err := providerserver.Serve(context.Background(), btpservicesprovider.New(version), opts); err != nil {
+	if err := providerserver.Serve(context.Background(), btpservicesprovider.New(), opts); err != nil {
 		log.Fatal(err)
 	}
 }
