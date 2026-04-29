@@ -80,6 +80,13 @@ func (d *basicAuthDataSource) Configure(_ context.Context, req datasource.Config
 		return
 	}
 
+	if clients.Cicd == nil {
+		resp.Diagnostics.AddError(
+			"Missing CI/CD Configuration",
+			"A cicd{} block must be configured in the provider to use CI/CD data sources.",
+		)
+		return
+	}
 	d.cli = clients.Cicd
 }
 

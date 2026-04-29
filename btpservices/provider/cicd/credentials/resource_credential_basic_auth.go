@@ -79,6 +79,14 @@ func (r *basicAuthResource) Configure(_ context.Context, req resource.ConfigureR
 		)
 		return
 	}
+
+	if clients.Cicd == nil {
+		resp.Diagnostics.AddError(
+			"Missing CI/CD Configuration",
+			"A cicd{} block must be configured in the provider to use CI/CD resources.",
+		)
+		return
+	}
 	r.cli = clients.Cicd
 }
 

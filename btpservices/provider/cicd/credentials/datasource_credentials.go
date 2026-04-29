@@ -75,6 +75,13 @@ func (d *credentialsDataSource) Configure(_ context.Context, req datasource.Conf
 		return
 	}
 
+	if clients.Cicd == nil {
+		resp.Diagnostics.AddError(
+			"Missing CI/CD Configuration",
+			"A cicd{} block must be configured in the provider to use CI/CD data sources.",
+		)
+		return
+	}
 	d.cli = clients.Cicd
 }
 
