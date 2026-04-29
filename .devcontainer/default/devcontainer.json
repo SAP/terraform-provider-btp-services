@@ -1,14 +1,15 @@
 {
-	"name": "Terraform provider for SAP BTP services - Development (with env file)",
+	"name": "Terraform provider for SAP BTP  services- Development",
+	//https://mcr.microsoft.com/en-us/product/devcontainers/go/tags
 	"image": "mcr.microsoft.com/devcontainers/go:dev-1.26",
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
 		"ghcr.io/devcontainers/features/terraform:1": {
-			"version": "1.14.5"
+			"version": "1.14.0"
 		},
 		"ghcr.io/devcontainers/features/github-cli:1": {},
 		"ghcr.io/robbert229/devcontainer-features/opentofu:1": {
-			"version": "1.11.5"
+			"version": "1.10.5"
 		}
 	},
 	"customizations": {
@@ -29,15 +30,5 @@
 	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
-	"remoteUser": "vscode",
-	// This devcontainer expects a file named .devcontainer/devcontainer.env to exist.
-	// you should place the following environment variables in that file:
-	// - SAPBTP_CICD_ENDPOINT
-	// - SAPBTP_CICD_TOKEN_URL
-	// - SAPBTP_CICD_CLIENT_ID
-	// - SAPBTP_CICD_CLIENT_SECRET
-	"runArgs": [
-		"--env-file",
-		".devcontainer/devcontainer.env"
-	]
+	"remoteUser": "vscode"
 }
