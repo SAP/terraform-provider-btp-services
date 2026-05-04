@@ -18,7 +18,7 @@ func TestAccDatasourceCicdCredentialBasicAuth(t *testing.T) {
 	t.Run("read", func(t *testing.T) {
 		t.Parallel()
 
-		rec, creds := cicdtest.SetupVCR(t, "fixtures/datasource_credential_read")
+		rec, creds := cicdtest.SetupVCR(t, "../fixtures/datasource_credential_read")
 		defer testutil.StopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
@@ -44,7 +44,7 @@ data "btpservice_cicd_credential" "uut" {
 	t.Run("not_found", func(t *testing.T) {
 		t.Parallel()
 
-		rec, creds := cicdtest.SetupVCR(t, "fixtures/datasource_credential_not_found")
+		rec, creds := cicdtest.SetupVCR(t, "../fixtures/datasource_credential_not_found")
 		defer testutil.StopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{

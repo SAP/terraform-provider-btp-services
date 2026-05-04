@@ -17,7 +17,7 @@ func TestAccDatasourceCicdCredentials(t *testing.T) {
 	t.Run("list", func(t *testing.T) {
 		t.Parallel()
 
-		rec, creds := cicdtest.SetupVCR(t, "fixtures/datasource_credentials_list")
+		rec, creds := cicdtest.SetupVCR(t, "../fixtures/datasource_credentials_list")
 		defer testutil.StopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{

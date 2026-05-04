@@ -18,7 +18,7 @@ func TestAccResourceCicdCredentialBasicAuth(t *testing.T) {
 	t.Run("happy path - basic creds", func(t *testing.T) {
 		t.Parallel()
 
-		rec, creds := cicdtest.SetupVCR(t, "fixtures/resource_credential_basic_auth")
+		rec, creds := cicdtest.SetupVCR(t, "../fixtures/resource_credential_basic_auth")
 		defer testutil.StopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
