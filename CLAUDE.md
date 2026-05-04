@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Terraform provider for SAP BTP (Business Technology Platform) services. The first service targeted is the CI/CD Service (credentials management). Provider type name: `btpservice`.
+This is a Terraform provider for SAP BTP (Business Technology Platform) services. The first service targeted is the CI/CD Service (credentials management). Provider type name: `btpservice` (resources are named `btpservice_cicd_credential_basic_auth` etc.).
 
 Module path: `github.com/SAP/terraform-provider-sap-btp-services`
 
@@ -26,7 +26,8 @@ Build and development:
 Testing:
 - `make test` - Run unit tests with coverage (all tags, parallel=4)
 - `make testacc` - Run acceptance tests (requires `TF_ACC=1`, long-running, needs live BTP credentials)
-- `go test -v -run TestResourceCredentialBasicAuth ./btpservices/provider/cicd/credentials/` - Run specific test
+- `go test -v -run TestResourceCredentialBasicAuth ./btpservices/provider/cicd/credentials/` - Run specific resource test
+- `go test -v -run TestDataSourceCredential ./btpservices/provider/cicd/credentials/` - Run specific datasource test
 
 Development setup:
 - Configure Terraform CLI dev override in `~/.terraformrc` (Mac/Linux) or `%APPDATA%/terraform.rc` (Windows):
@@ -56,6 +57,7 @@ btpservices/provider/
   cicd/
     service_package.go                                  # package cicd — registers resources/datasources
     cicdtest/testhelper.go                              # package cicdtest — SetupVCR() for CI/CD tests
+    fixtures/                                           # VCR cassettes (YAML) shared by all cicd tests
     credentials/
       resource_credential_basic_auth.go                 # CRUD resource
       resource_credential_basic_auth_test.go
@@ -64,7 +66,6 @@ btpservices/provider/
       datasource_credentials.go                         # list credentials data source
       datasource_credentials_test.go
       types.go                                          # model structs + valueFrom() + toRequest()
-      fixtures/                                         # VCR cassettes (YAML)
 
 internal/
   shared/
@@ -80,6 +81,7 @@ internal/
     models/
       credential.go                                     # API request/response structs
       errors.go
+      errors_test.go
 
 docs/                                                   # GENERATED — never edit manually
 examples/                                               # example Terraform configs
@@ -88,7 +90,7 @@ examples/                                               # example Terraform conf
 ## Architecture
 
 ### Adding a new service
-1. Create `internal/services/<svc>/client/` and `internal/services/<svc>/models/` for HTTP transport + models
+1. Create `internal/<svc>/client/` and `internal/<svc>/models/` for HTTP transport + models
 2. Create `btpservices/provider/<svc>/` for provider wiring (service_package.go + resources/datasources)
 3. Add a field to `internal/shared/provider_clients.go`
 4. Register `ServicePackage{}` in `btpservices/provider/provider.go::servicePackages()`
@@ -126,7 +128,9 @@ Env vars: `SAPBTP_CICD_ENDPOINT`, `SAPBTP_CICD_TOKEN_URL`, `SAPBTP_CICD_CLIENT_I
 
 **Testing:**
 - Uses `terraform-plugin-testing` framework
-- VCR (go-vcr) recordings in `fixtures/` reduce live API dependency
+- VCR (go-vcr v3.2.1) recordings in `btpservices/provider/cicd/fixtures/` reduce live API dependency
+- `IsUnitTest: true` on all test cases — run without `TF_ACC=1`
+- `ImportStateVerifyIgnore: []string{"password"}` — API never returns password on read
 - Test naming: `TestResource<Name>` or `TestDataSource<Name>`
 - Include import state verification in tests
 
