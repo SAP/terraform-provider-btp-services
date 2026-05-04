@@ -18,18 +18,14 @@ import (
 	"github.com/SAP/terraform-provider-sap-btp-services/internal/shared"
 )
 
-// Compile-time interface compliance check.
 var _ provider.Provider = &btpServicesProvider{}
 
-// New returns a constructor for the provider — called by main.go.
 func New() func() provider.Provider {
 	return func() provider.Provider {
 		return &btpServicesProvider{}
 	}
 }
 
-// NewWithClients returns a provider pre-loaded with the given clients.
-// Used exclusively by acceptance tests to inject a VCR-wrapped HTTP client.
 func NewWithClients(clients *shared.ProviderClients) provider.Provider {
 	return &btpServicesProvider{prebuiltClients: clients}
 }
@@ -38,7 +34,6 @@ type btpServicesProvider struct {
 	prebuiltClients *shared.ProviderClients
 }
 
-// providerModel is the Go representation of the HCL provider block.
 type providerModel struct {
 	Cicd *cicdProviderModel `tfsdk:"cicd"`
 }
@@ -90,7 +85,6 @@ func (p *btpServicesProvider) Schema(_ context.Context, _ provider.SchemaRequest
 }
 
 func (p *btpServicesProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	// Short-circuit for acceptance tests — clients already injected.
 	if p.prebuiltClients != nil {
 		resp.ResourceData = p.prebuiltClients
 		resp.DataSourceData = p.prebuiltClients
@@ -152,8 +146,6 @@ func (p *btpServicesProvider) DataSources(ctx context.Context) []func() datasour
 	return all
 }
 
-// resolveString returns the HCL string value if set, otherwise falls back to the
-// named environment variable.
 func resolveString(v types.String, envKey string) string {
 	if !v.IsNull() && !v.IsUnknown() {
 		return v.ValueString()

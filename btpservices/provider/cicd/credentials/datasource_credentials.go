@@ -17,7 +17,6 @@ import (
 var _ datasource.DataSource = &credentialsDataSource{}
 var _ datasource.DataSourceWithConfigure = &credentialsDataSource{}
 
-// NewCredentialsDataSource is the constructor exported to service_package.go.
 func NewCredentialsDataSource() datasource.DataSource {
 	return &credentialsDataSource{}
 }

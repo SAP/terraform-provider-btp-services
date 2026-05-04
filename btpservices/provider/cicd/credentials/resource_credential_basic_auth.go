@@ -21,7 +21,6 @@ var _ resource.Resource = &basicAuthResource{}
 var _ resource.ResourceWithConfigure = &basicAuthResource{}
 var _ resource.ResourceWithImportState = &basicAuthResource{}
 
-// NewBasicAuthResource is the constructor exported to service_package.go.
 func NewBasicAuthResource() resource.Resource {
 	return &basicAuthResource{}
 }
@@ -102,7 +101,6 @@ func (r *basicAuthResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	// POST returns 201 with no body — fetch the created resource by name.
 	result, err := r.cli.Credentials.Get(ctx, plan.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error Reading Credential After Create", err.Error())
@@ -110,7 +108,7 @@ func (r *basicAuthResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	state := basicAuthResourceValueFrom(*result)
-	state.Password = plan.Password // preserve — API never returns it
+	state.Password = plan.Password
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
@@ -132,7 +130,7 @@ func (r *basicAuthResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 
 	updated := basicAuthResourceValueFrom(*result)
-	updated.Password = state.Password // preserve — API masks it on read
+	updated.Password = state.Password
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
 }
 
@@ -154,7 +152,6 @@ func (r *basicAuthResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	// PATCH returns 204 with no body — read back to resolve any Computed fields.
 	result, err := r.cli.Credentials.Get(ctx, state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error Reading Credential After Update", err.Error())
@@ -162,7 +159,7 @@ func (r *basicAuthResource) Update(ctx context.Context, req resource.UpdateReque
 	}
 
 	updated := basicAuthResourceValueFrom(*result)
-	updated.Password = plan.Password // preserve — API never returns it
+	updated.Password = plan.Password
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
 }
 
