@@ -22,7 +22,7 @@ var _ datasource.DataSource = &basicAuthDataSource{}
 var _ datasource.DataSourceWithConfigure = &basicAuthDataSource{}
 
 // NewBasicAuthDataSource is the constructor exported to service_package.go.
-func NewBasicAuthDataSource() datasource.DataSource {
+func NewCredentialDataSource() datasource.DataSource {
 	return &basicAuthDataSource{}
 }
 

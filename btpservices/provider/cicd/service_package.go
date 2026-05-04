@@ -22,7 +22,7 @@ func (s ServicePackage) Resources(_ context.Context) []func() resource.Resource 
 
 func (s ServicePackage) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		credentials.NewBasicAuthDataSource,
+		credentials.NewCredentialDataSource,
 		credentials.NewCredentialsDataSource,
 	}
 }
