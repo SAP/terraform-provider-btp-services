@@ -21,7 +21,7 @@ import (
 // These are used on replay — no live credentials are needed.
 var Redacted = testutil.TestCredentials{
 	"endpoint":      "https://cicd-service.cfapps.eu12.hana.ondemand.com",
-	"token_url":     "https://test-ci-cd-l646hcu6.authentication.eu12.hana.ondemand.com/oauth/token",
+	"token_url":     "https://integration-test-cicd-service-kfdmyx7a.authentication.eu12.hana.ondemand.com/oauth/token",
 	"client_id":     "redacted-client-id",
 	"client_secret": "redacted-client-secret",
 }

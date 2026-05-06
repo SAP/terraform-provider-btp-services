@@ -3,11 +3,14 @@
 package provider
 
 import (
+	"context"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	tftest "github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/SAP/terraform-provider-sap-btp-services/internal/shared"
 )
@@ -29,9 +32,9 @@ func providerFactoryWithClients() map[string]func() (tfprotov6.ProviderServer, e
 }
 
 func TestProvider_Schema(t *testing.T) {
-	resource.UnitTest(t, resource.TestCase{
+	tftest.UnitTest(t, tftest.TestCase{
 		ProtoV6ProviderFactories: providerFactoryDev(),
-		Steps: []resource.TestStep{
+		Steps: []tftest.TestStep{
 			{
 				Config: `provider "bptservice" {}`,
 			},
@@ -40,9 +43,9 @@ func TestProvider_Schema(t *testing.T) {
 }
 
 func TestProvider_CicdBlock(t *testing.T) {
-	resource.UnitTest(t, resource.TestCase{
+	tftest.UnitTest(t, tftest.TestCase{
 		ProtoV6ProviderFactories: providerFactoryDev(),
-		Steps: []resource.TestStep{
+		Steps: []tftest.TestStep{
 			{
 				Config: `
 provider "btpservice" {
@@ -60,9 +63,9 @@ provider "btpservice" {
 }
 
 func TestProvider_CicdBlock_CustomTimeout(t *testing.T) {
-	resource.UnitTest(t, resource.TestCase{
+	tftest.UnitTest(t, tftest.TestCase{
 		ProtoV6ProviderFactories: providerFactoryDev(),
-		Steps: []resource.TestStep{
+		Steps: []tftest.TestStep{
 			{
 				Config: `
 provider "btpservice" {
@@ -85,9 +88,9 @@ func TestProvider_EnvVarFallback(t *testing.T) {
 	t.Setenv("SAPBTP_CICD_CLIENT_ID", "test-client-id")
 	t.Setenv("SAPBTP_CICD_CLIENT_SECRET", "test-client-secret")
 
-	resource.UnitTest(t, resource.TestCase{
+	tftest.UnitTest(t, tftest.TestCase{
 		ProtoV6ProviderFactories: providerFactoryDev(),
-		Steps: []resource.TestStep{
+		Steps: []tftest.TestStep{
 			{
 				Config: `
 provider "btpservice" {
@@ -99,12 +102,89 @@ provider "btpservice" {
 }
 
 func TestProvider_NewWithClients(t *testing.T) {
-	resource.UnitTest(t, resource.TestCase{
+	tftest.UnitTest(t, tftest.TestCase{
 		ProtoV6ProviderFactories: providerFactoryWithClients(),
-		Steps: []resource.TestStep{
+		Steps: []tftest.TestStep{
 			{
 				Config: `provider "btpservice" {}`,
 			},
 		},
 	})
+}
+
+// ---------------------------------------------------------------------------
+// Resources() / DataSources() registration tests
+// ---------------------------------------------------------------------------
+
+// expectedResourceTypes lists every resource type name the provider must expose.
+var expectedResourceTypes = []string{
+	"btpservice_cicd_credential_basic_auth",
+	"btpservice_cicd_credential_cloud_connector",
+	"btpservice_cicd_credential_webhook_secret",
+	"btpservice_cicd_credential_container_registry",
+	"btpservice_cicd_credential_kubernetes_config",
+}
+
+// expectedDataSourceTypes lists every data source type name the provider must expose.
+var expectedDataSourceTypes = []string{
+	"btpservice_cicd_credential",
+	"btpservice_cicd_credentials",
+}
+
+func TestProvider_Resources_Count(t *testing.T) {
+	p := New()()
+	ctx := context.Background()
+
+	factories := p.Resources(ctx)
+	if len(factories) != len(expectedResourceTypes) {
+		t.Errorf("expected %d resource factories, got %d", len(expectedResourceTypes), len(factories))
+	}
+}
+
+func TestProvider_Resources_TypeNames(t *testing.T) {
+	p := New()()
+	ctx := context.Background()
+
+	got := make(map[string]bool)
+	for _, factory := range p.Resources(ctx) {
+		r := factory()
+		var meta resource.MetadataResponse
+		r.Metadata(ctx, resource.MetadataRequest{ProviderTypeName: "btpservice"}, &meta)
+		got[meta.TypeName] = true
+	}
+
+	for _, name := range expectedResourceTypes {
+		if !got[name] {
+			t.Errorf("missing resource type %q", name)
+		}
+	}
+}
+
+func TestProvider_DataSources_Count(t *testing.T) {
+	p := New()()
+	ctx := context.Background()
+
+	factories := p.DataSources(ctx)
+	if len(factories) != len(expectedDataSourceTypes) {
+		t.Errorf("expected %d data source factories, got %d", len(expectedDataSourceTypes), len(factories))
+	}
+}
+
+func TestProvider_DataSources_TypeNames(t *testing.T) {
+	p := New()()
+	ctx := context.Background()
+
+	got := make(map[string]bool)
+	for _, factory := range p.DataSources(ctx) {
+		ds := factory()
+		var meta datasource.MetadataResponse
+		ds.Metadata(ctx, datasource.MetadataRequest{ProviderTypeName: "btpservice"}, &meta)
+		got[meta.TypeName] = true
+	}
+
+	for _, name := range expectedDataSourceTypes {
+		if !got[name] {
+			t.Errorf("missing data source type %q", name)
+		}
+	}
 }
