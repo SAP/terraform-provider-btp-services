@@ -6,6 +6,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 
 	credentials "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/credentials"
@@ -28,5 +29,15 @@ func (s ServicePackage) DataSources(_ context.Context) []func() datasource.DataS
 	return []func() datasource.DataSource{
 		credentials.NewCredentialDataSource,
 		credentials.NewCredentialsDataSource,
+	}
+}
+
+func (s ServicePackage) ListResources(_ context.Context) []func() list.ListResource {
+	return []func() list.ListResource{
+		credentials.NewBasicAuthListResource,
+		credentials.NewCloudConnectorListResource,
+		credentials.NewWebhookSecretListResource,
+		credentials.NewContainerRegistryListResource,
+		credentials.NewKubernetesConfigListResource,
 	}
 }

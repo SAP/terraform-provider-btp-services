@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -19,6 +20,7 @@ import (
 )
 
 var _ provider.Provider = &btpServicesProvider{}
+var _ provider.ProviderWithListResources = &btpServicesProvider{}
 
 func New() func() provider.Provider {
 	return func() provider.Provider {
@@ -88,6 +90,7 @@ func (p *btpServicesProvider) Configure(ctx context.Context, req provider.Config
 	if p.prebuiltClients != nil {
 		resp.ResourceData = p.prebuiltClients
 		resp.DataSourceData = p.prebuiltClients
+		resp.ListResourceData = p.prebuiltClients
 		return
 	}
 
@@ -114,6 +117,7 @@ func (p *btpServicesProvider) Configure(ctx context.Context, req provider.Config
 
 	resp.ResourceData = clients
 	resp.DataSourceData = clients
+	resp.ListResourceData = clients
 }
 
 // servicePackages is the single service registry.
@@ -121,10 +125,12 @@ func (p *btpServicesProvider) Configure(ctx context.Context, req provider.Config
 func servicePackages() []interface {
 	Resources(context.Context) []func() resource.Resource
 	DataSources(context.Context) []func() datasource.DataSource
+	ListResources(context.Context) []func() list.ListResource
 } {
 	return []interface {
 		Resources(context.Context) []func() resource.Resource
 		DataSources(context.Context) []func() datasource.DataSource
+		ListResources(context.Context) []func() list.ListResource
 	}{
 		cicd.ServicePackage{},
 	}
@@ -142,6 +148,14 @@ func (p *btpServicesProvider) DataSources(ctx context.Context) []func() datasour
 	var all []func() datasource.DataSource
 	for _, pkg := range servicePackages() {
 		all = append(all, pkg.DataSources(ctx)...)
+	}
+	return all
+}
+
+func (p *btpServicesProvider) ListResources(ctx context.Context) []func() list.ListResource {
+	var all []func() list.ListResource
+	for _, pkg := range servicePackages() {
+		all = append(all, pkg.ListResources(ctx)...)
 	}
 	return all
 }
