@@ -5,6 +5,8 @@ package cicdmodels
 // Credential is the API response model for a single credential.
 // Sensitive fields (password, token, etc.) are never returned by the API on read.
 // The type-specific readable fields are surfaced via the nested model fields below.
+// The API always returns the type key (e.g. "webhookToken":{}) even when the
+// content is write-only, so the presence of a non-nil pointer identifies the type.
 type Credential struct {
 	ID          string `json:"id"`
 	APIVersion  string `json:"apiVersion"`
@@ -18,7 +20,31 @@ type Credential struct {
 	// CloudConnector is populated only when the credential is of Cloud Connector type.
 	// locationId is readable on GET.
 	CloudConnector *CloudConnectorModel `json:"cloudConnector,omitempty"`
+
+	// WebhookToken is present (as an empty object) when the credential is of Webhook Secret type.
+	// The token itself is write-only and never returned.
+	WebhookToken *WebhookTokenModel `json:"webhookToken,omitempty"`
+
+	// ContainerRegistryConfiguration is present (as an empty object) when the credential is of
+	// Container Registry type. The content is write-only and never returned.
+	ContainerRegistryConfiguration *ContainerRegistryConfigurationModel `json:"containerRegistryConfiguration,omitempty"`
+
+	// KubernetesConfiguration is present (as an empty object) when the credential is of
+	// Kubernetes Config type. The content is write-only and never returned.
+	KubernetesConfiguration *KubernetesConfigurationModel `json:"kubernetesConfiguration,omitempty"`
 }
+
+// WebhookTokenModel is the read-response sub-object for webhook-secret credentials.
+// The token field is intentionally absent — the API never returns it.
+type WebhookTokenModel struct{}
+
+// ContainerRegistryConfigurationModel is the read-response sub-object for container-registry credentials.
+// The content field is intentionally absent — the API never returns it.
+type ContainerRegistryConfigurationModel struct{}
+
+// KubernetesConfigurationModel is the read-response sub-object for kubernetes-config credentials.
+// The content field is intentionally absent — the API never returns it.
+type KubernetesConfigurationModel struct{}
 
 // BasicAuthModel is the read-response sub-object for basic-auth credentials.
 // The password field is intentionally absent — the API never returns it.
