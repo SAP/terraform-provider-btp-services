@@ -11,7 +11,7 @@ import (
 	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/testutil"
 )
 
-func TestAccDatasourceCicdCredentials(t *testing.T) {
+func TestDatasourceCicdCredentials(t *testing.T) {
 	t.Parallel()
 
 	t.Run("list", func(t *testing.T) {
