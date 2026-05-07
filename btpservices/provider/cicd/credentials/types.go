@@ -10,6 +10,15 @@ import (
 )
 
 // ---------------------------------------------------------------------------
+// Shared identity model (all credential resources share the same identity shape)
+// ---------------------------------------------------------------------------
+
+// credentialIdentityModel holds the stable identity of a credential resource.
+type credentialIdentityModel struct {
+	ID types.String `tfsdk:"id"`
+}
+
+// ---------------------------------------------------------------------------
 // Basic Auth
 // ---------------------------------------------------------------------------
 
