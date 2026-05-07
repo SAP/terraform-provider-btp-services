@@ -8,9 +8,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	cicdclient "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/client"
 	cicdmodels "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/models"
@@ -20,6 +22,7 @@ import (
 var _ resource.Resource = &basicAuthResource{}
 var _ resource.ResourceWithConfigure = &basicAuthResource{}
 var _ resource.ResourceWithImportState = &basicAuthResource{}
+var _ resource.ResourceWithIdentity = &basicAuthResource{}
 
 func NewBasicAuthResource() resource.Resource {
 	return &basicAuthResource{}
@@ -31,6 +34,16 @@ type basicAuthResource struct {
 
 func (r *basicAuthResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = fmt.Sprintf("%s_cicd_credential_basic_auth", req.ProviderTypeName)
+}
+
+func (r *basicAuthResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
+	}
 }
 
 func (r *basicAuthResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -110,6 +123,7 @@ func (r *basicAuthResource) Create(ctx context.Context, req resource.CreateReque
 	state := basicAuthResourceValueFrom(*result)
 	state.Password = plan.Password
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, credentialIdentityModel{ID: types.StringValue(result.ID)})...)
 }
 
 func (r *basicAuthResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -132,6 +146,7 @@ func (r *basicAuthResource) Read(ctx context.Context, req resource.ReadRequest, 
 	updated := basicAuthResourceValueFrom(*result)
 	updated.Password = state.Password
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, credentialIdentityModel{ID: types.StringValue(result.ID)})...)
 }
 
 func (r *basicAuthResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -161,6 +176,7 @@ func (r *basicAuthResource) Update(ctx context.Context, req resource.UpdateReque
 	updated := basicAuthResourceValueFrom(*result)
 	updated.Password = plan.Password
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, credentialIdentityModel{ID: types.StringValue(result.ID)})...)
 }
 
 func (r *basicAuthResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -178,5 +194,5 @@ func (r *basicAuthResource) Delete(ctx context.Context, req resource.DeleteReque
 }
 
 func (r *basicAuthResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("id"), path.Root("id"), req, resp)
 }
