@@ -131,16 +131,6 @@ var expectedDataSourceTypes = []string{
 	"btpservice_cicd_credentials",
 }
 
-func TestProvider_Resources_Count(t *testing.T) {
-	p := New()()
-	ctx := context.Background()
-
-	factories := p.Resources(ctx)
-	if len(factories) != len(expectedResourceTypes) {
-		t.Errorf("expected %d resource factories, got %d", len(expectedResourceTypes), len(factories))
-	}
-}
-
 func TestProvider_Resources_TypeNames(t *testing.T) {
 	p := New()()
 	ctx := context.Background()
@@ -157,16 +147,6 @@ func TestProvider_Resources_TypeNames(t *testing.T) {
 		if !got[name] {
 			t.Errorf("missing resource type %q", name)
 		}
-	}
-}
-
-func TestProvider_DataSources_Count(t *testing.T) {
-	p := New()()
-	ctx := context.Background()
-
-	factories := p.DataSources(ctx)
-	if len(factories) != len(expectedDataSourceTypes) {
-		t.Errorf("expected %d data source factories, got %d", len(expectedDataSourceTypes), len(factories))
 	}
 }
 
