@@ -17,6 +17,10 @@ type ServicePackage struct{}
 func (s ServicePackage) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		credentials.NewBasicAuthResource,
+		credentials.NewCloudConnectorResource,
+		credentials.NewWebhookSecretResource,
+		credentials.NewContainerRegistryResource,
+		credentials.NewKubernetesConfigResource,
 	}
 }
 
