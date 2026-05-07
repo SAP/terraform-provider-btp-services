@@ -1,7 +1,5 @@
-// main.go
-
-// Run "make generate" to regenerate provider documentation.
-//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name btpservice --provider-dir .
+//go:generate go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
+//go:generate tfplugindocs generate --rendered-provider-name "SAP BTP Services" --provider-name "btpservice"
 
 package main
 
@@ -17,16 +15,17 @@ import (
 
 func main() {
 	var debug bool
-	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers")
+
+	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers like delve")
 	flag.Parse()
 
-	opts := providerserver.ServeOpts{
+	err := providerserver.Serve(context.Background(), btpservicesprovider.New(), providerserver.ServeOpts{
 		Address:         "registry.terraform.io/SAP/sap-btp-services",
 		Debug:           debug,
 		ProtocolVersion: 6,
-	}
+	})
 
-	if err := providerserver.Serve(context.Background(), btpservicesprovider.New(), opts); err != nil {
+	if err != nil {
 		log.Fatal(err)
 	}
 }

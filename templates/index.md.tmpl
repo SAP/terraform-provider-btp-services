@@ -1,0 +1,32 @@
+---
+page_title: "{{.RenderedProviderName}} Provider"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# Terraform Provider for {{.RenderedProviderName}}
+
+{{ .Description | trimspace }}
+
+{{ if .HasExample -}}
+## Example Usage
+
+{{tffile .ExampleFile}}
+{{- end }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Authentication
+
+The provider uses OAuth2 client credentials flow to authenticate against SAP BTP services.
+Each service block (e.g. `cicd`) requires its own credentials:
+
+- `endpoint` — the service base URL
+- `token_url` — the OAuth2 token endpoint
+- `client_id` — OAuth2 client ID
+- `client_secret` — OAuth2 client secret
+
+All fields can also be supplied via environment variables (e.g. `SAPBTP_CICD_ENDPOINT`, `SAPBTP_CICD_TOKEN_URL`, `SAPBTP_CICD_CLIENT_ID`, `SAPBTP_CICD_CLIENT_SECRET`).
+
+We recommend sourcing credentials via environment variables rather than hardcoding them in Terraform configuration files.

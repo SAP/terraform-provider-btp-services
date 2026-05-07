@@ -1,4 +1,4 @@
-// btpservices/provider/cicd/credentials/resource_basic_auth.go
+// btpservices/provider/cicd/credentials/resource_credential_cloud_connector.go
 
 package cicdcredentials
 
@@ -19,24 +19,24 @@ import (
 	"github.com/SAP/terraform-provider-sap-btp-services/internal/shared"
 )
 
-var _ resource.Resource = &basicAuthResource{}
-var _ resource.ResourceWithConfigure = &basicAuthResource{}
-var _ resource.ResourceWithImportState = &basicAuthResource{}
-var _ resource.ResourceWithIdentity = &basicAuthResource{}
+var _ resource.Resource = &cloudConnectorResource{}
+var _ resource.ResourceWithConfigure = &cloudConnectorResource{}
+var _ resource.ResourceWithImportState = &cloudConnectorResource{}
+var _ resource.ResourceWithIdentity = &cloudConnectorResource{}
 
-func NewBasicAuthResource() resource.Resource {
-	return &basicAuthResource{}
+func NewCloudConnectorResource() resource.Resource {
+	return &cloudConnectorResource{}
 }
 
-type basicAuthResource struct {
+type cloudConnectorResource struct {
 	cli *cicdclient.CicdClientFacade
 }
 
-func (r *basicAuthResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = fmt.Sprintf("%s_cicd_credential_basic_auth", req.ProviderTypeName)
+func (r *cloudConnectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = fmt.Sprintf("%s_cicd_credential_cloud_connector", req.ProviderTypeName)
 }
 
-func (r *basicAuthResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+func (r *cloudConnectorResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
 	resp.IdentitySchema = identityschema.Schema{
 		Attributes: map[string]identityschema.Attribute{
 			"id": identityschema.StringAttribute{
@@ -46,9 +46,9 @@ func (r *basicAuthResource) IdentitySchema(_ context.Context, _ resource.Identit
 	}
 }
 
-func (r *basicAuthResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *cloudConnectorResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manages a Basic Authentication credential in the SAP BTP CI/CD service.",
+		MarkdownDescription: "Manages a Cloud Connector credential in the SAP BTP CI/CD service.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "Unique identifier of the resource (assigned by the API).",
@@ -66,20 +66,15 @@ func (r *basicAuthResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				Optional:            true,
 				Computed:            true,
 			},
-			"username": schema.StringAttribute{
-				MarkdownDescription: "Username for basic authentication.",
+			"location_id": schema.StringAttribute{
+				MarkdownDescription: "Location ID of the Cloud Connector instance.",
 				Required:            true,
-			},
-			"password": schema.StringAttribute{
-				MarkdownDescription: "Password for basic authentication. Not returned by the API on reads — stored only in Terraform state.",
-				Required:            true,
-				Sensitive:           true,
 			},
 		},
 	}
 }
 
-func (r *basicAuthResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *cloudConnectorResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -102,8 +97,8 @@ func (r *basicAuthResource) Configure(_ context.Context, req resource.ConfigureR
 	r.cli = clients.Cicd
 }
 
-func (r *basicAuthResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan basicAuthResourceModel
+func (r *cloudConnectorResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var plan cloudConnectorResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -120,14 +115,12 @@ func (r *basicAuthResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	state := basicAuthResourceValueFrom(*result)
-	state.Password = plan.Password
-	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, cloudConnectorResourceValueFrom(*result))...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, credentialIdentityModel{ID: types.StringValue(result.ID)})...)
 }
 
-func (r *basicAuthResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state basicAuthResourceModel
+func (r *cloudConnectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state cloudConnectorResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -143,20 +136,18 @@ func (r *basicAuthResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	updated := basicAuthResourceValueFrom(*result)
-	updated.Password = state.Password
-	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, cloudConnectorResourceValueFrom(*result))...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, credentialIdentityModel{ID: types.StringValue(result.ID)})...)
 }
 
-func (r *basicAuthResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan basicAuthResourceModel
+func (r *cloudConnectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan cloudConnectorResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	var state basicAuthResourceModel
+	var state cloudConnectorResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -173,14 +164,12 @@ func (r *basicAuthResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	updated := basicAuthResourceValueFrom(*result)
-	updated.Password = plan.Password
-	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, cloudConnectorResourceValueFrom(*result))...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, credentialIdentityModel{ID: types.StringValue(result.ID)})...)
 }
 
-func (r *basicAuthResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state basicAuthResourceModel
+func (r *cloudConnectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var state cloudConnectorResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -193,6 +182,6 @@ func (r *basicAuthResource) Delete(ctx context.Context, req resource.DeleteReque
 	}
 }
 
-func (r *basicAuthResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *cloudConnectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("id"), path.Root("id"), req, resp)
 }

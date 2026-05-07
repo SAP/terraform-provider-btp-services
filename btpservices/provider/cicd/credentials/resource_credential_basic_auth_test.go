@@ -12,7 +12,7 @@ import (
 	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/testutil"
 )
 
-func TestAccResourceCicdCredentialBasicAuth(t *testing.T) {
+func TestResourceCicdCredentialBasicAuth(t *testing.T) {
 	t.Parallel()
 
 	t.Run("happy path - basic creds", func(t *testing.T) {
