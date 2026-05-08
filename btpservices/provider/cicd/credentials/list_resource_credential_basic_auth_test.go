@@ -1,4 +1,4 @@
-// btpservices/provider/cicd/credentials/list_resource_credential_cloud_connector_test.go
+// btpservices/provider/cicd/credentials/list_resource_credential_basic_auth_test.go
 
 package cicdcredentials_test
 
