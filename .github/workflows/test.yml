@@ -1,0 +1,151 @@
+# Terraform Provider testing workflow.
+name: Terraform Provider Tests
+
+# This GitHub action runs your tests for each pull request and push.
+# Optionally, you can turn it on using a schedule for regular testing.
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths-ignore:
+      - '*.md'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '*.md'
+  workflow_dispatch:
+  workflow_call:
+
+# Testing only needs permissions to read the repository contents.
+permissions:
+  contents: read
+
+# Define the latest Terraform version to use for upload of coverage report
+env:
+  LATEST_TF_VERSION: 1.15.*
+
+jobs:
+  # Ensure project builds before running testing matrix
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.2.0
+        with:
+          go-version-file: 'go.mod'
+          cache: false
+      - run: |
+         go mod download
+         go mod tidy
+      - run: go build -v .
+      - name: Run linters
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: latest
+          skip-cache: true
+
+  generate:
+    if: github.event.pull_request.draft == false
+    name: Docu Generation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.2.0
+        with:
+          go-version-file: 'go.mod'
+          cache: false
+      - run: go generate ./...
+      - name: git diff
+        run: |
+          git diff --compact-summary --exit-code || \
+            (echo; echo "Unexpected difference in directories after code generation. Run 'go generate ./...' command and commit."; exit 1)
+
+  gofix:
+    if: github.event.pull_request.draft == false
+    name: Go Fix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.2.0
+        with:
+          go-version-file: 'go.mod'
+          cache: false
+      - run: go fix ./...
+      - name: git diff
+        run: |
+          git diff --compact-summary --exit-code || \
+            (echo; echo "Unexpected difference in directories after running 'go fix'. Run 'go fix ./...' command and commit."; exit 1)
+
+  fixtureDriftDetect:
+    if: github.event.pull_request.draft == false
+    name: Fixture Drift Detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - run: .github/scripts/fixtureDriftDetect.sh btpservices/provider/cicd/fixtures/
+
+  # Run acceptance tests in a matrix with Terraform CLI versions
+  test:
+    if: github.event.pull_request.draft == false
+    name: Terraform Provider Acceptance Tests
+    needs: build
+    runs-on: ubuntu-latest
+    # Timeout for tests set to 25 minutes to safeguard long running tests (specifically for service instances)
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        # List of Terraform versions to be tested - last three versions are in scope
+        # Check https://endoflife.date/terraform for end of support dates
+        # '1.6.*' end of security support 10 Apr 2024
+        # '1.7.*' end of security support 26 Jun 2024
+        # '1.8.*' end of security support 26 Nov 2024
+        # '1.9.*' end of security support 27 Feb 2025
+        # '1.10.*' end of security support 14 May 2025
+        # '1.11.*' end of security support 20 Aug 2025
+        # '1.12.*' end of security support 19 nov 2025
+        terraform:
+          - '1.13.*'
+          - '1.14.*'
+          - '1.15.*'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.2.0
+        with:
+          go-version-file: 'go.mod'
+          cache: false
+      - uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
+        with:
+          terraform_version: ${{ matrix.terraform }}
+          terraform_wrapper: false
+      - run: |
+         go mod download
+         go mod tidy
+      - run: go test -v -timeout=1800s -parallel=4 ./...
+        if: ${{ matrix.terraform != env.LATEST_TF_VERSION}}
+        env:
+          TF_ACC: "1"
+      # For the latest version we also run coverage and use a dedicated action for a visual display of the test results
+      - uses: robherley/go-test-action@v0
+        if: ${{ matrix.terraform == env.LATEST_TF_VERSION}}
+        env:
+          TF_ACC: "1"
+        with:
+          testArguments: -v -cover -coverprofile=cover.out -timeout=1800s -parallel=4 ./...
+
+      # Upload coverage report for latest Terraform version only to avoid nameing issues in upload (see also https://github.com/actions/upload-artifact/tree/v4/?tab=readme-ov-file#breaking-changes)
+      - uses: actions/upload-artifact@v7
+        if: ${{ matrix.terraform == env.LATEST_TF_VERSION}}
+        with:
+          name: coverage-report
+          path: cover.out
+
+
