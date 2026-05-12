@@ -1,6 +1,6 @@
-// btpservices/provider/testutil/vcr.go
+// btpservices/provider/tfutils/vcr.go
 
-package testutil
+package tfutils
 
 import (
 	"net/http"
@@ -21,7 +21,7 @@ type TestCredentials map[string]string
 // SetupVCR creates a VCR recorder for acceptance tests.
 //
 // liveEnvVars maps each credential key to the environment variable that holds
-// the real value when recording (e.g. "client_id" → "SAPBTP_CICD_CLIENT_ID").
+// the real value when recording (e.g. "client_id" → "BTP_CICD_CLIENT_ID").
 // redacted holds the safe placeholder values that are written into cassettes
 // and used on replay — no live credentials are needed after the first recording.
 //

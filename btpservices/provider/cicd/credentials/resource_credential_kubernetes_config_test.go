@@ -8,8 +8,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/cicdtest"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/testutil"
+	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/utils"
+	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/tfutils"
 )
 
 func TestResourceCicdCredentialKubernetesConfig(t *testing.T) {
@@ -18,15 +18,15 @@ func TestResourceCicdCredentialKubernetesConfig(t *testing.T) {
 	t.Run("happy path - kubernetes config creds", func(t *testing.T) {
 		t.Parallel()
 
-		rec, creds := cicdtest.SetupVCR(t, "../fixtures/resource_credential_kubernetes_config")
-		defer testutil.StopQuietly(rec)
+		rec, creds := utils.SetupVCR(t, "../fixtures/resource_credential_kubernetes_config")
+		defer tfutils.StopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
 			IsUnitTest:               true,
-			ProtoV6ProviderFactories: cicdtest.GetTestProviders(creds, rec),
+			ProtoV6ProviderFactories: utils.GetTestProviders(creds, rec),
 			Steps: []resource.TestStep{
 				{
-					Config: cicdtest.HCLProviderBlock(creds) + `
+					Config: utils.HCLProviderBlock(creds) + `
 resource "btpservice_cicd_credential_kubernetes_config" "test" {
   name        = "tf-test-kubernetes-config"
   description = "Terraform acceptance test kubernetes config credential"
@@ -41,7 +41,7 @@ resource "btpservice_cicd_credential_kubernetes_config" "test" {
 				},
 				{
 					// Step 2: Update description and content
-					Config: cicdtest.HCLProviderBlock(creds) + `
+					Config: utils.HCLProviderBlock(creds) + `
 resource "btpservice_cicd_credential_kubernetes_config" "test" {
   name        = "tf-test-kubernetes-config"
   description = "Updated description"
@@ -67,10 +67,10 @@ resource "btpservice_cicd_credential_kubernetes_config" "test" {
 		t.Parallel()
 		resource.Test(t, resource.TestCase{
 			IsUnitTest:               true,
-			ProtoV6ProviderFactories: cicdtest.GetTestProviders(cicdtest.Redacted, nil),
+			ProtoV6ProviderFactories: utils.GetTestProviders(utils.Redacted, nil),
 			Steps: []resource.TestStep{
 				{
-					Config: cicdtest.HCLProviderBlock(cicdtest.Redacted) + `
+					Config: utils.HCLProviderBlock(utils.Redacted) + `
 resource "btpservice_cicd_credential_kubernetes_config" "test" {
   content = "apiVersion: v1"
 }
@@ -85,10 +85,10 @@ resource "btpservice_cicd_credential_kubernetes_config" "test" {
 		t.Parallel()
 		resource.Test(t, resource.TestCase{
 			IsUnitTest:               true,
-			ProtoV6ProviderFactories: cicdtest.GetTestProviders(cicdtest.Redacted, nil),
+			ProtoV6ProviderFactories: utils.GetTestProviders(utils.Redacted, nil),
 			Steps: []resource.TestStep{
 				{
-					Config: cicdtest.HCLProviderBlock(cicdtest.Redacted) + `
+					Config: utils.HCLProviderBlock(utils.Redacted) + `
 resource "btpservice_cicd_credential_kubernetes_config" "test" {
   name = "tf-test-missing-content"
 }
