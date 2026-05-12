@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -19,6 +20,7 @@ import (
 )
 
 var _ provider.Provider = &btpServicesProvider{}
+var _ provider.ProviderWithListResources = &btpServicesProvider{}
 
 func New() func() provider.Provider {
 	return func() provider.Provider {
@@ -58,19 +60,19 @@ func (p *btpServicesProvider) Schema(_ context.Context, _ provider.SchemaRequest
 				MarkdownDescription: "Configuration for the SAP BTP CI/CD service.",
 				Attributes: map[string]schema.Attribute{
 					"endpoint": schema.StringAttribute{
-						MarkdownDescription: "CI/CD service base URL. Env: `SAPBTP_CICD_ENDPOINT`.",
+						MarkdownDescription: "CI/CD service base URL. Env: `BTP_CICD_ENDPOINT`.",
 						Optional:            true,
 					},
 					"token_url": schema.StringAttribute{
-						MarkdownDescription: "OAuth2 token endpoint. Env: `SAPBTP_CICD_TOKEN_URL`.",
+						MarkdownDescription: "OAuth2 token endpoint. Env: `BTP_CICD_TOKEN_URL`.",
 						Optional:            true,
 					},
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "OAuth2 client ID. Env: `SAPBTP_CICD_CLIENT_ID`.",
+						MarkdownDescription: "OAuth2 client ID. Env: `BTP_CICD_CLIENT_ID`.",
 						Optional:            true,
 					},
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "OAuth2 client secret. Env: `SAPBTP_CICD_CLIENT_SECRET`.",
+						MarkdownDescription: "OAuth2 client secret. Env: `BTP_CICD_CLIENT_SECRET`.",
 						Optional:            true,
 						Sensitive:           true,
 					},
@@ -88,6 +90,7 @@ func (p *btpServicesProvider) Configure(ctx context.Context, req provider.Config
 	if p.prebuiltClients != nil {
 		resp.ResourceData = p.prebuiltClients
 		resp.DataSourceData = p.prebuiltClients
+		resp.ListResourceData = p.prebuiltClients
 		return
 	}
 
@@ -101,10 +104,10 @@ func (p *btpServicesProvider) Configure(ctx context.Context, req provider.Config
 
 	if data.Cicd != nil {
 		cfg := cicdclient.CicdClientConfig{
-			Endpoint:     resolveString(data.Cicd.Endpoint, "SAPBTP_CICD_ENDPOINT"),
-			TokenURL:     resolveString(data.Cicd.TokenURL, "SAPBTP_CICD_TOKEN_URL"),
-			ClientID:     resolveString(data.Cicd.ClientID, "SAPBTP_CICD_CLIENT_ID"),
-			ClientSecret: resolveString(data.Cicd.ClientSecret, "SAPBTP_CICD_CLIENT_SECRET"),
+			Endpoint:     resolveString(data.Cicd.Endpoint, "BTP_CICD_ENDPOINT"),
+			TokenURL:     resolveString(data.Cicd.TokenURL, "BTP_CICD_TOKEN_URL"),
+			ClientID:     resolveString(data.Cicd.ClientID, "BTP_CICD_CLIENT_ID"),
+			ClientSecret: resolveString(data.Cicd.ClientSecret, "BTP_CICD_CLIENT_SECRET"),
 		}
 		if !data.Cicd.Timeout.IsNull() && !data.Cicd.Timeout.IsUnknown() {
 			cfg.Timeout = time.Duration(data.Cicd.Timeout.ValueInt64()) * time.Second
@@ -114,6 +117,7 @@ func (p *btpServicesProvider) Configure(ctx context.Context, req provider.Config
 
 	resp.ResourceData = clients
 	resp.DataSourceData = clients
+	resp.ListResourceData = clients
 }
 
 // servicePackages is the single service registry.
@@ -121,10 +125,12 @@ func (p *btpServicesProvider) Configure(ctx context.Context, req provider.Config
 func servicePackages() []interface {
 	Resources(context.Context) []func() resource.Resource
 	DataSources(context.Context) []func() datasource.DataSource
+	ListResources(context.Context) []func() list.ListResource
 } {
 	return []interface {
 		Resources(context.Context) []func() resource.Resource
 		DataSources(context.Context) []func() datasource.DataSource
+		ListResources(context.Context) []func() list.ListResource
 	}{
 		cicd.ServicePackage{},
 	}
@@ -142,6 +148,14 @@ func (p *btpServicesProvider) DataSources(ctx context.Context) []func() datasour
 	var all []func() datasource.DataSource
 	for _, pkg := range servicePackages() {
 		all = append(all, pkg.DataSources(ctx)...)
+	}
+	return all
+}
+
+func (p *btpServicesProvider) ListResources(ctx context.Context) []func() list.ListResource {
+	var all []func() list.ListResource
+	for _, pkg := range servicePackages() {
+		all = append(all, pkg.ListResources(ctx)...)
 	}
 	return all
 }

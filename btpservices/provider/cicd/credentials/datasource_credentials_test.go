@@ -7,8 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/cicdtest"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/testutil"
+	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/utils"
+	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/tfutils"
 )
 
 func TestDatasourceCicdCredentials(t *testing.T) {
@@ -17,15 +17,15 @@ func TestDatasourceCicdCredentials(t *testing.T) {
 	t.Run("list", func(t *testing.T) {
 		t.Parallel()
 
-		rec, creds := cicdtest.SetupVCR(t, "../fixtures/datasource_credentials_list")
-		defer testutil.StopQuietly(rec)
+		rec, creds := utils.SetupVCR(t, "../fixtures/datasource_credentials_list")
+		defer tfutils.StopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
 			IsUnitTest:               true,
-			ProtoV6ProviderFactories: cicdtest.GetTestProviders(creds, rec),
+			ProtoV6ProviderFactories: utils.GetTestProviders(creds, rec),
 			Steps: []resource.TestStep{
 				{
-					Config: cicdtest.HCLProviderBlock(creds) + `
+					Config: utils.HCLProviderBlock(creds) + `
 data "btpservice_cicd_credentials" "uut" {}
 `,
 					Check: resource.ComposeAggregateTestCheckFunc(

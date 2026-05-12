@@ -8,8 +8,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/cicdtest"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/testutil"
+	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/utils"
+	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/tfutils"
 )
 
 func TestResourceCicdCredentialBasicAuth(t *testing.T) {
@@ -18,15 +18,15 @@ func TestResourceCicdCredentialBasicAuth(t *testing.T) {
 	t.Run("happy path - basic creds", func(t *testing.T) {
 		t.Parallel()
 
-		rec, creds := cicdtest.SetupVCR(t, "../fixtures/resource_credential_basic_auth")
-		defer testutil.StopQuietly(rec)
+		rec, creds := utils.SetupVCR(t, "../fixtures/resource_credential_basic_auth")
+		defer tfutils.StopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
 			IsUnitTest:               true,
-			ProtoV6ProviderFactories: cicdtest.GetTestProviders(creds, rec),
+			ProtoV6ProviderFactories: utils.GetTestProviders(creds, rec),
 			Steps: []resource.TestStep{
 				{
-					Config: cicdtest.HCLProviderBlock(creds) + `
+					Config: utils.HCLProviderBlock(creds) + `
 resource "btpservice_cicd_credential_basic_auth" "test" {
   name        = "tf-test-basic-auth"
   description = "Terraform acceptance test credential"
@@ -43,7 +43,7 @@ resource "btpservice_cicd_credential_basic_auth" "test" {
 				},
 				{
 					// Step 2: Update description and username
-					Config: cicdtest.HCLProviderBlock(creds) + `
+					Config: utils.HCLProviderBlock(creds) + `
 resource "btpservice_cicd_credential_basic_auth" "test" {
   name        = "tf-test-basic-auth"
   description = "Updated description"
@@ -71,10 +71,10 @@ resource "btpservice_cicd_credential_basic_auth" "test" {
 		t.Parallel()
 		resource.Test(t, resource.TestCase{
 			IsUnitTest:               true,
-			ProtoV6ProviderFactories: cicdtest.GetTestProviders(cicdtest.Redacted, nil),
+			ProtoV6ProviderFactories: utils.GetTestProviders(utils.Redacted, nil),
 			Steps: []resource.TestStep{
 				{
-					Config: cicdtest.HCLProviderBlock(cicdtest.Redacted) + `
+					Config: utils.HCLProviderBlock(utils.Redacted) + `
 resource "btpservice_cicd_credential_basic_auth" "test" {
   username = "test-user"
   password = "test-password"
@@ -90,10 +90,10 @@ resource "btpservice_cicd_credential_basic_auth" "test" {
 		t.Parallel()
 		resource.Test(t, resource.TestCase{
 			IsUnitTest:               true,
-			ProtoV6ProviderFactories: cicdtest.GetTestProviders(cicdtest.Redacted, nil),
+			ProtoV6ProviderFactories: utils.GetTestProviders(utils.Redacted, nil),
 			Steps: []resource.TestStep{
 				{
-					Config: cicdtest.HCLProviderBlock(cicdtest.Redacted) + `
+					Config: utils.HCLProviderBlock(utils.Redacted) + `
 resource "btpservice_cicd_credential_basic_auth" "test" {
   name     = "tf-test-missing-user"
   password = "test-password"
@@ -109,10 +109,10 @@ resource "btpservice_cicd_credential_basic_auth" "test" {
 		t.Parallel()
 		resource.Test(t, resource.TestCase{
 			IsUnitTest:               true,
-			ProtoV6ProviderFactories: cicdtest.GetTestProviders(cicdtest.Redacted, nil),
+			ProtoV6ProviderFactories: utils.GetTestProviders(utils.Redacted, nil),
 			Steps: []resource.TestStep{
 				{
-					Config: cicdtest.HCLProviderBlock(cicdtest.Redacted) + `
+					Config: utils.HCLProviderBlock(utils.Redacted) + `
 resource "btpservice_cicd_credential_basic_auth" "test" {
   name     = "tf-test-missing-pass"
   username = "test-user"

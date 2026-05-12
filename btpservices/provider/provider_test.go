@@ -83,10 +83,10 @@ provider "btpservice" {
 }
 
 func TestProvider_EnvVarFallback(t *testing.T) {
-	t.Setenv("SAPBTP_CICD_ENDPOINT", "https://cicd-service.cfapps.eu12.hana.ondemand.com")
-	t.Setenv("SAPBTP_CICD_TOKEN_URL", "https://example.authentication.eu12.hana.ondemand.com/oauth/token")
-	t.Setenv("SAPBTP_CICD_CLIENT_ID", "test-client-id")
-	t.Setenv("SAPBTP_CICD_CLIENT_SECRET", "test-client-secret")
+	t.Setenv("BTP_CICD_ENDPOINT", "https://cicd-service.cfapps.eu12.hana.ondemand.com")
+	t.Setenv("BTP_CICD_TOKEN_URL", "https://example.authentication.eu12.hana.ondemand.com/oauth/token")
+	t.Setenv("BTP_CICD_CLIENT_ID", "test-client-id")
+	t.Setenv("BTP_CICD_CLIENT_SECRET", "test-client-secret")
 
 	tftest.UnitTest(t, tftest.TestCase{
 		ProtoV6ProviderFactories: providerFactoryDev(),

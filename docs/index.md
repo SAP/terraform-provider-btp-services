@@ -42,11 +42,11 @@ provider "btpservice" {
 
 Optional:
 
-- `client_id` (String) OAuth2 client ID. Env: `SAPBTP_CICD_CLIENT_ID`.
-- `client_secret` (String, Sensitive) OAuth2 client secret. Env: `SAPBTP_CICD_CLIENT_SECRET`.
-- `endpoint` (String) CI/CD service base URL. Env: `SAPBTP_CICD_ENDPOINT`.
+- `client_id` (String) OAuth2 client ID. Env: `BTP_CICD_CLIENT_ID`.
+- `client_secret` (String, Sensitive) OAuth2 client secret. Env: `BTP_CICD_CLIENT_SECRET`.
+- `endpoint` (String) CI/CD service base URL. Env: `BTP_CICD_ENDPOINT`.
 - `timeout` (Number) HTTP request timeout in seconds. Defaults to 60.
-- `token_url` (String) OAuth2 token endpoint. Env: `SAPBTP_CICD_TOKEN_URL`.
+- `token_url` (String) OAuth2 token endpoint. Env: `BTP_CICD_TOKEN_URL`.
 
 ## Authentication
 
@@ -58,6 +58,6 @@ Each service block (e.g. `cicd`) requires its own credentials:
 - `client_id` — OAuth2 client ID
 - `client_secret` — OAuth2 client secret
 
-All fields can also be supplied via environment variables (e.g. `SAPBTP_CICD_ENDPOINT`, `SAPBTP_CICD_TOKEN_URL`, `SAPBTP_CICD_CLIENT_ID`, `SAPBTP_CICD_CLIENT_SECRET`).
+All fields can also be supplied via environment variables (e.g. `BTP_CICD_ENDPOINT`, `BTP_CICD_TOKEN_URL`, `BTP_CICD_CLIENT_ID`, `BTP_CICD_CLIENT_SECRET`).
 
 We recommend sourcing credentials via environment variables rather than hardcoding them in Terraform configuration files.
