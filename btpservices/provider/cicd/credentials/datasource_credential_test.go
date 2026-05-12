@@ -8,8 +8,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/cicdtest"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/testutil"
+	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/utils"
+	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/tfutils"
 )
 
 func TestDatasourceCicdCredentialBasicAuth(t *testing.T) {
@@ -18,15 +18,15 @@ func TestDatasourceCicdCredentialBasicAuth(t *testing.T) {
 	t.Run("read", func(t *testing.T) {
 		t.Parallel()
 
-		rec, creds := cicdtest.SetupVCR(t, "../fixtures/datasource_credential_read")
-		defer testutil.StopQuietly(rec)
+		rec, creds := utils.SetupVCR(t, "../fixtures/datasource_credential_read")
+		defer tfutils.StopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
 			IsUnitTest:               true,
-			ProtoV6ProviderFactories: cicdtest.GetTestProviders(creds, rec),
+			ProtoV6ProviderFactories: utils.GetTestProviders(creds, rec),
 			Steps: []resource.TestStep{
 				{
-					Config: cicdtest.HCLProviderBlock(creds) + `
+					Config: utils.HCLProviderBlock(creds) + `
 data "btpservice_cicd_credential" "uut" {
   name = "tf-ds-test-basic-auth"
 }
@@ -44,15 +44,15 @@ data "btpservice_cicd_credential" "uut" {
 	t.Run("not_found", func(t *testing.T) {
 		t.Parallel()
 
-		rec, creds := cicdtest.SetupVCR(t, "../fixtures/datasource_credential_not_found")
-		defer testutil.StopQuietly(rec)
+		rec, creds := utils.SetupVCR(t, "../fixtures/datasource_credential_not_found")
+		defer tfutils.StopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
 			IsUnitTest:               true,
-			ProtoV6ProviderFactories: cicdtest.GetTestProviders(creds, rec),
+			ProtoV6ProviderFactories: utils.GetTestProviders(creds, rec),
 			Steps: []resource.TestStep{
 				{
-					Config: cicdtest.HCLProviderBlock(creds) + `
+					Config: utils.HCLProviderBlock(creds) + `
 data "btpservice_cicd_credential" "uut" {
   name = "this-credential-does-not-exist"
 }

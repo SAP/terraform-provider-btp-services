@@ -60,19 +60,19 @@ func (p *btpServicesProvider) Schema(_ context.Context, _ provider.SchemaRequest
 				MarkdownDescription: "Configuration for the SAP BTP CI/CD service.",
 				Attributes: map[string]schema.Attribute{
 					"endpoint": schema.StringAttribute{
-						MarkdownDescription: "CI/CD service base URL. Env: `SAPBTP_CICD_ENDPOINT`.",
+						MarkdownDescription: "CI/CD service base URL. Env: `BTP_CICD_ENDPOINT`.",
 						Optional:            true,
 					},
 					"token_url": schema.StringAttribute{
-						MarkdownDescription: "OAuth2 token endpoint. Env: `SAPBTP_CICD_TOKEN_URL`.",
+						MarkdownDescription: "OAuth2 token endpoint. Env: `BTP_CICD_TOKEN_URL`.",
 						Optional:            true,
 					},
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "OAuth2 client ID. Env: `SAPBTP_CICD_CLIENT_ID`.",
+						MarkdownDescription: "OAuth2 client ID. Env: `BTP_CICD_CLIENT_ID`.",
 						Optional:            true,
 					},
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "OAuth2 client secret. Env: `SAPBTP_CICD_CLIENT_SECRET`.",
+						MarkdownDescription: "OAuth2 client secret. Env: `BTP_CICD_CLIENT_SECRET`.",
 						Optional:            true,
 						Sensitive:           true,
 					},
@@ -104,10 +104,10 @@ func (p *btpServicesProvider) Configure(ctx context.Context, req provider.Config
 
 	if data.Cicd != nil {
 		cfg := cicdclient.CicdClientConfig{
-			Endpoint:     resolveString(data.Cicd.Endpoint, "SAPBTP_CICD_ENDPOINT"),
-			TokenURL:     resolveString(data.Cicd.TokenURL, "SAPBTP_CICD_TOKEN_URL"),
-			ClientID:     resolveString(data.Cicd.ClientID, "SAPBTP_CICD_CLIENT_ID"),
-			ClientSecret: resolveString(data.Cicd.ClientSecret, "SAPBTP_CICD_CLIENT_SECRET"),
+			Endpoint:     resolveString(data.Cicd.Endpoint, "BTP_CICD_ENDPOINT"),
+			TokenURL:     resolveString(data.Cicd.TokenURL, "BTP_CICD_TOKEN_URL"),
+			ClientID:     resolveString(data.Cicd.ClientID, "BTP_CICD_CLIENT_ID"),
+			ClientSecret: resolveString(data.Cicd.ClientSecret, "BTP_CICD_CLIENT_SECRET"),
 		}
 		if !data.Cicd.Timeout.IsNull() && !data.Cicd.Timeout.IsUnknown() {
 			cfg.Timeout = time.Duration(data.Cicd.Timeout.ValueInt64()) * time.Second

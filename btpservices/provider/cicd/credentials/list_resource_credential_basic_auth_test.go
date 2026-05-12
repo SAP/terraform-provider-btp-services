@@ -15,9 +15,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/cicdtest"
+	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/utils"
 	cicdcredentials "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/credentials"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/testutil"
+	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/tfutils"
 )
 
 func TestListResourceCicdCredentialBasicAuth(t *testing.T) {
@@ -26,19 +26,19 @@ func TestListResourceCicdCredentialBasicAuth(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
 		t.Parallel()
 
-		rec, creds := cicdtest.SetupVCR(t, "../fixtures/list_resource_credential_basic_auth")
-		defer testutil.StopQuietly(rec)
+		rec, creds := utils.SetupVCR(t, "../fixtures/list_resource_credential_basic_auth")
+		defer tfutils.StopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
 			IsUnitTest:               true,
-			ProtoV6ProviderFactories: cicdtest.GetTestProviders(creds, rec),
+			ProtoV6ProviderFactories: utils.GetTestProviders(creds, rec),
 			TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 				tfversion.SkipBelow(tfversion.Version1_14_0),
 			},
 			Steps: []resource.TestStep{
 				{
 					Query: true,
-					Config: cicdtest.HCLProviderBlock(creds) + `
+					Config: utils.HCLProviderBlock(creds) + `
 list "btpservice_cicd_credential_basic_auth" "test" {
   provider = "btpservice"
 }
@@ -49,7 +49,7 @@ list "btpservice_cicd_credential_basic_auth" "test" {
 				},
 				{
 					Query: true,
-					Config: cicdtest.HCLProviderBlock(creds) + `
+					Config: utils.HCLProviderBlock(creds) + `
 list "btpservice_cicd_credential_basic_auth" "test" {
   provider         = "btpservice"
   include_resource = true

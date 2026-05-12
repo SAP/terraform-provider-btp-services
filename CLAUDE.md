@@ -98,7 +98,7 @@ examples/                                               # example Terraform conf
 ### Auth pattern
 OAuth2 client_credentials flow. The client fetches and caches the token internally.
 Config fields: `endpoint`, `token_url`, `client_id`, `client_secret`.
-Env vars: `SAPBTP_CICD_ENDPOINT`, `SAPBTP_CICD_TOKEN_URL`, `SAPBTP_CICD_CLIENT_ID`, `SAPBTP_CICD_CLIENT_SECRET`.
+Env vars: `BTP_CICD_ENDPOINT`, `BTP_CICD_TOKEN_URL`, `BTP_CICD_CLIENT_ID`, `BTP_CICD_CLIENT_SECRET`.
 
 ### CI/CD API
 - All endpoints use `/v2/` prefix (e.g. `GET /v2/credentials`)
@@ -149,7 +149,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 2. **Dev overrides**: Do NOT run `terraform init` — it will error.
 
-3. **Test credentials**: If acceptance tests fail, ensure `SAPBTP_CICD_*` env vars are set and cassettes exist.
+3. **Test credentials**: If acceptance tests fail, ensure `BTP_CICD_*` env vars are set and cassettes exist.
 
 4. **Generated docs**: Changes to `docs/*.md` will be overwritten. Update code comments and run `make generate`.
 
