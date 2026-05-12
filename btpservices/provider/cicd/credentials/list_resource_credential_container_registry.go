@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	cicdclient "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/client"
 	"github.com/SAP/terraform-provider-sap-btp-services/internal/shared"
@@ -77,7 +77,10 @@ func (r *containerRegistryListResource) List(ctx context.Context, req list.ListR
 			}
 
 			result := req.NewListResult(ctx)
-			result.Identity.SetAttribute(ctx, path.Root("id"), cred.ID)
+			result.DisplayName = cred.Name
+			result.Diagnostics.Append(result.Identity.Set(ctx, credentialIdentityModel{
+				ID: types.StringValue(cred.ID),
+			})...)
 
 			if req.IncludeResource {
 				model := containerRegistryResourceValueFrom(cred)
