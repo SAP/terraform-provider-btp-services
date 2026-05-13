@@ -3,8 +3,7 @@
 package cicdmodels
 
 // Credential is the API response model for a single credential.
-// Sensitive fields (password, token, etc.) are never returned by the API on read.
-// The type-specific readable fields are surfaced via the nested model fields below.
+// Sensitive fields (password, text, key, etc.) are never returned by the API on read.
 // The API always returns the type key (e.g. "webhookToken":{}) even when the
 // content is write-only, so the presence of a non-nil pointer identifies the type.
 type Credential struct {
@@ -13,9 +12,10 @@ type Credential struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 
-	// BasicAuth is populated only when the credential is of BasicAuth type.
-	// On reads the API returns the username but NOT the password.
-	Basic *BasicAuthModel `json:"basic,omitempty"`
+	// Only the sub-object matching the credential type is populated on read.
+	Basic                            *BasicAuthModel                        `json:"basic,omitempty"`
+	BasicForCustomIdP                *BasicForCustomIdPModel                `json:"basicForCustomIdP,omitempty"`
+	CertificateBasedAuthForCustomIdP *CertificateBasedAuthForCustomIdPModel `json:"certificateBasedAuthForCustomIdP,omitempty"`
 
 	// CloudConnector is populated only when the credential is of Cloud Connector type.
 	// locationId is readable on GET.
@@ -32,19 +32,15 @@ type Credential struct {
 	// KubernetesConfiguration is present (as an empty object) when the credential is of
 	// Kubernetes Config type. The content is write-only and never returned.
 	KubernetesConfiguration *KubernetesConfigurationModel `json:"kubernetesConfiguration,omitempty"`
+
+	// SecretText is present (as an empty object) when the credential is of Secret Text type.
+	// The text is write-only and never returned.
+	SecretText *SecretTextModel `json:"secretText,omitempty"`
+
+	// ServiceKey is present (as an empty object) when the credential is of Service Key type.
+	// The key is write-only and never returned.
+	ServiceKey *ServiceKeyModel `json:"serviceKey,omitempty"`
 }
-
-// WebhookTokenModel is the read-response sub-object for webhook-secret credentials.
-// The token field is intentionally absent — the API never returns it.
-type WebhookTokenModel struct{}
-
-// ContainerRegistryConfigurationModel is the read-response sub-object for container-registry credentials.
-// The content field is intentionally absent — the API never returns it.
-type ContainerRegistryConfigurationModel struct{}
-
-// KubernetesConfigurationModel is the read-response sub-object for kubernetes-config credentials.
-// The content field is intentionally absent — the API never returns it.
-type KubernetesConfigurationModel struct{}
 
 // BasicAuthModel is the read-response sub-object for basic-auth credentials.
 // The password field is intentionally absent — the API never returns it.
@@ -52,41 +48,86 @@ type BasicAuthModel struct {
 	Username string `json:"username"`
 }
 
+// BasicForCustomIdPModel is the read-response sub-object for basic-auth custom-IdP credentials.
+// The password field is never returned by the API.
+type BasicForCustomIdPModel struct {
+	Username string `json:"username"`
+	Origin   string `json:"origin,omitempty"`
+}
+
+// CertificateBasedAuthForCustomIdPModel is the read-response sub-object for
+// certificate-based custom-IdP credentials. All fields are readable.
+type CertificateBasedAuthForCustomIdPModel struct {
+	EmailAddress string `json:"emailAddress,omitempty"`
+	Hostname     string `json:"hostname,omitempty"`
+	Origin       string `json:"origin,omitempty"`
+}
+
+// SecretTextModel is the read-response sub-object for secret-text credentials.
+// The text field is write-only — the API never returns it on read.
+type SecretTextModel struct{}
+
+// ServiceKeyModel is the read-response sub-object for service-key credentials.
+// The key field is write-only — the API never returns it on read.
+type ServiceKeyModel struct{}
+
+// WebhookTokenModel is the read-response sub-object for webhook-token credentials.
+// The token field is write-only — the API never returns it on read.
+type WebhookTokenModel struct{}
+
+// ContainerRegistryConfigurationModel is the read-response sub-object for container-registry credentials.
+// The content field is write-only — the API never returns it on read.
+type ContainerRegistryConfigurationModel struct{}
+
+// KubernetesConfigurationModel is the read-response sub-object for kubernetes-config credentials.
+// The content field is write-only — the API never returns it on read.
+type KubernetesConfigurationModel struct{}
+
 // CreateCredentialRequest is the body sent to POST /v2/credentials.
 // Exactly one of the typed sub-objects must be set.
 type CreateCredentialRequest struct {
-	Name                           string                          `json:"name"`
-	Description                    string                          `json:"description"`
-	Basic                          *BasicAuth                      `json:"basic,omitempty"`
-	CloudConnector                 *CloudConnector                 `json:"cloudConnector,omitempty"`
-	WebhookToken                   *WebhookToken                   `json:"webhookToken,omitempty"`
-	ContainerRegistryConfiguration *ContainerRegistryConfiguration `json:"containerRegistryConfiguration,omitempty"`
-	KubernetesConfiguration        *KubernetesConfiguration        `json:"kubernetesConfiguration,omitempty"`
+	Name                             string                            `json:"name"`
+	Description                      string                            `json:"description"`
+	Basic                            *BasicAuth                        `json:"basic,omitempty"`
+	CloudConnector                   *CloudConnector                   `json:"cloudConnector,omitempty"`
+	WebhookToken                     *WebhookToken                     `json:"webhookToken,omitempty"`
+	ContainerRegistryConfiguration   *ContainerRegistryConfiguration   `json:"containerRegistryConfiguration,omitempty"`
+	KubernetesConfiguration          *KubernetesConfiguration          `json:"kubernetesConfiguration,omitempty"`
+	BasicForCustomIdP                *BasicForCustomIdP                `json:"basicForCustomIdP,omitempty"`
+	CertificateBasedAuthForCustomIdP *CertificateBasedAuthForCustomIdP `json:"certificateBasedAuthForCustomIdP,omitempty"`
+	ServiceKey                       *ServiceKey                       `json:"serviceKey,omitempty"`
+	SecretText                       *SecretText                       `json:"secretText,omitempty"`
 }
 
 // UpdateCredentialRequest is the body sent to PUT /v2/credentials/{reference}.
-// The name field is immutable; only description and the typed sub-object can change.
 type UpdateCredentialRequest struct {
-	Name                           string                          `json:"name"`
-	Description                    string                          `json:"description"`
-	Basic                          *BasicAuth                      `json:"basic,omitempty"`
-	CloudConnector                 *CloudConnector                 `json:"cloudConnector,omitempty"`
-	WebhookToken                   *WebhookToken                   `json:"webhookToken,omitempty"`
-	ContainerRegistryConfiguration *ContainerRegistryConfiguration `json:"containerRegistryConfiguration,omitempty"`
-	KubernetesConfiguration        *KubernetesConfiguration        `json:"kubernetesConfiguration,omitempty"`
+	Name                             string                            `json:"name"`
+	Description                      string                            `json:"description"`
+	Basic                            *BasicAuth                        `json:"basic,omitempty"`
+	CloudConnector                   *CloudConnector                   `json:"cloudConnector,omitempty"`
+	WebhookToken                     *WebhookToken                     `json:"webhookToken,omitempty"`
+	ContainerRegistryConfiguration   *ContainerRegistryConfiguration   `json:"containerRegistryConfiguration,omitempty"`
+	KubernetesConfiguration          *KubernetesConfiguration          `json:"kubernetesConfiguration,omitempty"`
+	BasicForCustomIdP                *BasicForCustomIdP                `json:"basicForCustomIdP,omitempty"`
+	CertificateBasedAuthForCustomIdP *CertificateBasedAuthForCustomIdP `json:"certificateBasedAuthForCustomIdP,omitempty"`
+	ServiceKey                       *ServiceKey                       `json:"serviceKey,omitempty"`
+	SecretText                       *SecretText                       `json:"secretText,omitempty"`
 }
 
 // PatchCredentialRequest is the body sent to PATCH /v2/credentials/{reference}.
 // Only non-nil fields are sent — omitempty ensures zero values are omitted.
-// Use pointer fields so callers can distinguish "set to empty" from "not provided".
 type PatchCredentialRequest struct {
-	Name                           *string                         `json:"name,omitempty"`
-	Description                    *string                         `json:"description,omitempty"`
-	Basic                          *BasicAuth                      `json:"basic,omitempty"`
-	CloudConnector                 *CloudConnector                 `json:"cloudConnector,omitempty"`
-	WebhookToken                   *WebhookToken                   `json:"webhookToken,omitempty"`
-	ContainerRegistryConfiguration *ContainerRegistryConfiguration `json:"containerRegistryConfiguration,omitempty"`
-	KubernetesConfiguration        *KubernetesConfiguration        `json:"kubernetesConfiguration,omitempty"`
+	Name                             *string                           `json:"name,omitempty"`
+	Description                      *string                           `json:"description,omitempty"`
+	Basic                            *BasicAuth                        `json:"basic,omitempty"`
+	CloudConnector                   *CloudConnector                   `json:"cloudConnector,omitempty"`
+	WebhookToken                     *WebhookToken                     `json:"webhookToken,omitempty"`
+	ContainerRegistryConfiguration   *ContainerRegistryConfiguration   `json:"containerRegistryConfiguration,omitempty"`
+	KubernetesConfiguration          *KubernetesConfiguration          `json:"kubernetesConfiguration,omitempty"`
+	BasicForCustomIdP                *BasicForCustomIdP                `json:"basicForCustomIdP,omitempty"`
+	CertificateBasedAuthForCustomIdP *CertificateBasedAuthForCustomIdP `json:"certificateBasedAuthForCustomIdP,omitempty"`
+	ServiceKey                       *ServiceKey                       `json:"serviceKey,omitempty"`
+	SecretText                       *SecretText                       `json:"secretText,omitempty"`
 }
 
 // BasicAuth is the write payload for the basic-auth credential sub-type.
@@ -121,6 +162,33 @@ type ContainerRegistryConfiguration struct {
 // The content is write-only — the API never returns it on read.
 type KubernetesConfiguration struct {
 	Content string `json:"content"`
+}
+
+// BasicForCustomIdP is the write payload for the basic-auth custom-IdP credential sub-type.
+// Origin is the custom identity provider's origin key (e.g. "custom-platform").
+type BasicForCustomIdP struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Origin   string `json:"origin"`
+}
+
+// CertificateBasedAuthForCustomIdP is the write payload for the certificate-based
+// custom-IdP credential sub-type. Authenticates using IAS tenant hostname + origin.
+type CertificateBasedAuthForCustomIdP struct {
+	EmailAddress string `json:"emailAddress"`
+	Hostname     string `json:"hostname"`
+	Origin       string `json:"origin"`
+}
+
+// ServiceKey is the write payload for the service-key credential sub-type.
+// Key must be valid JSON (SAP BTP service binding key).
+type ServiceKey struct {
+	Key string `json:"key"`
+}
+
+// SecretText is the write payload for the secret-text credential sub-type.
+type SecretText struct {
+	Text string `json:"text"`
 }
 
 // CredentialListResponse is the envelope returned by GET /v2/credentials.

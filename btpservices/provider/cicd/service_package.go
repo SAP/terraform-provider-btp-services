@@ -22,6 +22,10 @@ func (s ServicePackage) Resources(_ context.Context) []func() resource.Resource 
 		credentials.NewWebhookSecretResource,
 		credentials.NewContainerRegistryResource,
 		credentials.NewKubernetesConfigResource,
+		credentials.NewBasicAuthCIdPResource,
+		credentials.NewCertCIdPResource,
+		credentials.NewServiceKeyResource,
+		credentials.NewSecretTextResource,
 	}
 }
 
@@ -39,5 +43,9 @@ func (s ServicePackage) ListResources(_ context.Context) []func() list.ListResou
 		credentials.NewWebhookSecretListResource,
 		credentials.NewContainerRegistryListResource,
 		credentials.NewKubernetesConfigListResource,
+		credentials.NewBasicAuthCIdPListResource,
+		credentials.NewCertCIdPListResource,
+		credentials.NewServiceKeyListResource,
+		credentials.NewSecretTextListResource,
 	}
 }

@@ -36,7 +36,7 @@ func TestProvider_Schema(t *testing.T) {
 		ProtoV6ProviderFactories: providerFactoryDev(),
 		Steps: []tftest.TestStep{
 			{
-				Config: `provider "bptservice" {}`,
+				Config: `provider "btpservice" {}`,
 			},
 		},
 	})

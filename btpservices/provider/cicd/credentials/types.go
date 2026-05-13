@@ -14,9 +14,6 @@ import (
 // ---------------------------------------------------------------------------
 
 // credentialIdentityModel holds the stable identity of a credential resource.
-type credentialIdentityModel struct {
-	ID types.String `tfsdk:"id"`
-}
 
 // ---------------------------------------------------------------------------
 // Basic Auth
@@ -246,6 +243,186 @@ func (m kubernetesConfigResourceModel) toPatchRequest() cicdmodels.PatchCredenti
 // ---------------------------------------------------------------------------
 // Data source models (shared)
 // ---------------------------------------------------------------------------
+
+// basicAuthCIdPResourceModel is the Terraform state model for the basic-auth custom-IdP credential resource.
+type basicAuthCIdPResourceModel struct {
+	ID          types.String `tfsdk:"id"`
+	Name        types.String `tfsdk:"name"`
+	Description types.String `tfsdk:"description"`
+	Username    types.String `tfsdk:"username"`
+	Password    types.String `tfsdk:"password"`
+	Origin      types.String `tfsdk:"origin"`
+}
+
+func basicAuthCIdPResourceValueFrom(v cicdmodels.Credential) basicAuthCIdPResourceModel {
+	m := basicAuthCIdPResourceModel{
+		ID:          types.StringValue(v.ID),
+		Name:        types.StringValue(v.Name),
+		Description: types.StringValue(v.Description),
+	}
+	if v.BasicForCustomIdP != nil {
+		m.Username = types.StringValue(v.BasicForCustomIdP.Username)
+		m.Origin = types.StringValue(v.BasicForCustomIdP.Origin)
+	}
+	return m
+}
+
+func (m basicAuthCIdPResourceModel) toCreateRequest() cicdmodels.CreateCredentialRequest {
+	return cicdmodels.CreateCredentialRequest{
+		Name:        m.Name.ValueString(),
+		Description: m.Description.ValueString(),
+		BasicForCustomIdP: &cicdmodels.BasicForCustomIdP{
+			Username: m.Username.ValueString(),
+			Password: m.Password.ValueString(),
+			Origin:   m.Origin.ValueString(),
+		},
+	}
+}
+
+func (m basicAuthCIdPResourceModel) toPatchRequest() cicdmodels.PatchCredentialRequest {
+	name := m.Name.ValueString()
+	desc := m.Description.ValueString()
+	return cicdmodels.PatchCredentialRequest{
+		Name:        &name,
+		Description: &desc,
+		BasicForCustomIdP: &cicdmodels.BasicForCustomIdP{
+			Username: m.Username.ValueString(),
+			Password: m.Password.ValueString(),
+			Origin:   m.Origin.ValueString(),
+		},
+	}
+}
+
+// certCIdPResourceModel is the Terraform state model for the cert-based custom-IdP credential resource.
+type certCIdPResourceModel struct {
+	ID           types.String `tfsdk:"id"`
+	Name         types.String `tfsdk:"name"`
+	Description  types.String `tfsdk:"description"`
+	EmailAddress types.String `tfsdk:"email_address"`
+	Hostname     types.String `tfsdk:"hostname"`
+	Origin       types.String `tfsdk:"origin"`
+}
+
+func certCIdPResourceValueFrom(v cicdmodels.Credential) certCIdPResourceModel {
+	m := certCIdPResourceModel{
+		ID:          types.StringValue(v.ID),
+		Name:        types.StringValue(v.Name),
+		Description: types.StringValue(v.Description),
+	}
+	if v.CertificateBasedAuthForCustomIdP != nil {
+		m.EmailAddress = types.StringValue(v.CertificateBasedAuthForCustomIdP.EmailAddress)
+		m.Hostname = types.StringValue(v.CertificateBasedAuthForCustomIdP.Hostname)
+		m.Origin = types.StringValue(v.CertificateBasedAuthForCustomIdP.Origin)
+	}
+	return m
+}
+
+func (m certCIdPResourceModel) toCreateRequest() cicdmodels.CreateCredentialRequest {
+	return cicdmodels.CreateCredentialRequest{
+		Name:        m.Name.ValueString(),
+		Description: m.Description.ValueString(),
+		CertificateBasedAuthForCustomIdP: &cicdmodels.CertificateBasedAuthForCustomIdP{
+			EmailAddress: m.EmailAddress.ValueString(),
+			Hostname:     m.Hostname.ValueString(),
+			Origin:       m.Origin.ValueString(),
+		},
+	}
+}
+
+func (m certCIdPResourceModel) toPatchRequest() cicdmodels.PatchCredentialRequest {
+	name := m.Name.ValueString()
+	desc := m.Description.ValueString()
+	return cicdmodels.PatchCredentialRequest{
+		Name:        &name,
+		Description: &desc,
+		CertificateBasedAuthForCustomIdP: &cicdmodels.CertificateBasedAuthForCustomIdP{
+			EmailAddress: m.EmailAddress.ValueString(),
+			Hostname:     m.Hostname.ValueString(),
+			Origin:       m.Origin.ValueString(),
+		},
+	}
+}
+
+// serviceKeyResourceModel is the Terraform state model for the service-key credential resource.
+type serviceKeyResourceModel struct {
+	ID          types.String `tfsdk:"id"`
+	Name        types.String `tfsdk:"name"`
+	Description types.String `tfsdk:"description"`
+	Key         types.String `tfsdk:"key"`
+}
+
+func serviceKeyResourceValueFrom(v cicdmodels.Credential) serviceKeyResourceModel {
+	return serviceKeyResourceModel{
+		ID:          types.StringValue(v.ID),
+		Name:        types.StringValue(v.Name),
+		Description: types.StringValue(v.Description),
+	}
+}
+
+func (m serviceKeyResourceModel) toCreateRequest() cicdmodels.CreateCredentialRequest {
+	return cicdmodels.CreateCredentialRequest{
+		Name:        m.Name.ValueString(),
+		Description: m.Description.ValueString(),
+		ServiceKey: &cicdmodels.ServiceKey{
+			Key: m.Key.ValueString(),
+		},
+	}
+}
+
+func (m serviceKeyResourceModel) toPatchRequest() cicdmodels.PatchCredentialRequest {
+	name := m.Name.ValueString()
+	desc := m.Description.ValueString()
+	return cicdmodels.PatchCredentialRequest{
+		Name:        &name,
+		Description: &desc,
+		ServiceKey: &cicdmodels.ServiceKey{
+			Key: m.Key.ValueString(),
+		},
+	}
+}
+
+// secretTextResourceModel is the Terraform state model for the secret-text credential resource.
+type secretTextResourceModel struct {
+	ID          types.String `tfsdk:"id"`
+	Name        types.String `tfsdk:"name"`
+	Description types.String `tfsdk:"description"`
+	Text        types.String `tfsdk:"text"`
+}
+
+func secretTextResourceValueFrom(v cicdmodels.Credential) secretTextResourceModel {
+	return secretTextResourceModel{
+		ID:          types.StringValue(v.ID),
+		Name:        types.StringValue(v.Name),
+		Description: types.StringValue(v.Description),
+	}
+}
+
+func (m secretTextResourceModel) toCreateRequest() cicdmodels.CreateCredentialRequest {
+	return cicdmodels.CreateCredentialRequest{
+		Name:        m.Name.ValueString(),
+		Description: m.Description.ValueString(),
+		SecretText: &cicdmodels.SecretText{
+			Text: m.Text.ValueString(),
+		},
+	}
+}
+
+func (m secretTextResourceModel) toPatchRequest() cicdmodels.PatchCredentialRequest {
+	name := m.Name.ValueString()
+	desc := m.Description.ValueString()
+	return cicdmodels.PatchCredentialRequest{
+		Name:        &name,
+		Description: &desc,
+		SecretText: &cicdmodels.SecretText{
+			Text: m.Text.ValueString(),
+		},
+	}
+}
+
+// credentialIdentityModel is the identity model shared by all credential resources.
+type credentialIdentityModel struct {
+	ID types.String `tfsdk:"id"`
+}
 
 // basicAuthDSModel is the Terraform state model for the basic-auth credential data source.
 // No password field — the API never returns it.

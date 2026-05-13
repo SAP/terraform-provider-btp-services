@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -137,8 +136,7 @@ func hookRedactSensitiveData(creds TestCredentials) func(i *cassette.Interaction
 		redactJSONField(&i.Request.Body, "password", "redacted-password")
 		redactJSONField(&i.Response.Body, "password", "redacted-password")
 
-		// API response body: redact id (UUID) and _links
-		redactJSONUUIDs(&i.Response.Body)
+		// API response body: redact _links
 		redactJSONLinks(&i.Response.Body)
 
 		// Response headers
@@ -187,17 +185,6 @@ func hostOf(rawURL string) string {
 		return ""
 	}
 	return u.Hostname()
-}
-
-// uuidPattern matches standard UUID v4 strings.
-var uuidPattern = regexp.MustCompile(`[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`)
-
-// redactJSONUUIDs replaces all UUID values in a JSON body with "redacted-id".
-func redactJSONUUIDs(body *string) {
-	if body == nil {
-		return
-	}
-	*body = uuidPattern.ReplaceAllString(*body, "redacted-id")
 }
 
 // redactJSONLinks replaces the entire _links object value with a redacted placeholder.
