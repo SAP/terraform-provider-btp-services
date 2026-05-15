@@ -34,7 +34,7 @@ Development setup:
   ```hcl
   provider_installation {
     dev_overrides {
-      "sap/btp-services" = "/path/to/go/bin"
+      "sap/sap-btp-services" = "/go/bin"
     }
     direct {}
   }

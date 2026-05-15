@@ -20,7 +20,7 @@ func main() {
 	flag.Parse()
 
 	err := providerserver.Serve(context.Background(), btpservicesprovider.New(), providerserver.ServeOpts{
-		Address:         "registry.terraform.io/SAP/sap-btp-services",
+		Address:         "registry.terraform.io/sap/sap-btp-services",
 		Debug:           debug,
 		ProtocolVersion: 6,
 	})

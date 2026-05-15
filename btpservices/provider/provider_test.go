@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
@@ -123,12 +124,33 @@ var expectedResourceTypes = []string{
 	"btpservice_cicd_credential_webhook_secret",
 	"btpservice_cicd_credential_container_registry",
 	"btpservice_cicd_credential_kubernetes_config",
+	"btpservice_cicd_credential_cert_based_auth_custom_idp",
+	"btpservice_cicd_credential_service_key",
+	"btpservice_cicd_credential_secret_text",
+	"btpservice_cicd_credential_basic_auth_custom_idp",
+	"btpservice_cicd_repository",
 }
 
 // expectedDataSourceTypes lists every data source type name the provider must expose.
 var expectedDataSourceTypes = []string{
 	"btpservice_cicd_credential",
 	"btpservice_cicd_credentials",
+	"btpservice_cicd_repositories",
+	"btpservice_cicd_repository",
+}
+
+// expectedListResourceTypes lists every list resource type name the provider must expose.
+var expectedListResourceTypes = []string{
+	"btpservice_cicd_credential_basic_auth",
+	"btpservice_cicd_credential_cloud_connector",
+	"btpservice_cicd_credential_webhook_secret",
+	"btpservice_cicd_credential_container_registry",
+	"btpservice_cicd_credential_kubernetes_config",
+	"btpservice_cicd_credential_basic_auth_custom_idp",
+	"btpservice_cicd_credential_cert_based_auth_custom_idp",
+	"btpservice_cicd_credential_service_key",
+	"btpservice_cicd_credential_secret_text",
+	"btpservice_cicd_repository",
 }
 
 func TestProvider_Resources_TypeNames(t *testing.T) {
@@ -165,6 +187,30 @@ func TestProvider_DataSources_TypeNames(t *testing.T) {
 	for _, name := range expectedDataSourceTypes {
 		if !got[name] {
 			t.Errorf("missing data source type %q", name)
+		}
+	}
+}
+
+func TestProvider_ListResources_TypeNames(t *testing.T) {
+	p, ok := New()().(interface {
+		ListResources(context.Context) []func() list.ListResource
+	})
+	if !ok {
+		t.Fatal("provider does not implement ProviderWithListResources")
+	}
+	ctx := context.Background()
+
+	got := make(map[string]bool)
+	for _, factory := range p.ListResources(ctx) {
+		lr := factory()
+		var meta resource.MetadataResponse
+		lr.Metadata(ctx, resource.MetadataRequest{ProviderTypeName: "btpservice"}, &meta)
+		got[meta.TypeName] = true
+	}
+
+	for _, name := range expectedListResourceTypes {
+		if !got[name] {
+			t.Errorf("missing list resource type %q", name)
 		}
 	}
 }
