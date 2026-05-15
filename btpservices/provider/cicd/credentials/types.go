@@ -470,3 +470,47 @@ func credentialsDSItemsFrom(list []cicdmodels.Credential) types.List {
 	result, _ := types.ListValue(credentialsDSItemType, items)
 	return result
 }
+
+// ---------------------------------------------------------------------------
+// Credential usage data source models
+// ---------------------------------------------------------------------------
+
+// credentialUsageDSModel is the Terraform state for the credential usage data source.
+type credentialUsageDSModel struct {
+	Credential types.String `tfsdk:"credential"`
+	UserType   types.String `tfsdk:"usertype"`
+	Usages     types.List   `tfsdk:"usages"`
+}
+
+// credentialUsageDSItemType is the object type for each usage entry.
+var credentialUsageDSItemType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"id":   types.StringType,
+		"name": types.StringType,
+		"type": types.StringType,
+	},
+}
+
+func credentialUsageDSItemsFrom(usages []cicdmodels.CredentialUsage) types.List {
+	items := make([]attr.Value, 0, len(usages))
+	for _, u := range usages {
+		obj, _ := types.ObjectValue(credentialUsageDSItemType.AttrTypes, map[string]attr.Value{
+			"id":   types.StringValue(u.ID),
+			"name": types.StringValue(u.Name),
+			"type": types.StringValue(u.Type),
+		})
+		items = append(items, obj)
+	}
+	result, _ := types.ListValue(credentialUsageDSItemType, items)
+	return result
+}
+
+// ---------------------------------------------------------------------------
+// Job credentials data source models
+// ---------------------------------------------------------------------------
+
+// jobCredentialsDSModel is the Terraform state for the job credentials data source.
+type jobCredentialsDSModel struct {
+	Job           types.String `tfsdk:"job"`
+	CredentialIDs types.List   `tfsdk:"credential_ids"`
+}

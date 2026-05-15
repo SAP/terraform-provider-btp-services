@@ -33,6 +33,8 @@ func (s ServicePackage) DataSources(_ context.Context) []func() datasource.DataS
 	return []func() datasource.DataSource{
 		credentials.NewCredentialDataSource,
 		credentials.NewCredentialsDataSource,
+		credentials.NewCredentialUsageDataSource,
+		credentials.NewJobCredentialsDataSource,
 	}
 }
 
