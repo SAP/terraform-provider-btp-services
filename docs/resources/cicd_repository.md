@@ -29,7 +29,7 @@ resource "btpservice_cicd_repository" "with_webhook" {
   name      = "my-webhook-repo"
   clone_url = "https://github.com/example/my-app"
 
-  event_receiver {
+  event_receiver = {
     active                      = true
     scm_type                    = "GITHUB"
     webhook_token_credential_id = btpservice_cicd_credential_webhook_secret.webhook.id
