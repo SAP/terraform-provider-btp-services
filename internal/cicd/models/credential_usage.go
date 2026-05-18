@@ -1,11 +1,16 @@
 package cicdmodels
 
-// CredentialUsage represents a single entry in the usages list for a credential.
-// Each entry identifies a job or repository that references the credential.
-type CredentialUsage struct {
+// CredentialUsageUser holds the id/name/type of the job or repository that uses the credential.
+type CredentialUsageUser struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 	Type string `json:"type"` // "job" or "repository"
+}
+
+// CredentialUsage represents a single entry in the usages list for a credential.
+// The API wraps the identity fields under a nested "user" object.
+type CredentialUsage struct {
+	User CredentialUsageUser `json:"user"`
 }
 
 // CredentialUsageListResponse is the HAL envelope returned by

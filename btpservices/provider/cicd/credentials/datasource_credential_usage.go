@@ -98,7 +98,11 @@ func (d *credentialUsageDataSource) Read(ctx context.Context, req datasource.Rea
 		return
 	}
 
-	usages, err := d.cli.Credentials.GetUsages(ctx, config.Credential.ValueString(), config.UserType.ValueString())
+	usertype := ""
+	if !config.UserType.IsNull() && !config.UserType.IsUnknown() {
+		usertype = config.UserType.ValueString()
+	}
+	usages, err := d.cli.Credentials.GetUsages(ctx, config.Credential.ValueString(), usertype)
 	if err != nil {
 		if cicdmodels.IsNotFound(err) {
 			resp.Diagnostics.AddError(
@@ -111,10 +115,16 @@ func (d *credentialUsageDataSource) Read(ctx context.Context, req datasource.Rea
 		return
 	}
 
+	usagesList, diags := credentialUsageDSItemsFrom(usages)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	state := credentialUsageDSModel{
 		Credential: config.Credential,
 		UserType:   config.UserType,
-		Usages:     credentialUsageDSItemsFrom(usages),
+		Usages:     usagesList,
 	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }

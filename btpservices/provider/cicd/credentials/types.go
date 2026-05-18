@@ -4,6 +4,7 @@ package cicdcredentials
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	cicdmodels "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/models"
@@ -491,18 +492,21 @@ var credentialUsageDSItemType = types.ObjectType{
 	},
 }
 
-func credentialUsageDSItemsFrom(usages []cicdmodels.CredentialUsage) types.List {
+func credentialUsageDSItemsFrom(usages []cicdmodels.CredentialUsage) (types.List, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	items := make([]attr.Value, 0, len(usages))
 	for _, u := range usages {
-		obj, _ := types.ObjectValue(credentialUsageDSItemType.AttrTypes, map[string]attr.Value{
-			"id":   types.StringValue(u.ID),
-			"name": types.StringValue(u.Name),
-			"type": types.StringValue(u.Type),
+		obj, d := types.ObjectValue(credentialUsageDSItemType.AttrTypes, map[string]attr.Value{
+			"id":   types.StringValue(u.User.ID),
+			"name": types.StringValue(u.User.Name),
+			"type": types.StringValue(u.User.Type),
 		})
+		diags.Append(d...)
 		items = append(items, obj)
 	}
-	result, _ := types.ListValue(credentialUsageDSItemType, items)
-	return result
+	result, d := types.ListValue(credentialUsageDSItemType, items)
+	diags.Append(d...)
+	return result, diags
 }
 
 // ---------------------------------------------------------------------------

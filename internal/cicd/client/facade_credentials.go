@@ -5,6 +5,7 @@ package cicdclient
 import (
 	"context"
 	"fmt"
+	"net/url"
 
 	cicdmodels "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/models"
 )
@@ -70,7 +71,9 @@ func (f *credentialsFacade) List(ctx context.Context) ([]cicdmodels.Credential, 
 func (f *credentialsFacade) GetUsages(ctx context.Context, reference, usertype string) ([]cicdmodels.CredentialUsage, error) {
 	path := fmt.Sprintf("/v2/credentials/%s/usages", reference)
 	if usertype != "" {
-		path = fmt.Sprintf("%s?usertype=%s", path, usertype)
+		q := url.Values{}
+		q.Set("usertype", usertype)
+		path = path + "?" + q.Encode()
 	}
 	var result cicdmodels.CredentialUsageListResponse
 	if err := f.hc.doGet(ctx, path, &result); err != nil {

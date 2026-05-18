@@ -10,6 +10,7 @@ import (
 	cicdcredentials "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/credentials"
 	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/utils"
 	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/tfutils"
+	"github.com/SAP/terraform-provider-sap-btp-services/internal/shared"
 )
 
 func TestDatasourceCicdCredentialUsage(t *testing.T) {
@@ -28,12 +29,21 @@ func TestDatasourceCicdCredentialUsage(t *testing.T) {
 				{
 					Config: utils.HCLProviderBlock(creds) + `
 data "btpservice_cicd_credential_usage" "uut" {
-  credential = "tf-test-basic-auth-cidp"
+  credential = "tf-ds-test-basic-auth"
 }
 `,
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("data.btpservice_cicd_credential_usage.uut", "credential", "tf-test-basic-auth-cidp"),
-						resource.TestCheckResourceAttrSet("data.btpservice_cicd_credential_usage.uut", "usages.#"),
+						resource.TestCheckResourceAttr("data.btpservice_cicd_credential_usage.uut", "credential", "tf-ds-test-basic-auth"),
+						resource.TestCheckResourceAttr("data.btpservice_cicd_credential_usage.uut", "usages.#", "3"),
+						resource.TestCheckResourceAttrSet("data.btpservice_cicd_credential_usage.uut", "usages.0.id"),
+						resource.TestCheckResourceAttr("data.btpservice_cicd_credential_usage.uut", "usages.0.name", "tf-test-job"),
+						resource.TestCheckResourceAttr("data.btpservice_cicd_credential_usage.uut", "usages.0.type", "job"),
+						resource.TestCheckResourceAttrSet("data.btpservice_cicd_credential_usage.uut", "usages.1.id"),
+						resource.TestCheckResourceAttr("data.btpservice_cicd_credential_usage.uut", "usages.1.name", "tf-test-repo"),
+						resource.TestCheckResourceAttr("data.btpservice_cicd_credential_usage.uut", "usages.1.type", "repository"),
+						resource.TestCheckResourceAttrSet("data.btpservice_cicd_credential_usage.uut", "usages.2.id"),
+						resource.TestCheckResourceAttr("data.btpservice_cicd_credential_usage.uut", "usages.2.name", "tf-ds-test-repo"),
+						resource.TestCheckResourceAttr("data.btpservice_cicd_credential_usage.uut", "usages.2.type", "repository"),
 					),
 				},
 			},
@@ -53,21 +63,24 @@ data "btpservice_cicd_credential_usage" "uut" {
 				{
 					Config: utils.HCLProviderBlock(creds) + `
 data "btpservice_cicd_credential_usage" "uut" {
-  credential = "tf-test-basic-auth-cidp"
+  credential = "tf-ds-test-basic-auth"
   usertype   = "job"
 }
 `,
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("data.btpservice_cicd_credential_usage.uut", "credential", "tf-test-basic-auth-cidp"),
+						resource.TestCheckResourceAttr("data.btpservice_cicd_credential_usage.uut", "credential", "tf-ds-test-basic-auth"),
 						resource.TestCheckResourceAttr("data.btpservice_cicd_credential_usage.uut", "usertype", "job"),
-						resource.TestCheckResourceAttrSet("data.btpservice_cicd_credential_usage.uut", "usages.#"),
+						resource.TestCheckResourceAttr("data.btpservice_cicd_credential_usage.uut", "usages.#", "1"),
+						resource.TestCheckResourceAttrSet("data.btpservice_cicd_credential_usage.uut", "usages.0.id"),
+						resource.TestCheckResourceAttr("data.btpservice_cicd_credential_usage.uut", "usages.0.name", "tf-test-job"),
+						resource.TestCheckResourceAttr("data.btpservice_cicd_credential_usage.uut", "usages.0.type", "job"),
 					),
 				},
 			},
 		})
 	})
 
-	t.Run("error path - configure", func(t *testing.T) {
+	t.Run("error path - wrong provider data type", func(t *testing.T) {
 		t.Parallel()
 
 		d := cicdcredentials.NewCredentialUsageDataSource().(datasource.DataSourceWithConfigure)
@@ -76,6 +89,18 @@ data "btpservice_cicd_credential_usage" "uut" {
 		d.Configure(context.Background(), req, resp)
 		if !resp.Diagnostics.HasError() {
 			t.Error("expected error for invalid provider data type")
+		}
+	})
+
+	t.Run("error path - nil cicd client", func(t *testing.T) {
+		t.Parallel()
+
+		d := cicdcredentials.NewCredentialUsageDataSource().(datasource.DataSourceWithConfigure)
+		resp := &datasource.ConfigureResponse{}
+		req := datasource.ConfigureRequest{ProviderData: &shared.ProviderClients{Cicd: nil}}
+		d.Configure(context.Background(), req, resp)
+		if !resp.Diagnostics.HasError() {
+			t.Error("expected error when Cicd client is nil")
 		}
 	})
 }
