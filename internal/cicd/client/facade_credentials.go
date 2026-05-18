@@ -5,6 +5,7 @@ package cicdclient
 import (
 	"context"
 	"fmt"
+	"net/url"
 
 	cicdmodels "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/models"
 )
@@ -62,4 +63,37 @@ func (f *credentialsFacade) List(ctx context.Context) ([]cicdmodels.Credential, 
 		return []cicdmodels.Credential{}, nil
 	}
 	return result.Embedded.Credentials, nil
+}
+
+// GetUsages sends GET /v2/credentials/{reference}/usages and returns the list of
+// jobs and repositories that reference the given credential.
+// usertype is optional — pass "" to return all usage types, or "job"/"repository" to filter.
+func (f *credentialsFacade) GetUsages(ctx context.Context, reference, usertype string) ([]cicdmodels.CredentialUsage, error) {
+	path := fmt.Sprintf("/v2/credentials/%s/usages", reference)
+	if usertype != "" {
+		q := url.Values{}
+		q.Set("usertype", usertype)
+		path = path + "?" + q.Encode()
+	}
+	var result cicdmodels.CredentialUsageListResponse
+	if err := f.hc.doGet(ctx, path, &result); err != nil {
+		return nil, err
+	}
+	if result.Embedded == nil {
+		return []cicdmodels.CredentialUsage{}, nil
+	}
+	return result.Embedded.Usages, nil
+}
+
+// GetJobCredentials sends GET /v2/jobs/{jobReference}/credentials and returns the list
+// of credential IDs that a build of the job is allowed to use.
+func (f *credentialsFacade) GetJobCredentials(ctx context.Context, jobReference string) ([]string, error) {
+	var result cicdmodels.JobCredentialListResponse
+	if err := f.hc.doGet(ctx, fmt.Sprintf("/v2/jobs/%s/credentials", jobReference), &result); err != nil {
+		return nil, err
+	}
+	if result.IDs == nil {
+		return []string{}, nil
+	}
+	return result.IDs, nil
 }
