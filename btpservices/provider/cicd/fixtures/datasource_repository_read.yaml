@@ -1,0 +1,217 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 29
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-token-host
+        remote_addr: ""
+        request_uri: ""
+        body: grant_type=client_credentials
+        form:
+            grant_type:
+                - client_credentials
+        headers:
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://redacted-token-host/oauth/token
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"access_token":"redacted-access-token","token_type":"bearer","expires_in":3599,"scope":"redacted-scope","jti":"redacted-jti"}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 13 May 2026 04:34:01 GMT
+            Pragma:
+                - no-cache
+            Server:
+                - nginx
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+            X-Xss-Protection:
+                - 1; mode=block
+        status: 200 OK
+        code: 200
+        duration: 932.473875ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/repositories/tf-ds-test-repo
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","name":"tf-ds-test-repo","id":"4126058b-997f-45b3-9379-4a948b96949f","cloneUrl":"https://github.com/example/my-webhook-repo","cloneCredentialId":"8be241d3-6101-45d0-9e64-01f66e52c4de","cloudConnectorCredentialId":null,"eventReceiver":{"apiVersion":"v2","webhookId":"71464e11-e1a2-4d73-9577-dff8fb9f5346","active":true,"scmType":"GITHUB","webhookTokenCredentialId":null,"_links":{"self":{"href":"redacted"}}},"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Wed, 13 May 2026 04:34:02 GMT
+            Etag:
+                - W/"0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 891.087376ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/repositories/tf-ds-test-repo
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","name":"tf-ds-test-repo","id":"4126058b-997f-45b3-9379-4a948b96949f","cloneUrl":"https://github.com/example/my-webhook-repo","cloneCredentialId":"8be241d3-6101-45d0-9e64-01f66e52c4de","cloudConnectorCredentialId":null,"eventReceiver":{"apiVersion":"v2","webhookId":"71464e11-e1a2-4d73-9577-dff8fb9f5346","active":true,"scmType":"GITHUB","webhookTokenCredentialId":null,"_links":{"self":{"href":"redacted"}}},"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Wed, 13 May 2026 04:34:03 GMT
+            Etag:
+                - W/"0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 283.105667ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/repositories/tf-ds-test-repo
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","name":"tf-ds-test-repo","id":"4126058b-997f-45b3-9379-4a948b96949f","cloneUrl":"https://github.com/example/my-webhook-repo","cloneCredentialId":"8be241d3-6101-45d0-9e64-01f66e52c4de","cloudConnectorCredentialId":null,"eventReceiver":{"apiVersion":"v2","webhookId":"71464e11-e1a2-4d73-9577-dff8fb9f5346","active":true,"scmType":"GITHUB","webhookTokenCredentialId":null,"_links":{"self":{"href":"redacted"}}},"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Wed, 13 May 2026 04:34:03 GMT
+            Etag:
+                - W/"0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 298.632625ms
