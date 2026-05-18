@@ -1,0 +1,547 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 29
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-token-host
+        remote_addr: ""
+        request_uri: ""
+        body: grant_type=client_credentials
+        form:
+            grant_type:
+                - client_credentials
+        headers:
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://redacted-token-host/oauth/token
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"access_token":"redacted-access-token","token_type":"bearer","expires_in":3599,"scope":"redacted-scope","jti":"redacted-jti"}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 13 May 2026 04:37:45 GMT
+            Pragma:
+                - no-cache
+            Server:
+                - nginx
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+            X-Xss-Protection:
+                - 1; mode=block
+        status: 200 OK
+        code: 200
+        duration: 985.769542ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 76
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"tf-test-repo","cloneUrl":"https://github.com/example/tf-test-repo"}'
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted-api-host/v2/repositories
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-cache, no-store, max-age=0, must-revalidate
+            Content-Length:
+                - "0"
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Date:
+                - Wed, 13 May 2026 04:37:46 GMT
+            Etag:
+                - W/"0"
+            Expires:
+                - "0"
+            Location:
+                - redacted-location
+            Pragma:
+                - no-cache
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 201 Created
+        code: 201
+        duration: 814.066126ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/repositories/tf-test-repo
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","name":"tf-test-repo","id":"f2f28721-200b-49f0-8c86-1823f1d70652","cloneUrl":"https://github.com/example/tf-test-repo","cloneCredentialId":null,"cloudConnectorCredentialId":null,"eventReceiver":null,"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Wed, 13 May 2026 04:37:46 GMT
+            Etag:
+                - W/"0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 278.261ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/repositories/f2f28721-200b-49f0-8c86-1823f1d70652
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","name":"tf-test-repo","id":"f2f28721-200b-49f0-8c86-1823f1d70652","cloneUrl":"https://github.com/example/tf-test-repo","cloneCredentialId":null,"cloudConnectorCredentialId":null,"eventReceiver":null,"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Wed, 13 May 2026 04:37:46 GMT
+            Etag:
+                - W/"0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 317.667958ms
+    - id: 4
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/repositories/f2f28721-200b-49f0-8c86-1823f1d70652
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","name":"tf-test-repo","id":"f2f28721-200b-49f0-8c86-1823f1d70652","cloneUrl":"https://github.com/example/tf-test-repo","cloneCredentialId":null,"cloudConnectorCredentialId":null,"eventReceiver":null,"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Wed, 13 May 2026 04:37:47 GMT
+            Etag:
+                - W/"0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 277.918292ms
+    - id: 5
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 128
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: '{"id":"f2f28721-200b-49f0-8c86-1823f1d70652","name":"tf-test-repo","cloneUrl":"https://github.com/example/tf-test-repo-updated"}'
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted-api-host/v2/repositories
+        method: PUT
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-cache, no-store, max-age=0, must-revalidate
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Date:
+                - Wed, 13 May 2026 04:37:47 GMT
+            Etag:
+                - W/"1"
+            Expires:
+                - "0"
+            Pragma:
+                - no-cache
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 204 No Content
+        code: 204
+        duration: 319.418625ms
+    - id: 6
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/repositories/f2f28721-200b-49f0-8c86-1823f1d70652
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","name":"tf-test-repo","id":"f2f28721-200b-49f0-8c86-1823f1d70652","cloneUrl":"https://github.com/example/tf-test-repo-updated","cloneCredentialId":null,"cloudConnectorCredentialId":null,"eventReceiver":null,"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Wed, 13 May 2026 04:37:47 GMT
+            Etag:
+                - W/"1"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 307.531ms
+    - id: 7
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/repositories/f2f28721-200b-49f0-8c86-1823f1d70652
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","name":"tf-test-repo","id":"f2f28721-200b-49f0-8c86-1823f1d70652","cloneUrl":"https://github.com/example/tf-test-repo-updated","cloneCredentialId":null,"cloudConnectorCredentialId":null,"eventReceiver":null,"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Wed, 13 May 2026 04:37:48 GMT
+            Etag:
+                - W/"1"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 271.215458ms
+    - id: 8
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/repositories/f2f28721-200b-49f0-8c86-1823f1d70652
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","name":"tf-test-repo","id":"f2f28721-200b-49f0-8c86-1823f1d70652","cloneUrl":"https://github.com/example/tf-test-repo-updated","cloneCredentialId":null,"cloudConnectorCredentialId":null,"eventReceiver":null,"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Wed, 13 May 2026 04:37:48 GMT
+            Etag:
+                - W/"1"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 272.19975ms
+    - id: 9
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/repositories/f2f28721-200b-49f0-8c86-1823f1d70652
+        method: DELETE
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-cache, no-store, max-age=0, must-revalidate
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Date:
+                - Wed, 13 May 2026 04:37:48 GMT
+            Expires:
+                - "0"
+            Pragma:
+                - no-cache
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 204 No Content
+        code: 204
+        duration: 295.25125ms

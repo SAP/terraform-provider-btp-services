@@ -10,13 +10,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 
 	credentials "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/credentials"
+	repositories "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/repositories"
 )
 
-// ServicePackage wires all CI/CD resources and data sources into the provider.d
+// ServicePackage wires all CI/CD resources and data sources into the provider.
 type ServicePackage struct{}
 
 func (s ServicePackage) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		// Credentials Resource
 		credentials.NewBasicAuthResource,
 		credentials.NewCloudConnectorResource,
 		credentials.NewWebhookSecretResource,
@@ -26,6 +28,10 @@ func (s ServicePackage) Resources(_ context.Context) []func() resource.Resource 
 		credentials.NewCertCIdPResource,
 		credentials.NewServiceKeyResource,
 		credentials.NewSecretTextResource,
+
+		// Repository Resources
+
+		repositories.NewRepositoryResource,
 	}
 }
 
@@ -35,6 +41,12 @@ func (s ServicePackage) DataSources(_ context.Context) []func() datasource.DataS
 		credentials.NewCredentialsDataSource,
 		credentials.NewCredentialUsageDataSource,
 		credentials.NewJobCredentialsDataSource,
+
+
+		// Repository Datasources
+		repositories.NewRepositoryDataSource,
+		repositories.NewRepositoriesDataSource,
+
 	}
 }
 
@@ -49,5 +61,8 @@ func (s ServicePackage) ListResources(_ context.Context) []func() list.ListResou
 		credentials.NewCertCIdPListResource,
 		credentials.NewServiceKeyListResource,
 		credentials.NewSecretTextListResource,
+
+		// Repository ListResources
+		repositories.NewRepositoryListResource,
 	}
 }
