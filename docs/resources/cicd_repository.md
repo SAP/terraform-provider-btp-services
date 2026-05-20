@@ -65,7 +65,7 @@ Required:
 
 Optional:
 
-- `webhook_token_credential_id` (String) ID of the webhook secret credential for this event receiver. Max 63 characters.
+- `webhook_token_credential_id` (String) The ID for the webhook secret of this event receiver. Required for all SCM types except `BITBUCKET_CLOUD`. Max 63 characters.
 
 Read-Only:
 

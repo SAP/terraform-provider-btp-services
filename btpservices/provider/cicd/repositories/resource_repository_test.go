@@ -148,4 +148,59 @@ resource "btpservice_cicd_repository" "test" {
 			},
 		})
 	})
+
+	t.Run("error - webhook_token_credential_id required for non-BITBUCKET_CLOUD", func(t *testing.T) {
+		t.Parallel()
+		for _, scmType := range []string{"GITHUB", "BITBUCKET", "GITLAB", "AZUREREPOS"} {
+			t.Run(scmType, func(t *testing.T) {
+				t.Parallel()
+				resource.Test(t, resource.TestCase{
+					IsUnitTest:               true,
+					ProtoV6ProviderFactories: utils.GetTestProviders(utils.Redacted, nil),
+					Steps: []resource.TestStep{
+						{
+							Config: utils.HCLProviderBlock(utils.Redacted) + `
+resource "btpservice_cicd_repository" "test" {
+  name      = "tf-test-repo"
+  clone_url = "https://github.com/example/repo"
+
+  event_receiver = {
+    active   = true
+    scm_type = "` + scmType + `"
+  }
+}
+`,
+							ExpectError: regexp.MustCompile(`webhook_token_credential_id is required when scm_type is not BITBUCKET_CLOUD`),
+						},
+					},
+				})
+			})
+		}
+	})
+
+	t.Run("no error - webhook_token_credential_id not required for BITBUCKET_CLOUD", func(t *testing.T) {
+		t.Parallel()
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: utils.GetTestProviders(utils.Redacted, nil),
+			Steps: []resource.TestStep{
+				{
+					Config: utils.HCLProviderBlock(utils.Redacted) + `
+resource "btpservice_cicd_repository" "test" {
+  name      = "tf-test-repo"
+  clone_url = "https://github.com/example/repo"
+
+  event_receiver = {
+    active   = true
+    scm_type = "BITBUCKET_CLOUD"
+  }
+}
+`,
+					// PlanOnly stops after plan — validation passes, no API call is made.
+					PlanOnly:            true,
+					ExpectNonEmptyPlan:  true,
+				},
+			},
+		})
+	})
 }

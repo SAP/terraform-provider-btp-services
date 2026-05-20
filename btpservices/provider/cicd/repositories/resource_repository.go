@@ -27,7 +27,7 @@ import (
 var _ resource.Resource = &repositoryResource{}
 var _ resource.ResourceWithConfigure = &repositoryResource{}
 var _ resource.ResourceWithImportState = &repositoryResource{}
-
+var _ resource.ResourceWithValidateConfig = &repositoryResource{}
 var _ resource.ResourceWithIdentity = &repositoryResource{}
 
 func NewRepositoryResource() resource.Resource {
@@ -126,10 +126,10 @@ func (r *repositoryResource) Schema(_ context.Context, _ resource.SchemaRequest,
 						},
 					},
 
-					// webhook_token_credential_id is required for all SCM types in the UI,
-					// but the API treats it as optional — no validation is enforced here.
+					// webhook_token_credential_id is required for all SCM types except BITBUCKET_CLOUD.
+					// Enforced by webhookTokenRequiredValidator on the event_receiver block.
 					"webhook_token_credential_id": schema.StringAttribute{
-						MarkdownDescription: "ID of the webhook secret credential for this event receiver. Max 63 characters.",
+						MarkdownDescription: "The ID for the webhook secret of this event receiver. Required for all SCM types except `BITBUCKET_CLOUD`. Max 63 characters.",
 						Optional:            true,
 						Computed:            true,
 						Validators: []validator.String{
@@ -255,4 +255,24 @@ func (r *repositoryResource) Delete(ctx context.Context, req resource.DeleteRequ
 
 func (r *repositoryResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("id"), path.Root("id"), req, resp)
+}
+
+func (r *repositoryResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {
+	var data repositoryResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() || data.EventReceiver == nil {
+		return
+	}
+	scm := data.EventReceiver.SCMType
+	token := data.EventReceiver.WebhookTokenCredentialID
+	if scm.IsUnknown() || token.IsUnknown() {
+		return
+	}
+	if scm.ValueString() != "BITBUCKET_CLOUD" && (token.IsNull() || token.ValueString() == "") {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("event_receiver").AtName("webhook_token_credential_id"),
+			"Missing Required Attribute",
+			"webhook_token_credential_id is required when scm_type is not BITBUCKET_CLOUD.",
+		)
+	}
 }

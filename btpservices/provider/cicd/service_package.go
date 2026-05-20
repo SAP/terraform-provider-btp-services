@@ -46,6 +46,8 @@ func (s ServicePackage) DataSources(_ context.Context) []func() datasource.DataS
 		repositories.NewRepositoryDataSource,
 		repositories.NewRepositoriesDataSource,
 		repositories.NewRepositoryJobsDataSource,
+		repositories.NewRepositoryEventReceiverDataSource,
+		repositories.NewRepositoryWebhookConfigDataSource,
 	}
 }
 
