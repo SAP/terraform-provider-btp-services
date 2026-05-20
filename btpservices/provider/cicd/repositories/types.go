@@ -221,3 +221,41 @@ func repositoriesDSItemsFrom(list []cicdmodels.Repository) (types.List, diag.Dia
 	diags.Append(d...)
 	return result, diags
 }
+
+// ---------------------------------------------------------------------------
+// Event receiver data source model
+// ---------------------------------------------------------------------------
+
+type repositoryEventReceiverDSModel struct {
+	Repository               types.String `tfsdk:"repository"`
+	Active                   types.Bool   `tfsdk:"active"`
+	SCMType                  types.String `tfsdk:"scm_type"`
+	WebhookID                types.String `tfsdk:"webhook_id"`
+	WebhookTokenCredentialID types.String `tfsdk:"webhook_token_credential_id"`
+}
+
+func repositoryEventReceiverDSValueFrom(repository string, v cicdmodels.EventReceiverModel) repositoryEventReceiverDSModel {
+	return repositoryEventReceiverDSModel{
+		Repository:               types.StringValue(repository),
+		Active:                   types.BoolValue(v.Active),
+		SCMType:                  types.StringValue(v.SCMType),
+		WebhookID:                types.StringValue(v.WebhookID),
+		WebhookTokenCredentialID: types.StringValue(v.WebhookTokenCredentialID),
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Webhook config data source model
+// ---------------------------------------------------------------------------
+
+type repositoryWebhookConfigDSModel struct {
+	Repository types.String `tfsdk:"repository"`
+	WebhookURI types.String `tfsdk:"webhook_uri"`
+}
+
+func repositoryWebhookConfigDSValueFrom(repository string, v cicdmodels.WebhookConfig) repositoryWebhookConfigDSModel {
+	return repositoryWebhookConfigDSModel{
+		Repository: types.StringValue(repository),
+		WebhookURI: types.StringValue(v.WebhookURI),
+	}
+}

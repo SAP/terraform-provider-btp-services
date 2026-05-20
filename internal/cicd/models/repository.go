@@ -53,3 +53,8 @@ type RepositoryListResponse struct {
 type RepositoryListEmbedded struct {
 	Repositories []Repository `json:"repositories"`
 }
+
+// WebhookConfig is the API response model for GET /v2/repositories/{ref}/webhookConfig.
+type WebhookConfig struct {
+	WebhookURI string `json:"webhookUri"`
+}

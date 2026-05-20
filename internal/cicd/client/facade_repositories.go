@@ -57,3 +57,21 @@ func (f *repositoriesFacade) List(ctx context.Context) ([]cicdmodels.Repository,
 	}
 	return result.Embedded.Repositories, nil
 }
+
+// GetEventReceiver sends GET /v2/repositories/{reference}/eventReceiver.
+func (f *repositoriesFacade) GetEventReceiver(ctx context.Context, reference string) (*cicdmodels.EventReceiverModel, error) {
+	var result cicdmodels.EventReceiverModel
+	if err := f.hc.doGet(ctx, fmt.Sprintf("/v2/repositories/%s/eventReceiver", reference), &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// GetWebhookConfig sends GET /v2/repositories/{reference}/webhookConfig.
+func (f *repositoriesFacade) GetWebhookConfig(ctx context.Context, reference string) (*cicdmodels.WebhookConfig, error) {
+	var result cicdmodels.WebhookConfig
+	if err := f.hc.doGet(ctx, fmt.Sprintf("/v2/repositories/%s/webhookConfig", reference), &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
