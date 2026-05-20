@@ -235,12 +235,16 @@ type repositoryEventReceiverDSModel struct {
 }
 
 func repositoryEventReceiverDSValueFrom(repository string, v cicdmodels.EventReceiverModel) repositoryEventReceiverDSModel {
+	webhookTokenCredID := types.StringNull()
+	if v.WebhookTokenCredentialID != "" {
+		webhookTokenCredID = types.StringValue(v.WebhookTokenCredentialID)
+	}
 	return repositoryEventReceiverDSModel{
 		Repository:               types.StringValue(repository),
 		Active:                   types.BoolValue(v.Active),
 		SCMType:                  types.StringValue(v.SCMType),
 		WebhookID:                types.StringValue(v.WebhookID),
-		WebhookTokenCredentialID: types.StringValue(v.WebhookTokenCredentialID),
+		WebhookTokenCredentialID: webhookTokenCredID,
 	}
 }
 

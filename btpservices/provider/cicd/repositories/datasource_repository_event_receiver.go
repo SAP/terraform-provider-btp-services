@@ -84,6 +84,14 @@ func (d *repositoryEventReceiverDataSource) Read(ctx context.Context, req dataso
 		return
 	}
 
+	if d.cli == nil {
+		resp.Diagnostics.AddError(
+			"Missing CI/CD Configuration",
+			"A cicd{} block must be configured in the provider to use CI/CD data sources.",
+		)
+		return
+	}
+
 	result, err := d.cli.Repositories.GetEventReceiver(ctx, config.Repository.ValueString())
 	if err != nil {
 		if cicdmodels.IsNotFound(err) {
