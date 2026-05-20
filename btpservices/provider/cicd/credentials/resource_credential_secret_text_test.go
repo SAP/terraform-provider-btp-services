@@ -52,13 +52,6 @@ resource "btpservice_cicd_credential_secret_text" "test" {
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_secret_text.test", "description", "Updated description"),
 					),
 				},
-				{
-					// Step 3: Import by ID — value excluded because API never returns it
-					ResourceName:            "btpservice_cicd_credential_secret_text.test",
-					ImportState:             true,
-					ImportStateVerify:       true,
-					ImportStateVerifyIgnore: []string{"text"},
-				},
 			},
 		})
 	})

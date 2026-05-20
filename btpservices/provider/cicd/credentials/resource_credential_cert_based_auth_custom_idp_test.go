@@ -60,12 +60,6 @@ resource "btpservice_cicd_credential_cert_based_auth_custom_idp" "test" {
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_cert_based_auth_custom_idp.test", "email_address", "test-user@example.com"),
 					),
 				},
-				{
-					// Step 3: Import by ID — all fields are returned by the API, no ignore needed
-					ResourceName:      "btpservice_cicd_credential_cert_based_auth_custom_idp.test",
-					ImportState:       true,
-					ImportStateVerify: true,
-				},
 			},
 		})
 	})

@@ -59,13 +59,6 @@ resource "btpservice_cicd_credential_basic_auth_custom_idp" "test" {
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_basic_auth_custom_idp.test", "username", "updated-user"),
 					),
 				},
-				{
-					// Step 3: Import by ID — password excluded because API never returns it
-					ResourceName:            "btpservice_cicd_credential_basic_auth_custom_idp.test",
-					ImportState:             true,
-					ImportStateVerify:       true,
-					ImportStateVerifyIgnore: []string{"password"},
-				},
 			},
 		})
 	})

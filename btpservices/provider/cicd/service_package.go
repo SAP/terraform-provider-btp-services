@@ -46,23 +46,11 @@ func (s ServicePackage) DataSources(_ context.Context) []func() datasource.DataS
 		repositories.NewRepositoryDataSource,
 		repositories.NewRepositoriesDataSource,
 		repositories.NewRepositoryJobsDataSource,
-		repositories.NewRepositoryEventReceiverDataSource,
-		repositories.NewRepositoryWebhookConfigDataSource,
 	}
 }
 
 func (s ServicePackage) ListResources(_ context.Context) []func() list.ListResource {
 	return []func() list.ListResource{
-		credentials.NewBasicAuthListResource,
-		credentials.NewCloudConnectorListResource,
-		credentials.NewWebhookSecretListResource,
-		credentials.NewContainerRegistryListResource,
-		credentials.NewKubernetesConfigListResource,
-		credentials.NewBasicAuthCIdPListResource,
-		credentials.NewCertCIdPListResource,
-		credentials.NewServiceKeyListResource,
-		credentials.NewSecretTextListResource,
-
 		// Repository ListResources
 		repositories.NewRepositoryListResource,
 	}

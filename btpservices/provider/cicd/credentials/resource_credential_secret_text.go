@@ -6,13 +6,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	cicdclient "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/client"
 	cicdmodels "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/models"
@@ -21,8 +18,6 @@ import (
 
 var _ resource.Resource = &secretTextResource{}
 var _ resource.ResourceWithConfigure = &secretTextResource{}
-var _ resource.ResourceWithImportState = &secretTextResource{}
-var _ resource.ResourceWithIdentity = &secretTextResource{}
 
 func NewSecretTextResource() resource.Resource {
 	return &secretTextResource{}
@@ -108,7 +103,6 @@ func (r *secretTextResource) Create(ctx context.Context, req resource.CreateRequ
 	state := secretTextResourceValueFrom(*result)
 	state.Text = plan.Text
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
-	resp.Diagnostics.Append(resp.Identity.Set(ctx, credentialIdentityModel{ID: types.StringValue(result.ID)})...)
 }
 
 func (r *secretTextResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -131,7 +125,6 @@ func (r *secretTextResource) Read(ctx context.Context, req resource.ReadRequest,
 	updated := secretTextResourceValueFrom(*result)
 	updated.Text = state.Text
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
-	resp.Diagnostics.Append(resp.Identity.Set(ctx, credentialIdentityModel{ID: types.StringValue(result.ID)})...)
 }
 
 func (r *secretTextResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -161,7 +154,6 @@ func (r *secretTextResource) Update(ctx context.Context, req resource.UpdateRequ
 	updated := secretTextResourceValueFrom(*result)
 	updated.Text = plan.Text
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
-	resp.Diagnostics.Append(resp.Identity.Set(ctx, credentialIdentityModel{ID: types.StringValue(result.ID)})...)
 }
 
 func (r *secretTextResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -175,20 +167,5 @@ func (r *secretTextResource) Delete(ctx context.Context, req resource.DeleteRequ
 		if !cicdmodels.IsNotFound(err) {
 			resp.Diagnostics.AddError("Error Deleting Credential", err.Error())
 		}
-	}
-}
-
-func (r *secretTextResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("id"), path.Root("id"), req, resp)
-}
-
-func (r *secretTextResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
-	resp.IdentitySchema = identityschema.Schema{
-		Attributes: map[string]identityschema.Attribute{
-			"id": identityschema.StringAttribute{
-				Description:       "The unique identifier of the credential.",
-				RequiredForImport: true,
-			},
-		},
 	}
 }

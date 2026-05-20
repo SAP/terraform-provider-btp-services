@@ -6,13 +6,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	cicdclient "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/client"
 	cicdmodels "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/models"
@@ -21,8 +18,6 @@ import (
 
 var _ resource.Resource = &cloudConnectorResource{}
 var _ resource.ResourceWithConfigure = &cloudConnectorResource{}
-var _ resource.ResourceWithImportState = &cloudConnectorResource{}
-var _ resource.ResourceWithIdentity = &cloudConnectorResource{}
 
 func NewCloudConnectorResource() resource.Resource {
 	return &cloudConnectorResource{}
@@ -36,15 +31,6 @@ func (r *cloudConnectorResource) Metadata(_ context.Context, req resource.Metada
 	resp.TypeName = fmt.Sprintf("%s_cicd_credential_cloud_connector", req.ProviderTypeName)
 }
 
-func (r *cloudConnectorResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
-	resp.IdentitySchema = identityschema.Schema{
-		Attributes: map[string]identityschema.Attribute{
-			"id": identityschema.StringAttribute{
-				RequiredForImport: true,
-			},
-		},
-	}
-}
 
 func (r *cloudConnectorResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
@@ -116,7 +102,6 @@ func (r *cloudConnectorResource) Create(ctx context.Context, req resource.Create
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, cloudConnectorResourceValueFrom(*result))...)
-	resp.Diagnostics.Append(resp.Identity.Set(ctx, credentialIdentityModel{ID: types.StringValue(result.ID)})...)
 }
 
 func (r *cloudConnectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -137,7 +122,6 @@ func (r *cloudConnectorResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, cloudConnectorResourceValueFrom(*result))...)
-	resp.Diagnostics.Append(resp.Identity.Set(ctx, credentialIdentityModel{ID: types.StringValue(result.ID)})...)
 }
 
 func (r *cloudConnectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -165,7 +149,6 @@ func (r *cloudConnectorResource) Update(ctx context.Context, req resource.Update
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, cloudConnectorResourceValueFrom(*result))...)
-	resp.Diagnostics.Append(resp.Identity.Set(ctx, credentialIdentityModel{ID: types.StringValue(result.ID)})...)
 }
 
 func (r *cloudConnectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -180,8 +163,4 @@ func (r *cloudConnectorResource) Delete(ctx context.Context, req resource.Delete
 			resp.Diagnostics.AddError("Error Deleting Credential", err.Error())
 		}
 	}
-}
-
-func (r *cloudConnectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("id"), path.Root("id"), req, resp)
 }

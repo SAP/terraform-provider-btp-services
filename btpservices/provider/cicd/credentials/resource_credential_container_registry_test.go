@@ -52,13 +52,6 @@ resource "btpservice_cicd_credential_container_registry" "test" {
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_container_registry.test", "description", "Updated description"),
 					),
 				},
-				{
-					// Step 3: Import by ID — content excluded because API never returns it
-					ResourceName:            "btpservice_cicd_credential_container_registry.test",
-					ImportState:             true,
-					ImportStateVerify:       true,
-					ImportStateVerifyIgnore: []string{"content"},
-				},
 			},
 		})
 	})

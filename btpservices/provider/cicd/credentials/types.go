@@ -420,11 +420,6 @@ func (m secretTextResourceModel) toPatchRequest() cicdmodels.PatchCredentialRequ
 	}
 }
 
-// credentialIdentityModel is the identity model shared by all credential resources.
-type credentialIdentityModel struct {
-	ID types.String `tfsdk:"id"`
-}
-
 // basicAuthDSModel is the Terraform state model for the basic-auth credential data source.
 // No password field — the API never returns it.
 type basicAuthDSModel struct {

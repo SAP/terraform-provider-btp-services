@@ -141,15 +141,6 @@ var expectedDataSourceTypes = []string{
 
 // expectedListResourceTypes lists every list resource type name the provider must expose.
 var expectedListResourceTypes = []string{
-	"btpservice_cicd_credential_basic_auth",
-	"btpservice_cicd_credential_cloud_connector",
-	"btpservice_cicd_credential_webhook_secret",
-	"btpservice_cicd_credential_container_registry",
-	"btpservice_cicd_credential_kubernetes_config",
-	"btpservice_cicd_credential_basic_auth_custom_idp",
-	"btpservice_cicd_credential_cert_based_auth_custom_idp",
-	"btpservice_cicd_credential_service_key",
-	"btpservice_cicd_credential_secret_text",
 	"btpservice_cicd_repository",
 }
 
