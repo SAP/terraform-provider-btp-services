@@ -6,13 +6,15 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"gopkg.in/yaml.v3"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 
 	cicdclient "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/client"
 	cicdmodels "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/models"
@@ -21,6 +23,7 @@ import (
 
 var _ resource.Resource = &jobResource{}
 var _ resource.ResourceWithConfigure = &jobResource{}
+var _ resource.ResourceWithImportState = &jobResource{}
 
 func NewJobResource() resource.Resource {
 	return &jobResource{}
@@ -59,16 +62,26 @@ func (r *jobResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 				Required:            true,
 			},
 			"pipeline": schema.StringAttribute{
-				MarkdownDescription: "Pipeline type. Known values: `sap-cloud-sdk`, `cpi`, `cf-env`, `kyma-cnb`, `sap-ui5-abap-fes`.",
+				MarkdownDescription: "Pipeline type. One of: `cpi`, `cf-env`, `kyma-cnb`, `sap-ui5-abap-fes`.",
 				Required:            true,
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"cpi",
+						"cf-env",
+						"kyma-cnb",
+						"sap-ui5-abap-fes",
+					),
+				},
 			},
 			"pipeline_version": schema.StringAttribute{
 				MarkdownDescription: "Version of the pipeline type (e.g. `3.0`, `1.0`).",
 				Required:            true,
 			},
 			"pipeline_parameters": schema.StringAttribute{
-				MarkdownDescription: "Pipeline parameters as a YAML string. Use `file()` to load from a file. " +
-					"The content is converted to JSON before being sent to the API.",
+				MarkdownDescription: "Pipeline parameters as a YAML string. Use `file()` or `templatefile()` to load from a file. " +
+					"When `configurationSource` is `source_repository`, the pipeline reads its config from the repo — set this to `configurationSource: source_repository`. " +
+					"When `configurationSource` is `job_parameter`, provide the full pipeline configuration here. " +
+					"The value is stored as-is in state so formatting is preserved across plans.",
 				Required: true,
 				Validators: []validator.String{
 					validYAMLValidator{},
@@ -84,13 +97,36 @@ func (r *jobResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 			},
 			"branch": schema.StringAttribute{
 				MarkdownDescription: "Branch pattern for the job. Required when `repository_id` is set.",
-				Optional:            true,
-				Computed:            true,
+				Required:            true,
 			},
 			"repository_id": schema.StringAttribute{
 				MarkdownDescription: "ID of the source repository used by this job.",
+				Required:            true,
+			},
+			"notification_configuration": schema.SingleNestedAttribute{
+				MarkdownDescription: "Optional notification settings for the job.",
 				Optional:            true,
-				Computed:            true,
+				Attributes: map[string]schema.Attribute{
+					"ans": schema.SingleNestedAttribute{
+						MarkdownDescription: "SAP Alert Notification Service (ANS) settings.",
+						Optional:            true,
+						Attributes: map[string]schema.Attribute{
+							"active": schema.BoolAttribute{
+								MarkdownDescription: "Whether ANS notifications are active for this job.",
+								Required:            true,
+							},
+							"credential_id": schema.StringAttribute{
+								MarkdownDescription: "ID of the ANS credential to use.",
+								Required:            true,
+							},
+							"custom_tag": schema.StringAttribute{
+								MarkdownDescription: "Optional custom tag added to ANS notifications.",
+								Optional:            true,
+								Computed:            true,
+							},
+						},
+					},
+				},
 			},
 		},
 	}
@@ -167,6 +203,9 @@ func (r *jobResource) Read(ctx context.Context, req resource.ReadRequest, resp *
 		return
 	}
 
+	// Preserve the user's YAML string on normal reads (prevents false diffs).
+	// On import, state.PipelineParameters is empty — jobResourceValueFrom
+	// falls back to serialising the API response to canonical YAML.
 	updated, err := jobResourceValueFrom(*result, state.PipelineParameters.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Error Mapping Job Response", err.Error())
@@ -227,6 +266,13 @@ func (r *jobResource) Delete(ctx context.Context, req resource.DeleteRequest, re
 	}
 }
 
+// ImportState populates the id field from the import ID, then Terraform calls
+// Read() automatically. Read() will see an empty pipeline_parameters in state
+// and fall back to serialising the API response to canonical YAML.
+func (r *jobResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("id"), path.Root("id"), req, resp)
+}
+
 // validYAMLValidator is a schema validator that ensures a string is valid YAML.
 type validYAMLValidator struct{}
 
@@ -250,5 +296,4 @@ func (v validYAMLValidator) ValidateString(_ context.Context, req validator.Stri
 			fmt.Sprintf("pipeline_parameters must be valid YAML: %s", err.Error()),
 		)
 	}
-	_ = types.StringValue // keep import used
 }
