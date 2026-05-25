@@ -1,0 +1,547 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 29
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-token-host
+        remote_addr: ""
+        request_uri: ""
+        body: grant_type=client_credentials
+        form:
+            grant_type:
+                - client_credentials
+        headers:
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://redacted-token-host/oauth/token
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"access_token":"redacted-access-token","token_type":"bearer","expires_in":3599,"scope":"redacted-scope","jti":"redacted-jti"}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Mon, 25 May 2026 05:52:29 GMT
+            Pragma:
+                - no-cache
+            Server:
+                - nginx
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+            X-Xss-Protection:
+                - 1; mode=block
+        status: 200 OK
+        code: 200
+        duration: 1.092211626s
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 564
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"tf-test-kyma-cnb","description":"Kyma CNB test job","active":true,"pipeline":"kyma-cnb","pipelineVersion":"1.0","pipelineParameters":{"configurationSource":"job_parameter","kymaCnbConfiguration":{"common":{"chartPath":"helm/chart","images":[{"name":"app-image","path":"."}]},"stages":{"build":{"cnb":{"containerRegistry":{"credential":"d794d687-3053-4cba-a942-88e6b13ef035","url":"https://docker.io/myuser"}},"npm":{"toolVersion":"N22"}}}}},"buildRetentionDays":7,"maxBuildsToKeep":50,"branch":"main","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f"}'
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted-api-host/v2/jobs
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-cache, no-store, max-age=0, must-revalidate
+            Content-Length:
+                - "0"
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Date:
+                - Mon, 25 May 2026 05:52:30 GMT
+            Etag:
+                - W/"0"
+            Expires:
+                - "0"
+            Location:
+                - redacted-location
+            Pragma:
+                - no-cache
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 201 Created
+        code: 201
+        duration: 788.426542ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/tf-test-kyma-cnb
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","id":"b90822e4-c356-41df-bf04-613f56b9c8b6","name":"tf-test-kyma-cnb","description":"Kyma CNB test job","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","branch":"main","pipeline":"kyma-cnb","pipelineVersion":"1.0","active":true,"buildRetentionDays":7,"maxBuildsToKeep":50,"pipelineParameters":{"kymaCnbConfiguration":{"common":{"chartPath":"helm/chart","images":[{"name":"app-image","path":"."}]},"stages":{"build":{"cnb":{"containerRegistry":{"credential":"d794d687-3053-4cba-a942-88e6b13ef035","url":"https://docker.io/myuser"}},"npm":{"toolVersion":"N22"}}}},"configurationSource":"job_parameter"},"notificationConfiguration":null,"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Mon, 25 May 2026 05:52:31 GMT
+            Etag:
+                - W/"1"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 261.602792ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/b90822e4-c356-41df-bf04-613f56b9c8b6
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","id":"b90822e4-c356-41df-bf04-613f56b9c8b6","name":"tf-test-kyma-cnb","description":"Kyma CNB test job","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","branch":"main","pipeline":"kyma-cnb","pipelineVersion":"1.0","active":true,"buildRetentionDays":7,"maxBuildsToKeep":50,"pipelineParameters":{"kymaCnbConfiguration":{"common":{"chartPath":"helm/chart","images":[{"name":"app-image","path":"."}]},"stages":{"build":{"cnb":{"containerRegistry":{"credential":"d794d687-3053-4cba-a942-88e6b13ef035","url":"https://docker.io/myuser"}},"npm":{"toolVersion":"N22"}}}},"configurationSource":"job_parameter"},"notificationConfiguration":null,"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Mon, 25 May 2026 05:52:31 GMT
+            Etag:
+                - W/"1"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 305.434167ms
+    - id: 4
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/b90822e4-c356-41df-bf04-613f56b9c8b6
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","id":"b90822e4-c356-41df-bf04-613f56b9c8b6","name":"tf-test-kyma-cnb","description":"Kyma CNB test job","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","branch":"main","pipeline":"kyma-cnb","pipelineVersion":"1.0","active":true,"buildRetentionDays":7,"maxBuildsToKeep":50,"pipelineParameters":{"kymaCnbConfiguration":{"common":{"chartPath":"helm/chart","images":[{"name":"app-image","path":"."}]},"stages":{"build":{"cnb":{"containerRegistry":{"credential":"d794d687-3053-4cba-a942-88e6b13ef035","url":"https://docker.io/myuser"}},"npm":{"toolVersion":"N22"}}}},"configurationSource":"job_parameter"},"notificationConfiguration":null,"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Mon, 25 May 2026 05:52:31 GMT
+            Etag:
+                - W/"1"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 264.77525ms
+    - id: 5
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 620
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: '{"id":"b90822e4-c356-41df-bf04-613f56b9c8b6","name":"tf-test-kyma-cnb","description":"Kyma CNB test job - updated","active":false,"pipeline":"kyma-cnb","pipelineVersion":"1.0","pipelineParameters":{"configurationSource":"job_parameter","kymaCnbConfiguration":{"common":{"chartPath":"helm/chart","images":[{"name":"app-image","path":"."}]},"stages":{"build":{"cnb":{"containerRegistry":{"credential":"d794d687-3053-4cba-a942-88e6b13ef035","url":"https://docker.io/myuser"}},"npm":{"toolVersion":"N22"}}}}},"buildRetentionDays":14,"maxBuildsToKeep":20,"branch":"main","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f"}'
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted-api-host/v2/jobs
+        method: PUT
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-cache, no-store, max-age=0, must-revalidate
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Date:
+                - Mon, 25 May 2026 05:52:32 GMT
+            Etag:
+                - W/"2"
+            Expires:
+                - "0"
+            Pragma:
+                - no-cache
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 204 No Content
+        code: 204
+        duration: 346.138667ms
+    - id: 6
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/b90822e4-c356-41df-bf04-613f56b9c8b6
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","id":"b90822e4-c356-41df-bf04-613f56b9c8b6","name":"tf-test-kyma-cnb","description":"Kyma CNB test job - updated","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","branch":"main","pipeline":"kyma-cnb","pipelineVersion":"1.0","active":false,"buildRetentionDays":14,"maxBuildsToKeep":20,"pipelineParameters":{"kymaCnbConfiguration":{"common":{"chartPath":"helm/chart","images":[{"name":"app-image","path":"."}]},"stages":{"build":{"cnb":{"containerRegistry":{"credential":"d794d687-3053-4cba-a942-88e6b13ef035","url":"https://docker.io/myuser"}},"npm":{"toolVersion":"N22"}}}},"configurationSource":"job_parameter"},"notificationConfiguration":null,"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Mon, 25 May 2026 05:52:32 GMT
+            Etag:
+                - W/"2"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 272.370292ms
+    - id: 7
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/b90822e4-c356-41df-bf04-613f56b9c8b6
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","id":"b90822e4-c356-41df-bf04-613f56b9c8b6","name":"tf-test-kyma-cnb","description":"Kyma CNB test job - updated","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","branch":"main","pipeline":"kyma-cnb","pipelineVersion":"1.0","active":false,"buildRetentionDays":14,"maxBuildsToKeep":20,"pipelineParameters":{"kymaCnbConfiguration":{"common":{"chartPath":"helm/chart","images":[{"name":"app-image","path":"."}]},"stages":{"build":{"cnb":{"containerRegistry":{"credential":"d794d687-3053-4cba-a942-88e6b13ef035","url":"https://docker.io/myuser"}},"npm":{"toolVersion":"N22"}}}},"configurationSource":"job_parameter"},"notificationConfiguration":null,"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Mon, 25 May 2026 05:52:32 GMT
+            Etag:
+                - W/"2"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 281.251917ms
+    - id: 8
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/b90822e4-c356-41df-bf04-613f56b9c8b6
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","id":"b90822e4-c356-41df-bf04-613f56b9c8b6","name":"tf-test-kyma-cnb","description":"Kyma CNB test job - updated","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","branch":"main","pipeline":"kyma-cnb","pipelineVersion":"1.0","active":false,"buildRetentionDays":14,"maxBuildsToKeep":20,"pipelineParameters":{"kymaCnbConfiguration":{"common":{"chartPath":"helm/chart","images":[{"name":"app-image","path":"."}]},"stages":{"build":{"cnb":{"containerRegistry":{"credential":"d794d687-3053-4cba-a942-88e6b13ef035","url":"https://docker.io/myuser"}},"npm":{"toolVersion":"N22"}}}},"configurationSource":"job_parameter"},"notificationConfiguration":null,"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Mon, 25 May 2026 05:52:33 GMT
+            Etag:
+                - W/"2"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 270.507834ms
+    - id: 9
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/b90822e4-c356-41df-bf04-613f56b9c8b6
+        method: DELETE
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-cache, no-store, max-age=0, must-revalidate
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Date:
+                - Mon, 25 May 2026 05:52:33 GMT
+            Expires:
+                - "0"
+            Pragma:
+                - no-cache
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 204 No Content
+        code: 204
+        duration: 340.642333ms
