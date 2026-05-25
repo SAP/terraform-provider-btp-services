@@ -255,13 +255,13 @@ func (r *buildTriggerResource) ImportState(ctx context.Context, req resource.Imp
 		})...)
 		return
 	}
-	// Identity-based import (Terraform 1.12+): req.Identity carries job and id.
-	var job, id types.String
-	resp.Diagnostics.Append(req.Identity.GetAttribute(ctx, path.Root("job"), &job)...)
-	resp.Diagnostics.Append(req.Identity.GetAttribute(ctx, path.Root("id"), &id)...)
+	// Identity-based import (Terraform 1.12+): resp.Identity is pre-populated from req.Identity.
+	var identity buildTriggerIdentityModel
+	diags := resp.Identity.Get(ctx, &identity)
+	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("job"), job)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("job"), identity.Job)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), identity.ID)...)
 }
