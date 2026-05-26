@@ -5,6 +5,7 @@ package cicdjobs
 import (
 	"context"
 	"fmt"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -14,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"gopkg.in/yaml.v3"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 
 	cicdclient "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/client"
@@ -51,6 +53,12 @@ func (r *jobResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Name of the job. Must match `[a-zA-Z0-9_-]{1,64}`.",
 				Required:            true,
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[a-zA-Z0-9_-]{1,64}$`),
+						"must match [a-zA-Z0-9_-]{1,64}",
+					),
+				},
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: "Optional human-readable description of the job.",
@@ -88,8 +96,11 @@ func (r *jobResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *
 				},
 			},
 			"build_retention_days": schema.Int64Attribute{
-				MarkdownDescription: "Number of days build artifacts are retained.",
+				MarkdownDescription: "Number of days build artifacts are retained. Must be between 1 and 28 (inclusive).",
 				Required:            true,
+				Validators: []validator.Int64{
+					int64validator.Between(1, 28),
+				},
 			},
 			"max_builds_to_keep": schema.Int64Attribute{
 				MarkdownDescription: "Maximum number of builds retained for this job.",
