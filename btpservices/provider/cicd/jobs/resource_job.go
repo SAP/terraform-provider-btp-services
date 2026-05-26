@@ -189,7 +189,7 @@ func (r *jobResource) Create(ctx context.Context, req resource.CreateRequest, re
 		return
 	}
 
-	state, err := jobResourceValueFrom(*result, plan.PipelineParameters.ValueString())
+	state, err := jobResourceValueFrom(*result, plan.PipelineParameters.ValueString(), false)
 	if err != nil {
 		resp.Diagnostics.AddError("Error Mapping Job Response", err.Error())
 		return
@@ -214,10 +214,11 @@ func (r *jobResource) Read(ctx context.Context, req resource.ReadRequest, resp *
 		return
 	}
 
-	// Preserve the user's YAML string on normal reads (prevents false diffs).
-	// On import, state.PipelineParameters is empty — jobResourceValueFrom
-	// falls back to serialising the API response to canonical YAML.
-	updated, err := jobResourceValueFrom(*result, state.PipelineParameters.ValueString())
+	// On import the Framework only populates id; all other attributes are null.
+	// Detect this by checking PipelineParameters — if null, we are on the import
+	// path and jobResourceValueFrom will serialise the API response to YAML.
+	isImport := state.PipelineParameters.IsNull()
+	updated, err := jobResourceValueFrom(*result, state.PipelineParameters.ValueString(), isImport)
 	if err != nil {
 		resp.Diagnostics.AddError("Error Mapping Job Response", err.Error())
 		return
@@ -238,7 +239,7 @@ func (r *jobResource) Update(ctx context.Context, req resource.UpdateRequest, re
 		return
 	}
 
-	updateReq, err := plan.toUpdateRequest()
+	updateReq, err := plan.toUpdateRequest(state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Invalid pipeline_parameters", err.Error())
 		return
@@ -255,7 +256,7 @@ func (r *jobResource) Update(ctx context.Context, req resource.UpdateRequest, re
 		return
 	}
 
-	updated, err := jobResourceValueFrom(*result, plan.PipelineParameters.ValueString())
+	updated, err := jobResourceValueFrom(*result, plan.PipelineParameters.ValueString(), false)
 	if err != nil {
 		resp.Diagnostics.AddError("Error Mapping Job Response", err.Error())
 		return

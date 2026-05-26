@@ -67,11 +67,11 @@ func mapToYAML(m map[string]any) (string, error) {
 // storing the API form would always differ from what the plan expected and
 // cause "provider produced inconsistent result" errors.
 //
-// On import priorYAML is empty string. In that case we fall back to serialising
+// On import isImport is true. In that case we fall back to serialising
 // the API response to canonical YAML so the state is populated correctly.
-func jobResourceValueFrom(v cicdmodels.Job, priorYAML string) (jobResourceModel, error) {
+func jobResourceValueFrom(v cicdmodels.Job, priorYAML string, isImport bool) (jobResourceModel, error) {
 	pipelineParams := priorYAML
-	if pipelineParams == "" {
+	if isImport {
 		// Import path: no prior user YAML — serialize the API response.
 		canonical, err := mapToYAML(v.PipelineParameters)
 		if err != nil {
@@ -128,13 +128,13 @@ func (m jobResourceModel) toCreateRequest() (cicdmodels.CreateJobRequest, error)
 	}, nil
 }
 
-func (m jobResourceModel) toUpdateRequest() (cicdmodels.UpdateJobRequest, error) {
+func (m jobResourceModel) toUpdateRequest(id string) (cicdmodels.UpdateJobRequest, error) {
 	params, err := yamlToMap(m.PipelineParameters.ValueString())
 	if err != nil {
 		return cicdmodels.UpdateJobRequest{}, err
 	}
 	return cicdmodels.UpdateJobRequest{
-		ID:                        m.ID.ValueString(),
+		ID:                        id,
 		Name:                      m.Name.ValueString(),
 		Description:               m.Description.ValueString(),
 		Active:                    m.Active.ValueBool(),
