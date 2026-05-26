@@ -278,8 +278,6 @@ func (r *jobResource) Delete(ctx context.Context, req resource.DeleteRequest, re
 }
 
 // ImportState populates the id field from the import ID, then Terraform calls
-// Read() automatically. Read() will see an empty pipeline_parameters in state
-// and fall back to serialising the API response to canonical YAML.
 func (r *jobResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("id"), path.Root("id"), req, resp)
 }
