@@ -1,0 +1,547 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 29
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-token-host
+        remote_addr: ""
+        request_uri: ""
+        body: grant_type=client_credentials
+        form:
+            grant_type:
+                - client_credentials
+        headers:
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://redacted-token-host/oauth/token
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"access_token":"redacted-access-token","token_type":"bearer","expires_in":3599,"scope":"redacted-scope","jti":"redacted-jti"}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Mon, 25 May 2026 05:52:29 GMT
+            Pragma:
+                - no-cache
+            Server:
+                - nginx
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+            X-Xss-Protection:
+                - 1; mode=block
+        status: 200 OK
+        code: 200
+        duration: 1.089856043s
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 435
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"tf-test-job-ans","description":"Job with ANS notifications","active":true,"pipeline":"cf-env","pipelineVersion":"3.0","pipelineParameters":{"configurationSource":"source_repository"},"buildRetentionDays":28,"maxBuildsToKeep":10,"branch":"main","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","notificationConfiguration":{"ans":{"active":true,"credentialId":"b9a0ba8a-8933-446f-b32e-7ff64ca2e5ce","customTag":"my-team"}}}'
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted-api-host/v2/jobs
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-cache, no-store, max-age=0, must-revalidate
+            Content-Length:
+                - "0"
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Date:
+                - Mon, 25 May 2026 05:52:30 GMT
+            Etag:
+                - W/"0"
+            Expires:
+                - "0"
+            Location:
+                - redacted-location
+            Pragma:
+                - no-cache
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 201 Created
+        code: 201
+        duration: 727.691917ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/tf-test-job-ans
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","id":"442dec1d-efac-4ffa-9622-3b5f40423923","name":"tf-test-job-ans","description":"Job with ANS notifications","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","branch":"main","pipeline":"cf-env","pipelineVersion":"3.0","active":true,"buildRetentionDays":28,"maxBuildsToKeep":10,"pipelineParameters":{"configurationSource":"source_repository"},"notificationConfiguration":{"ans":{"credentialId":"b9a0ba8a-8933-446f-b32e-7ff64ca2e5ce","customTag":"my-team","active":true}},"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Mon, 25 May 2026 05:52:31 GMT
+            Etag:
+                - W/"0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 268.982708ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/442dec1d-efac-4ffa-9622-3b5f40423923
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","id":"442dec1d-efac-4ffa-9622-3b5f40423923","name":"tf-test-job-ans","description":"Job with ANS notifications","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","branch":"main","pipeline":"cf-env","pipelineVersion":"3.0","active":true,"buildRetentionDays":28,"maxBuildsToKeep":10,"pipelineParameters":{"configurationSource":"source_repository"},"notificationConfiguration":{"ans":{"credentialId":"b9a0ba8a-8933-446f-b32e-7ff64ca2e5ce","customTag":"my-team","active":true}},"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Mon, 25 May 2026 05:52:31 GMT
+            Etag:
+                - W/"0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 328.511834ms
+    - id: 4
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/442dec1d-efac-4ffa-9622-3b5f40423923
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","id":"442dec1d-efac-4ffa-9622-3b5f40423923","name":"tf-test-job-ans","description":"Job with ANS notifications","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","branch":"main","pipeline":"cf-env","pipelineVersion":"3.0","active":true,"buildRetentionDays":28,"maxBuildsToKeep":10,"pipelineParameters":{"configurationSource":"source_repository"},"notificationConfiguration":{"ans":{"credentialId":"b9a0ba8a-8933-446f-b32e-7ff64ca2e5ce","customTag":"my-team","active":true}},"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Mon, 25 May 2026 05:52:31 GMT
+            Etag:
+                - W/"0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 284.181542ms
+    - id: 5
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 480
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: '{"id":"442dec1d-efac-4ffa-9622-3b5f40423923","name":"tf-test-job-ans","description":"Job with ANS notifications","active":true,"pipeline":"cf-env","pipelineVersion":"3.0","pipelineParameters":{"configurationSource":"source_repository"},"buildRetentionDays":28,"maxBuildsToKeep":10,"branch":"main","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","notificationConfiguration":{"ans":{"active":false,"credentialId":"b9a0ba8a-8933-446f-b32e-7ff64ca2e5ce","customTag":"my-team"}}}'
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted-api-host/v2/jobs
+        method: PUT
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-cache, no-store, max-age=0, must-revalidate
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Date:
+                - Mon, 25 May 2026 05:52:32 GMT
+            Etag:
+                - W/"1"
+            Expires:
+                - "0"
+            Pragma:
+                - no-cache
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 204 No Content
+        code: 204
+        duration: 335.651625ms
+    - id: 6
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/442dec1d-efac-4ffa-9622-3b5f40423923
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","id":"442dec1d-efac-4ffa-9622-3b5f40423923","name":"tf-test-job-ans","description":"Job with ANS notifications","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","branch":"main","pipeline":"cf-env","pipelineVersion":"3.0","active":true,"buildRetentionDays":28,"maxBuildsToKeep":10,"pipelineParameters":{"configurationSource":"source_repository"},"notificationConfiguration":{"ans":{"credentialId":"b9a0ba8a-8933-446f-b32e-7ff64ca2e5ce","customTag":"my-team","active":false}},"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Mon, 25 May 2026 05:52:32 GMT
+            Etag:
+                - W/"0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 277.470792ms
+    - id: 7
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/442dec1d-efac-4ffa-9622-3b5f40423923
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","id":"442dec1d-efac-4ffa-9622-3b5f40423923","name":"tf-test-job-ans","description":"Job with ANS notifications","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","branch":"main","pipeline":"cf-env","pipelineVersion":"3.0","active":true,"buildRetentionDays":28,"maxBuildsToKeep":10,"pipelineParameters":{"configurationSource":"source_repository"},"notificationConfiguration":{"ans":{"credentialId":"b9a0ba8a-8933-446f-b32e-7ff64ca2e5ce","customTag":"my-team","active":false}},"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Mon, 25 May 2026 05:52:32 GMT
+            Etag:
+                - W/"0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 281.444417ms
+    - id: 8
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/442dec1d-efac-4ffa-9622-3b5f40423923
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"apiVersion":"v2","id":"442dec1d-efac-4ffa-9622-3b5f40423923","name":"tf-test-job-ans","description":"Job with ANS notifications","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","branch":"main","pipeline":"cf-env","pipelineVersion":"3.0","active":true,"buildRetentionDays":28,"maxBuildsToKeep":10,"pipelineParameters":{"configurationSource":"source_repository"},"notificationConfiguration":{"ans":{"credentialId":"b9a0ba8a-8933-446f-b32e-7ff64ca2e5ce","customTag":"my-team","active":false}},"_links":{"self":{"href":"redacted"}}}'
+        headers:
+            Cache-Control:
+                - no-cache, must-revalidate, private
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Content-Type:
+                - application/hal+json;charset=UTF-8
+            Date:
+                - Mon, 25 May 2026 05:52:33 GMT
+            Etag:
+                - W/"0"
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 200 OK
+        code: 200
+        duration: 268.732584ms
+    - id: 9
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api-host
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Authorization:
+                - redacted
+        url: https://redacted-api-host/v2/jobs/442dec1d-efac-4ffa-9622-3b5f40423923
+        method: DELETE
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-cache, no-store, max-age=0, must-revalidate
+            Content-Security-Policy:
+                - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
+            Date:
+                - Mon, 25 May 2026 05:52:33 GMT
+            Expires:
+                - "0"
+            Pragma:
+                - no-cache
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - Origin
+                - Access-Control-Request-Method
+                - Access-Control-Request-Headers
+            X-Content-Type-Options:
+                - nosniff
+            X-Frame-Options:
+                - DENY
+            X-Vcap-Request-Id:
+                - redacted-vcap-request-id
+        status: 204 No Content
+        code: 204
+        duration: 321.045042ms

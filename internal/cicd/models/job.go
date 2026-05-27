@@ -40,3 +40,35 @@ type JobListResponse struct {
 type JobListEmbedded struct {
 	Jobs []Job `json:"jobs"`
 }
+
+// CreateJobRequest is the request body for POST /v2/jobs.
+type CreateJobRequest struct {
+	Name                      string                     `json:"name"`
+	Description               string                     `json:"description,omitempty"`
+	Active                    bool                       `json:"active"`
+	Pipeline                  string                     `json:"pipeline"`
+	PipelineVersion           string                     `json:"pipelineVersion"`
+	PipelineParameters        map[string]any             `json:"pipelineParameters"`
+	BuildRetentionDays        int64                      `json:"buildRetentionDays"`
+	MaxBuildsToKeep           int64                      `json:"maxBuildsToKeep"`
+	Branch                    string                     `json:"branch,omitempty"`
+	RepositoryID              string                     `json:"repositoryId,omitempty"`
+	NotificationConfiguration *NotificationConfiguration `json:"notificationConfiguration,omitempty"`
+}
+
+// UpdateJobRequest is the request body for PUT /v2/jobs (full replace).
+// The id field identifies which job to update since there is no {reference} in the URL.
+type UpdateJobRequest struct {
+	ID                        string                     `json:"id"`
+	Name                      string                     `json:"name"`
+	Description               string                     `json:"description,omitempty"`
+	Active                    bool                       `json:"active"`
+	Pipeline                  string                     `json:"pipeline"`
+	PipelineVersion           string                     `json:"pipelineVersion"`
+	PipelineParameters        map[string]any             `json:"pipelineParameters"`
+	BuildRetentionDays        int64                      `json:"buildRetentionDays"`
+	MaxBuildsToKeep           int64                      `json:"maxBuildsToKeep"`
+	Branch                    string                     `json:"branch,omitempty"`
+	RepositoryID              string                     `json:"repositoryId,omitempty"`
+	NotificationConfiguration *NotificationConfiguration `json:"notificationConfiguration,omitempty"`
+}
