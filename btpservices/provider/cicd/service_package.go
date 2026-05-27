@@ -58,5 +58,8 @@ func (s ServicePackage) ListResources(_ context.Context) []func() list.ListResou
 	return []func() list.ListResource{
 		// Repository ListResources
 		repositories.NewRepositoryListResource,
+
+		// Job ListResources
+		jobs.NewBuildTriggerListResource,
 	}
 }

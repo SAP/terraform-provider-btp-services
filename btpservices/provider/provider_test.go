@@ -141,6 +141,7 @@ var expectedDataSourceTypes = []string{
 
 // expectedListResourceTypes lists every list resource type name the provider must expose.
 var expectedListResourceTypes = []string{
+	"btpservice_cicd_build_trigger",
 	"btpservice_cicd_repository",
 }
 
