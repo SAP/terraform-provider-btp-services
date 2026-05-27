@@ -70,15 +70,6 @@ type buildTriggerListConfigModel struct {
 }
 
 func (r *buildTriggerListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
-	if r.cli == nil {
-		var d diag.Diagnostics
-		d.AddError(
-			"Provider Not Configured",
-			"The CI/CD client is not configured. Ensure a cicd{} block is present in the provider configuration.",
-		)
-		stream.Results = list.ListResultsStreamDiagnostics(d)
-		return
-	}
 
 	var config buildTriggerListConfigModel
 	diags := req.Config.Get(ctx, &config)
