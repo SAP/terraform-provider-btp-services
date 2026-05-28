@@ -34,7 +34,7 @@ func (s ServicePackage) Resources(_ context.Context) []func() resource.Resource 
 		repositories.NewRepositoryResource,
 
 		// Job Resources
-		jobs.NewBuildTriggerResource,
+		jobs.NewTriggerResource,
 	}
 }
 
@@ -60,6 +60,6 @@ func (s ServicePackage) ListResources(_ context.Context) []func() list.ListResou
 		repositories.NewRepositoryListResource,
 
 		// Job ListResources
-		jobs.NewBuildTriggerListResource,
+		jobs.NewTriggerListResource,
 	}
 }
