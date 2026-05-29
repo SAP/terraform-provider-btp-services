@@ -130,6 +130,7 @@ var expectedResourceTypes = []string{
 	"btpservice_cicd_credential_basic_auth_custom_idp",
 	"btpservice_cicd_repository",
 	"btpservice_cicd_job",
+	"btpservice_cicd_trigger",
 }
 
 // expectedDataSourceTypes lists every data source type name the provider must expose.
@@ -138,6 +139,8 @@ var expectedDataSourceTypes = []string{
 	"btpservice_cicd_credentials",
 	"btpservice_cicd_repositories",
 	"btpservice_cicd_repository",
+	"btpservice_cicd_trigger",
+	"btpservice_cicd_triggers",
 }
 
 // expectedListResourceTypes lists every list resource type name the provider must expose.
