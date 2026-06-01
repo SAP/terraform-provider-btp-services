@@ -13,14 +13,14 @@ Manages a CI/CD job in the SAP BTP CI/CD service.
 
 ```terraform
 locals {
-  repository_id  = "fda133cb-9dae-4d8e-a64d-82fa105f7b2c"
-  deploy_cred    = "63c7a7a3-eb0e-436c-8f9d-21e14d113977"
-  sonar_cred     = "c734a875-92df-4dbf-af65-8ebac9a58cd9"
-  registry_cred  = "efbf4d27-5ac2-4717-b95f-cd5c20d16718"
+  repository_id   = "fda133cb-9dae-4d8e-a64d-82fa105f7b2c"
+  deploy_cred     = "63c7a7a3-eb0e-436c-8f9d-21e14d113977"
+  sonar_cred      = "c734a875-92df-4dbf-af65-8ebac9a58cd9"
+  registry_cred   = "efbf4d27-5ac2-4717-b95f-cd5c20d16718"
   kubeconfig_cred = "d794d687-3053-4cba-a942-88e6b13ef035"
-  ans_cred       = "2b19cbdf-ca27-47fb-980b-0c5e66b8c57d"
-  ctm_cred       = "b9a0ba8a-8933-446f-b32e-7ff64ca2e5ce"
-  api_plan_key   = "c1e2f3a4-0000-0000-0000-111111111111"
+  ans_cred        = "2b19cbdf-ca27-47fb-980b-0c5e66b8c57d"
+  ctm_cred        = "b9a0ba8a-8933-446f-b32e-7ff64ca2e5ce"
+  api_plan_key    = "c1e2f3a4-0000-0000-0000-111111111111"
 }
 
 # =============================================================================

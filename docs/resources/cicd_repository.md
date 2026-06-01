@@ -19,8 +19,8 @@ resource "btpservice_cicd_repository" "example" {
 
 # Private repository with clone credential
 resource "btpservice_cicd_repository" "private" {
-  name               = "my-private-repo"
-  clone_url          = "https://github.com/example/my-private-app"
+  name                = "my-private-repo"
+  clone_url           = "https://github.com/example/my-private-app"
   clone_credential_id = btpservice_cicd_credential_basic_auth.deploy_user.id
 }
 

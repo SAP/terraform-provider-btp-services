@@ -15,7 +15,7 @@ Manages a Container Registry configuration credential in the SAP BTP CI/CD servi
 resource "btpservice_cicd_credential_container_registry" "example" {
   name        = "my-container-registry"
   description = "Container registry credentials for Docker Hub"
-  content     = jsonencode({
+  content = jsonencode({
     auths = {
       "registry.example.com" = {
         auth = base64encode("username:password")

@@ -26,13 +26,10 @@ Lists all triggers for a CI/CD job in the SAP BTP CI/CD service.
 <a id="nestedatt--values"></a>
 ### Nested Schema for `values`
 
-Optional:
-
-- `timer` (Attributes) Timer schedule configuration. Present when `type` is `timer`. (see [below for nested schema](#nestedatt--values--timer))
-
 Read-Only:
 
 - `id` (String) Unique identifier of the trigger.
+- `timer` (Attributes) Timer schedule configuration. Present when `type` is `timer`. (see [below for nested schema](#nestedatt--values--timer))
 - `type` (String) Trigger type (e.g. `timer`).
 
 <a id="nestedatt--values--timer"></a>
