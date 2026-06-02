@@ -1,4 +1,4 @@
-module github.com/SAP/terraform-provider-sap-btp-services
+module github.com/SAP/terraform-provider-btp-services
 
 go 1.25.8
 

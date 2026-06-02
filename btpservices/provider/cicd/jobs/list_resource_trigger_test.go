@@ -16,9 +16,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
-	cicdjobs "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/jobs"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/utils"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/tfutils"
+	cicdjobs "github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/jobs"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/utils"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/tfutils"
 )
 
 func TestListResourceCicdTrigger(t *testing.T) {

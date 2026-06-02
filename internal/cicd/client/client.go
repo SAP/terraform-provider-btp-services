@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	cicdmodels "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/models"
+	cicdmodels "github.com/SAP/terraform-provider-btp-services/internal/cicd/models"
 )
 
 // cicdHTTPClient is the low-level HTTP transport.

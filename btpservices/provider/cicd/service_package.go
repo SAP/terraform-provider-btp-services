@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 
-	credentials "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/credentials"
-	jobs "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/jobs"
-	repositories "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/repositories"
+	credentials "github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/credentials"
+	jobs "github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/jobs"
+	repositories "github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/repositories"
 )
 
 // ServicePackage wires all CI/CD resources and data sources into the provider.

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Terraform provider for SAP BTP (Business Technology Platform) services. The first service targeted is the CI/CD Service (credentials management). Provider type name: `btpservice` (resources are named `btpservice_cicd_credential_basic_auth` etc.).
 
-Module path: `github.com/SAP/terraform-provider-sap-btp-services`
+Module path: `github.com/SAP/terraform-provider-btp-services`
 
 ## Essential Commands
 
@@ -34,7 +34,7 @@ Development setup:
   ```hcl
   provider_installation {
     dev_overrides {
-      "sap/sap-btp-services" = "/go/bin"
+      "SAP/btp-services" = "/go/bin"
     }
     direct {}
   }
@@ -53,19 +53,46 @@ Pre-commit hooks (via Lefthook):
 btpservices/provider/
   provider.go                                           # package btpservicesprovider — provider schema + Configure()
   provider_test.go
-  testutil/vcr.go                                       # package testutil — generic VCR helper
+  tfutils/vcr.go                                        # package tfutils — generic VCR helper
   cicd/
     service_package.go                                  # package cicd — registers resources/datasources
-    cicdtest/testhelper.go                              # package cicdtest — SetupVCR() for CI/CD tests
     fixtures/                                           # VCR cassettes (YAML) shared by all cicd tests
     credentials/
       resource_credential_basic_auth.go                 # CRUD resource
-      resource_credential_basic_auth_test.go
+      resource_credential_basic_auth_custom_idp.go
+      resource_credential_cert_based_auth_custom_idp.go
+      resource_credential_cloud_connector.go
+      resource_credential_container_registry.go
+      resource_credential_kubernetes_config.go
+      resource_credential_secret_text.go
+      resource_credential_service_key.go
+      resource_credential_webhook_secret.go
       datasource_credential.go                          # single credential data source
-      datasource_credential_test.go
+      datasource_credential_usage.go                    # credential usage data source
       datasource_credentials.go                         # list credentials data source
-      datasource_credentials_test.go
+      datasource_job_credentials.go                     # credentials by job data source
       types.go                                          # model structs + valueFrom() + toRequest()
+    jobs/
+      resource_job.go                                   # job CRUD resource
+      resource_trigger.go                               # trigger CRUD resource
+      list_resource_job.go                              # list resource for jobs
+      list_resource_trigger.go                          # list resource for triggers
+      datasource_job.go
+      datasource_jobs.go
+      datasource_trigger.go
+      datasource_triggers.go
+      types.go
+    repositories/
+      resource_repository.go                            # repository CRUD resource
+      list_resource_repository.go                       # list resource for repositories
+      datasource_repository.go
+      datasource_repositories.go
+      datasource_repository_event_receiver.go
+      datasource_repository_jobs.go
+      datasource_repository_webhook_config.go
+      types.go
+    utils/
+      util.go                                           # shared cicd utility helpers
 
 internal/
   shared/
@@ -76,12 +103,15 @@ internal/
       client_config.go
       facade.go                                         # CicdClientFacade interface
       facade_credentials.go                             # credential CRUD methods
-      facade_credentials_test.go
-      facade_test.go
+      facade_jobs.go                                    # job/trigger CRUD methods
+      facade_repositories.go                            # repository CRUD methods
     models/
-      credential.go                                     # API request/response structs
+      credential.go                                     # credential API request/response structs
+      credential_usage.go
+      job.go
+      repository.go
+      trigger.go
       errors.go
-      errors_test.go
 
 docs/                                                   # GENERATED — never edit manually
 examples/                                               # example Terraform configs

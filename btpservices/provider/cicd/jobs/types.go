@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"gopkg.in/yaml.v3"
 
-	cicdmodels "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/models"
+	cicdmodels "github.com/SAP/terraform-provider-btp-services/internal/cicd/models"
 )
 
 // jobIdentityModel is the identity of a job resource.

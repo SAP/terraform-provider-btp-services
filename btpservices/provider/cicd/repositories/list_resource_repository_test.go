@@ -15,9 +15,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
-	cicdrepositories "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/repositories"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/utils"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/tfutils"
+	cicdrepositories "github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/repositories"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/utils"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/tfutils"
 )
 
 func TestListResourceCicdRepository(t *testing.T) {

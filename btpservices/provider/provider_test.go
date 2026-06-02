@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	tftest "github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/SAP/terraform-provider-sap-btp-services/internal/shared"
+	"github.com/SAP/terraform-provider-btp-services/internal/shared"
 )
 
 func providerFactoryDev() map[string]func() (tfprotov6.ProviderServer, error) {

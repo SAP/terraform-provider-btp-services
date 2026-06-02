@@ -14,9 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd"
-	cicdclient "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/client"
-	"github.com/SAP/terraform-provider-sap-btp-services/internal/shared"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd"
+	cicdclient "github.com/SAP/terraform-provider-btp-services/internal/cicd/client"
+	"github.com/SAP/terraform-provider-btp-services/internal/shared"
 )
 
 var _ provider.Provider = &btpServicesProvider{}

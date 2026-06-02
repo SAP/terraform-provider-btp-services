@@ -12,8 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 
-	cicdclient "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/client"
-	"github.com/SAP/terraform-provider-sap-btp-services/internal/shared"
+	cicdclient "github.com/SAP/terraform-provider-btp-services/internal/cicd/client"
+	"github.com/SAP/terraform-provider-btp-services/internal/shared"
 )
 
 var _ list.ListResourceWithConfigure = &repositoryListResource{}

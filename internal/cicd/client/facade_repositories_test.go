@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	cicdmodels "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/models"
+	cicdmodels "github.com/SAP/terraform-provider-btp-services/internal/cicd/models"
 )
 
 func TestRepositoriesFacade_Create(t *testing.T) {

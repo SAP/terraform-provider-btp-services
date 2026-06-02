@@ -3,7 +3,7 @@
 package shared
 
 import (
-	cicdclient "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/client"
+	cicdclient "github.com/SAP/terraform-provider-btp-services/internal/cicd/client"
 )
 
 // ProviderClients is stored as ProviderData after provider Configure().

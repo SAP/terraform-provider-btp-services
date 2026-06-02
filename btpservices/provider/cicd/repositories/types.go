@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	cicdmodels "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/models"
+	cicdmodels "github.com/SAP/terraform-provider-btp-services/internal/cicd/models"
 )
 
 // repositoryIdentityModel holds the stable identity of a repository resource.

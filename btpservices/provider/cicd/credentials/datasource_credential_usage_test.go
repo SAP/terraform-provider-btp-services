@@ -7,10 +7,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	cicdcredentials "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/credentials"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/utils"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/tfutils"
-	"github.com/SAP/terraform-provider-sap-btp-services/internal/shared"
+	cicdcredentials "github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/credentials"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/utils"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/tfutils"
+	"github.com/SAP/terraform-provider-btp-services/internal/shared"
 )
 
 func TestDatasourceCicdCredentialUsage(t *testing.T) {

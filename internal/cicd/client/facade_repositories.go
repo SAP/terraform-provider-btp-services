@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/url"
 
-	cicdmodels "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/models"
+	cicdmodels "github.com/SAP/terraform-provider-btp-services/internal/cicd/models"
 )
 
 type repositoriesFacade struct {

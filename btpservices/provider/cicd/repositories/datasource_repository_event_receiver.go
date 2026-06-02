@@ -7,9 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 
-	cicdclient "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/client"
-	cicdmodels "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/models"
-	"github.com/SAP/terraform-provider-sap-btp-services/internal/shared"
+	cicdclient "github.com/SAP/terraform-provider-btp-services/internal/cicd/client"
+	cicdmodels "github.com/SAP/terraform-provider-btp-services/internal/cicd/models"
+	"github.com/SAP/terraform-provider-btp-services/internal/shared"
 )
 
 var _ datasource.DataSource = &repositoryEventReceiverDataSource{}

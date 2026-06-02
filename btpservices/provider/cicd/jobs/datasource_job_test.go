@@ -8,8 +8,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/utils"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/tfutils"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/utils"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/tfutils"
 )
 
 func TestDatasourceCicdJob(t *testing.T) {

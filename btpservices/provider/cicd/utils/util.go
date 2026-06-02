@@ -11,10 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"gopkg.in/dnaeon/go-vcr.v3/recorder"
 
-	btpservicesprovider "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/tfutils"
-	cicdclient "github.com/SAP/terraform-provider-sap-btp-services/internal/cicd/client"
-	"github.com/SAP/terraform-provider-sap-btp-services/internal/shared"
+	btpservicesprovider "github.com/SAP/terraform-provider-btp-services/btpservices/provider"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/tfutils"
+	cicdclient "github.com/SAP/terraform-provider-btp-services/internal/cicd/client"
+	"github.com/SAP/terraform-provider-btp-services/internal/shared"
 )
 
 // Redacted holds the placeholder values written into cassettes.

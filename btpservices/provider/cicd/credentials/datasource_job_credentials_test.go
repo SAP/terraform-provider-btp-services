@@ -7,9 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	cicdcredentials "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/credentials"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/utils"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/tfutils"
+	cicdcredentials "github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/credentials"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/utils"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/tfutils"
 )
 
 func TestDatasourceCicdJobCredentials(t *testing.T) {

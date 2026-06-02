@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	cicdrepositories "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/repositories"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/utils"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/tfutils"
+	cicdrepositories "github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/repositories"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/utils"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/tfutils"
 )
 
 func TestDatasourceCicdRepositoryEventReceiver(t *testing.T) {

@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 
-	btpservicesprovider "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider"
+	btpservicesprovider "github.com/SAP/terraform-provider-btp-services/btpservices/provider"
 )
 
 func main() {
@@ -20,7 +20,7 @@ func main() {
 	flag.Parse()
 
 	err := providerserver.Serve(context.Background(), btpservicesprovider.New(), providerserver.ServeOpts{
-		Address:         "registry.terraform.io/sap/sap-btp-services",
+		Address:         "registry.terraform.io/sap/btp-services",
 		Debug:           debug,
 		ProtocolVersion: 6,
 	})

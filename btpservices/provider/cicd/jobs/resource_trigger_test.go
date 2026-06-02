@@ -12,10 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
-	cicdjobs "github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/jobs"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/cicd/utils"
-	"github.com/SAP/terraform-provider-sap-btp-services/btpservices/provider/tfutils"
-	"github.com/SAP/terraform-provider-sap-btp-services/internal/shared"
+	cicdjobs "github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/jobs"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd/utils"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/tfutils"
+	"github.com/SAP/terraform-provider-btp-services/internal/shared"
 )
 
 func TestResourceCicdTrigger(t *testing.T) {
