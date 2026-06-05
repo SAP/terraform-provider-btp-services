@@ -38,7 +38,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 03 Jun 2026 08:03:33 GMT
+                - Wed, 03 Jun 2026 08:39:09 GMT
             Pragma:
                 - no-cache
             Server:
@@ -55,7 +55,7 @@ interactions:
                 - 1; mode=block
         status: 200 OK
         code: 200
-        duration: 1.136874167s
+        duration: 1.10927325s
     - id: 1
       request:
         proto: HTTP/1.1
@@ -72,7 +72,7 @@ interactions:
         headers:
             Authorization:
                 - redacted
-        url: https://redacted-api-host/v2/jobs/ca9101f6-49b7-4e91-b632-e4c222fd9e4d
+        url: https://redacted-api-host/v2/jobs/tf-test-job/builds?filter=latestFinished
         method: GET
       response:
         proto: HTTP/2.0
@@ -82,18 +82,20 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: false
-        body: '{"apiVersion":"v2","id":"ca9101f6-49b7-4e91-b632-e4c222fd9e4d","name":"tf-test-job","description":"","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","branch":"main","pipeline":"cf-env","pipelineVersion":"3.0","active":true,"buildRetentionDays":7,"maxBuildsToKeep":50,"pipelineParameters":{"cfEnvConfiguration":null,"configurationSource":"source_repository"},"notificationConfiguration":null,"_links":{"self":{"href":"redacted"}}}'
+        body: '{"_embedded":{"builds":[{"number":9,"apiVersion":"v2","id":"766ee8a3-5f3d-4f78-9113-e3c62f75521e","branch":"main","repositoryUrl":"https://github.com/example/my-webhook-repo","status":"FINISHED","result":"ERROR_CONTENT","progress":0,"timestampStart":1780475862000,"timestampEnd":1780475923000,"commitsSinceLastBuild":[],"builtCommit":{"hash":"main","message":null,"authorEmail":null,"timestamp":null},"cause":"DIRECT","parameters":[{"name":"addon.yml","value":null,"visibility":"RESTRICTED"}],"problemDetail":null,"_links":{"self":{"href":"redacted"}}}]},"_links":{"self":{"href":"redacted"}}}'
         headers:
             Cache-Control:
-                - no-cache, must-revalidate, private
+                - no-cache, no-store, max-age=0, must-revalidate
             Content-Security-Policy:
                 - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
             Content-Type:
                 - application/hal+json;charset=UTF-8
             Date:
-                - Wed, 03 Jun 2026 08:03:34 GMT
-            Etag:
-                - W/"1"
+                - Wed, 03 Jun 2026 08:39:10 GMT
+            Expires:
+                - "0"
+            Pragma:
+                - no-cache
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload;
             Vary:
@@ -108,7 +110,7 @@ interactions:
                 - redacted-vcap-request-id
         status: 200 OK
         code: 200
-        duration: 895.734001ms
+        duration: 798.123251ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -125,7 +127,7 @@ interactions:
         headers:
             Authorization:
                 - redacted
-        url: https://redacted-api-host/v2/jobs/ca9101f6-49b7-4e91-b632-e4c222fd9e4d
+        url: https://redacted-api-host/v2/jobs/tf-test-job/builds?filter=latestFinished
         method: GET
       response:
         proto: HTTP/2.0
@@ -135,18 +137,20 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: false
-        body: '{"apiVersion":"v2","id":"ca9101f6-49b7-4e91-b632-e4c222fd9e4d","name":"tf-test-job","description":"","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","branch":"main","pipeline":"cf-env","pipelineVersion":"3.0","active":true,"buildRetentionDays":7,"maxBuildsToKeep":50,"pipelineParameters":{"cfEnvConfiguration":null,"configurationSource":"source_repository"},"notificationConfiguration":null,"_links":{"self":{"href":"redacted"}}}'
+        body: '{"_embedded":{"builds":[{"number":9,"apiVersion":"v2","id":"766ee8a3-5f3d-4f78-9113-e3c62f75521e","branch":"main","repositoryUrl":"https://github.com/example/my-webhook-repo","status":"FINISHED","result":"ERROR_CONTENT","progress":0,"timestampStart":1780475862000,"timestampEnd":1780475923000,"commitsSinceLastBuild":[],"builtCommit":{"hash":"main","message":null,"authorEmail":null,"timestamp":null},"cause":"DIRECT","parameters":[{"name":"addon.yml","value":null,"visibility":"RESTRICTED"}],"problemDetail":null,"_links":{"self":{"href":"redacted"}}}]},"_links":{"self":{"href":"redacted"}}}'
         headers:
             Cache-Control:
-                - no-cache, must-revalidate, private
+                - no-cache, no-store, max-age=0, must-revalidate
             Content-Security-Policy:
                 - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
             Content-Type:
                 - application/hal+json;charset=UTF-8
             Date:
-                - Wed, 03 Jun 2026 08:03:35 GMT
-            Etag:
-                - W/"1"
+                - Wed, 03 Jun 2026 08:39:11 GMT
+            Expires:
+                - "0"
+            Pragma:
+                - no-cache
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload;
             Vary:
@@ -161,7 +165,7 @@ interactions:
                 - redacted-vcap-request-id
         status: 200 OK
         code: 200
-        duration: 289.807292ms
+        duration: 305.2795ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -178,7 +182,7 @@ interactions:
         headers:
             Authorization:
                 - redacted
-        url: https://redacted-api-host/v2/jobs/ca9101f6-49b7-4e91-b632-e4c222fd9e4d
+        url: https://redacted-api-host/v2/jobs/tf-test-job/builds?filter=latestFinished
         method: GET
       response:
         proto: HTTP/2.0
@@ -188,18 +192,20 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: false
-        body: '{"apiVersion":"v2","id":"ca9101f6-49b7-4e91-b632-e4c222fd9e4d","name":"tf-test-job","description":"","repositoryId":"4126058b-997f-45b3-9379-4a948b96949f","branch":"main","pipeline":"cf-env","pipelineVersion":"3.0","active":true,"buildRetentionDays":7,"maxBuildsToKeep":50,"pipelineParameters":{"cfEnvConfiguration":null,"configurationSource":"source_repository"},"notificationConfiguration":null,"_links":{"self":{"href":"redacted"}}}'
+        body: '{"_embedded":{"builds":[{"number":9,"apiVersion":"v2","id":"766ee8a3-5f3d-4f78-9113-e3c62f75521e","branch":"main","repositoryUrl":"https://github.com/example/my-webhook-repo","status":"FINISHED","result":"ERROR_CONTENT","progress":0,"timestampStart":1780475862000,"timestampEnd":1780475923000,"commitsSinceLastBuild":[],"builtCommit":{"hash":"main","message":null,"authorEmail":null,"timestamp":null},"cause":"DIRECT","parameters":[{"name":"addon.yml","value":null,"visibility":"RESTRICTED"}],"problemDetail":null,"_links":{"self":{"href":"redacted"}}}]},"_links":{"self":{"href":"redacted"}}}'
         headers:
             Cache-Control:
-                - no-cache, must-revalidate, private
+                - no-cache, no-store, max-age=0, must-revalidate
             Content-Security-Policy:
                 - script-src 'self' 'sha256-FcEBYmacwrB2dKDs/dMi5LqxTcj2XGw5M6t3QhNP2QE='; object-src 'none'; base-uri 'self';
             Content-Type:
                 - application/hal+json;charset=UTF-8
             Date:
-                - Wed, 03 Jun 2026 08:03:35 GMT
-            Etag:
-                - W/"1"
+                - Wed, 03 Jun 2026 08:39:11 GMT
+            Expires:
+                - "0"
+            Pragma:
+                - no-cache
             Strict-Transport-Security:
                 - max-age=31536000; includeSubDomains; preload;
             Vary:
@@ -214,4 +220,4 @@ interactions:
                 - redacted-vcap-request-id
         status: 200 OK
         code: 200
-        duration: 286.261875ms
+        duration: 375.357167ms
