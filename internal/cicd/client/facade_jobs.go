@@ -133,3 +133,4 @@ func (f *jobsFacade) ListTriggers(ctx context.Context, jobRef string) ([]cicdmod
 	}
 	return result.Embedded.Triggers, nil
 }
+

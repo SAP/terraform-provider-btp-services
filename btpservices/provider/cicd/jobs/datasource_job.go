@@ -94,6 +94,12 @@ func (d *jobDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, re
 				MarkdownDescription: "ID of the source repository used by the job.",
 				Computed:            true,
 			},
+			"etag": schema.StringAttribute{
+				MarkdownDescription: "Current ETag of the job. Pass this as `job_etag` in " +
+					"`btpservice_cicd_run_build` to guard against triggering a build if the " +
+					"job configuration was changed since the last plan.",
+				Computed: true,
+			},
 			"notification_configuration": schema.SingleNestedAttribute{
 				MarkdownDescription: "Notification settings for the job.",
 				Computed:            true,
@@ -158,7 +164,7 @@ func (d *jobDataSource) Read(ctx context.Context, req datasource.ReadRequest, re
 		reference = config.Name.ValueString()
 	}
 
-	result, err := d.cli.Jobs.Get(ctx, reference)
+	result, etag, err := d.cli.Builds.GetJobWithETag(ctx, reference)
 	if err != nil {
 		if cicdmodels.IsNotFound(err) {
 			resp.Diagnostics.AddError(
@@ -171,7 +177,7 @@ func (d *jobDataSource) Read(ctx context.Context, req datasource.ReadRequest, re
 		return
 	}
 
-	state, err := jobDSValueFrom(*result)
+	state, err := jobDSValueFrom(*result, etag)
 	if err != nil {
 		resp.Diagnostics.AddError("Error Mapping Job Response", err.Error())
 		return

@@ -126,6 +126,33 @@ func (c *cicdHTTPClient) doGet(ctx context.Context, path string, out any) error 
 	return json.NewDecoder(resp.Body).Decode(out)
 }
 
+// doGetWithETag performs a GET and also returns the raw ETag response header value (e.g. W/"1").
+func (c *cicdHTTPClient) doGetWithETag(ctx context.Context, path string, out any) (string, error) {
+	token, err := c.bearerToken(ctx)
+	if err != nil {
+		return "", err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+path, nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = resp.Body.Close() }()
+	if err := cicdmodels.CheckAPIResponse(resp, path); err != nil {
+		return "", err
+	}
+	etag := resp.Header.Get("ETag")
+	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		return "", err
+	}
+	return etag, nil
+}
+
 func (c *cicdHTTPClient) doPost(ctx context.Context, path string, body any) error {
 	return c.doWithBody(ctx, http.MethodPost, path, body, nil)
 }

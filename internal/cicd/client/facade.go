@@ -11,6 +11,7 @@ type CicdClientFacade struct {
 	Credentials  credentialsFacade
 	Repositories repositoriesFacade
 	Jobs         jobsFacade
+	Builds       buildsFacade
 }
 
 // NewCicdClientFacade constructs a facade using the OAuth2 client-credentials flow
@@ -22,6 +23,7 @@ func NewCicdClientFacade(cfg CicdClientConfig) *CicdClientFacade {
 		Credentials:  newCredentialsFacade(hc),
 		Repositories: newRepositoriesFacade(hc),
 		Jobs:         newJobsFacade(hc),
+		Builds:       newBuildsFacade(hc),
 	}
 }
 
@@ -33,5 +35,6 @@ func NewCicdClientFacadeWithHTTP(cfg CicdClientConfig, httpClient *http.Client) 
 		Credentials:  newCredentialsFacade(hc),
 		Repositories: newRepositoriesFacade(hc),
 		Jobs:         newJobsFacade(hc),
+		Builds:       newBuildsFacade(hc),
 	}
 }

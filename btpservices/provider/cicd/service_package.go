@@ -5,6 +5,7 @@ package cicd
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -49,6 +50,7 @@ func (s ServicePackage) DataSources(_ context.Context) []func() datasource.DataS
 		// Job Datasources
 		jobs.NewJobDataSource,
 		jobs.NewJobsDataSource,
+		jobs.NewBuildsDataSource,
 
 		// Repository Datasources
 		repositories.NewRepositoryDataSource,
@@ -73,5 +75,13 @@ func (s ServicePackage) ListResources(_ context.Context) []func() list.ListResou
 
 		// Job ListResources
 		jobs.NewTriggerListResource,
+	}
+}
+
+func (s ServicePackage) Actions(_ context.Context) []func() action.Action {
+	return []func() action.Action{
+		jobs.NewRunBuildAction,
+		jobs.NewAbortBuildAction,
+		jobs.NewDeleteBuildAction,
 	}
 }
