@@ -27,7 +27,7 @@ resource "terraform_data" "delete_build" {
 action "btpservice_cicd_delete_build" "example" {
   config {
     job   = "my-pipeline-job"
-    build = "7"
+    build = 7
   }
 }
 ```
@@ -37,5 +37,5 @@ action "btpservice_cicd_delete_build" "example" {
 
 ### Required
 
-- `build` (String) Build sequence number or ID to delete.
+- `build` (Number) Build sequence number to delete.
 - `job` (String) Name or ID of the CI/CD job that owns the build.

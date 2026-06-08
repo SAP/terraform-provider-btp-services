@@ -31,7 +31,7 @@ func TestActionDeleteBuild(t *testing.T) {
 			ProtoV6ProviderFactories: utils.GetTestProviders(creds, rec),
 			Steps: []resource.TestStep{
 				{
-					Config: utils.HCLProviderBlock(creds) + hclActionDeleteBuild("tf-test-job", "10"),
+					Config: utils.HCLProviderBlock(creds) + hclActionDeleteBuild("tf-test-job", 10),
 				},
 			},
 		})
@@ -51,7 +51,7 @@ func TestActionDeleteBuild(t *testing.T) {
 			ProtoV6ProviderFactories: utils.GetTestProviders(creds, rec),
 			Steps: []resource.TestStep{
 				{
-					Config:      utils.HCLProviderBlock(creds) + hclActionDeleteBuild("tf-test-job", "999"),
+					Config:      utils.HCLProviderBlock(creds) + hclActionDeleteBuild("tf-test-job", 999),
 					ExpectError: regexp.MustCompile(`Build Not Found`),
 				},
 			},
@@ -72,7 +72,7 @@ func TestActionDeleteBuild(t *testing.T) {
 					Config: utils.HCLProviderBlock(utils.Redacted) + `
 action "btpservice_cicd_delete_build" "uut" {
   config {
-    build = "1"
+    build = 1
   }
 }
 `,
@@ -107,7 +107,7 @@ action "btpservice_cicd_delete_build" "uut" {
 	})
 }
 
-func hclActionDeleteBuild(job, build string) string {
+func hclActionDeleteBuild(job string, build int) string {
 	return fmt.Sprintf(`
 resource "terraform_data" "trigger" {
   lifecycle {
@@ -121,7 +121,7 @@ resource "terraform_data" "trigger" {
 action "btpservice_cicd_delete_build" "uut" {
   config {
     job   = %q
-    build = %q
+    build = %d
   }
 }
 `, job, build)

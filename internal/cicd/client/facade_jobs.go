@@ -34,6 +34,18 @@ func (f *jobsFacade) Get(ctx context.Context, reference string) (*cicdmodels.Job
 	return &result, nil
 }
 
+// GetWithETag sends GET /v2/jobs/{reference} and also returns the raw ETag response header
+// value (e.g. W/"1"). The ETag is used to guard against triggering a build on a stale job.
+func (f *jobsFacade) GetWithETag(ctx context.Context, reference string) (*cicdmodels.Job, string, error) {
+	var result cicdmodels.Job
+	etag, err := f.hc.doGetWithETag(ctx, fmt.Sprintf("/v2/jobs/%s", url.PathEscape(reference)), &result)
+	if err != nil {
+		return nil, "", err
+	}
+	result.ETag = etag
+	return &result, etag, nil
+}
+
 // Update sends PUT /v2/jobs (full replace, job identified by name in request body).
 // The API returns 204 with no body.
 func (f *jobsFacade) Update(ctx context.Context, req cicdmodels.UpdateJobRequest) error {
@@ -133,4 +145,3 @@ func (f *jobsFacade) ListTriggers(ctx context.Context, jobRef string) ([]cicdmod
 	}
 	return result.Embedded.Triggers, nil
 }
-

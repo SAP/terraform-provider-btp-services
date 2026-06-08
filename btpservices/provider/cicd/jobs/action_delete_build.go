@@ -5,6 +5,7 @@ package cicdjobs
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/action/schema"
@@ -30,7 +31,7 @@ type deleteBuildAction struct {
 // deleteBuildModel is the configuration model for the btpservice_cicd_delete_build action.
 type deleteBuildModel struct {
 	Job   types.String `tfsdk:"job"`
-	Build types.String `tfsdk:"build"`
+	Build types.Int64  `tfsdk:"build"`
 }
 
 func (a *deleteBuildAction) Metadata(_ context.Context, req action.MetadataRequest, resp *action.MetadataResponse) {
@@ -45,8 +46,8 @@ func (a *deleteBuildAction) Schema(_ context.Context, _ action.SchemaRequest, re
 				MarkdownDescription: "Name or ID of the CI/CD job that owns the build.",
 				Required:            true,
 			},
-			"build": schema.StringAttribute{
-				MarkdownDescription: "Build sequence number or ID to delete.",
+			"build": schema.Int64Attribute{
+				MarkdownDescription: "Build sequence number to delete.",
 				Required:            true,
 			},
 		},
@@ -82,11 +83,12 @@ func (a *deleteBuildAction) Invoke(ctx context.Context, req action.InvokeRequest
 		return
 	}
 
-	if err := a.cli.Builds.Delete(ctx, config.Job.ValueString(), config.Build.ValueString()); err != nil {
+	buildRef := strconv.FormatInt(config.Build.ValueInt64(), 10)
+	if err := a.cli.Builds.Delete(ctx, config.Job.ValueString(), buildRef); err != nil {
 		if cicdmodels.IsNotFound(err) {
 			resp.Diagnostics.AddError(
 				"Build Not Found",
-				fmt.Sprintf("No build %q found for job %q.", config.Build.ValueString(), config.Job.ValueString()),
+				fmt.Sprintf("No build %d found for job %q.", config.Build.ValueInt64(), config.Job.ValueString()),
 			)
 			return
 		}

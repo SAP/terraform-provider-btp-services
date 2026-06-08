@@ -31,10 +31,10 @@ type runBuildAction struct {
 
 // runBuildModel is the configuration model for the btpservice_cicd_run_build action.
 type runBuildModel struct {
-	Job             types.String        `tfsdk:"job"`
-	JobETag         types.String        `tfsdk:"job_etag"`
-	CommitToBeBuilt types.String        `tfsdk:"commit_to_be_built"`
-	Parameters      []buildParamModel   `tfsdk:"parameters"`
+	Job             types.String      `tfsdk:"job"`
+	JobETag         types.String      `tfsdk:"job_etag"`
+	CommitToBeBuilt types.String      `tfsdk:"commit_to_be_built"`
+	Parameters      []buildParamModel `tfsdk:"parameters"`
 }
 
 type buildParamModel struct {

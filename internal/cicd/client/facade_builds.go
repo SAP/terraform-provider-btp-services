@@ -18,18 +18,6 @@ func newBuildsFacade(hc *cicdHTTPClient) buildsFacade {
 	return buildsFacade{hc: hc}
 }
 
-// GetJobWithETag sends GET /v2/jobs/{reference} and also returns the raw ETag response header
-// value (e.g. W/"1"). The ETag is used to guard against triggering a build on a stale job.
-func (f *buildsFacade) GetJobWithETag(ctx context.Context, jobReference string) (*cicdmodels.Job, string, error) {
-	var result cicdmodels.Job
-	etag, err := f.hc.doGetWithETag(ctx, fmt.Sprintf("/v2/jobs/%s", url.PathEscape(jobReference)), &result)
-	if err != nil {
-		return nil, "", err
-	}
-	result.ETag = etag
-	return &result, etag, nil
-}
-
 // Trigger sends POST /v2/jobs/{jobRef}/builds.
 // The API returns 201 with no body on success.
 // Returns a ConflictError (wrapping 409) if jobETag is stale.
@@ -55,7 +43,7 @@ func (f *buildsFacade) Delete(ctx context.Context, jobRef, buildRef string) erro
 // ListBuilds sends GET /v2/jobs/{jobRef}/builds?filter={filter}.
 // filter must be "latest" or "latestFinished".
 func (f *buildsFacade) ListBuilds(ctx context.Context, jobRef, filter string) ([]cicdmodels.BuildStub, error) {
-	path := fmt.Sprintf("/v2/jobs/%s/builds?filter=%s", url.PathEscape(jobRef), url.QueryEscape(filter))
+	path := fmt.Sprintf("/v2/jobs/%s/builds?filter=%s", url.PathEscape(jobRef), url.PathEscape(filter))
 	var result cicdmodels.BuildListResponse
 	if err := f.hc.doGet(ctx, path, &result); err != nil {
 		return nil, err

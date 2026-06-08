@@ -12,6 +12,6 @@ resource "terraform_data" "abort_build" {
 action "btpservice_cicd_abort_build" "example" {
   config {
     job   = "my-pipeline-job"
-    build = "42"
+    build = 42
   }
 }

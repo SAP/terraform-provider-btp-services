@@ -12,6 +12,6 @@ resource "terraform_data" "delete_build" {
 action "btpservice_cicd_delete_build" "example" {
   config {
     job   = "my-pipeline-job"
-    build = "7"
+    build = 7
   }
 }

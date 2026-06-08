@@ -27,7 +27,7 @@ resource "terraform_data" "abort_build" {
 action "btpservice_cicd_abort_build" "example" {
   config {
     job   = "my-pipeline-job"
-    build = "42"
+    build = 42
   }
 }
 ```
@@ -37,5 +37,5 @@ action "btpservice_cicd_abort_build" "example" {
 
 ### Required
 
-- `build` (String) Build sequence number or ID to abort.
+- `build` (Number) Build sequence number to abort.
 - `job` (String) Name or ID of the CI/CD job that owns the build.

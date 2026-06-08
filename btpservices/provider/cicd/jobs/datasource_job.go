@@ -164,7 +164,7 @@ func (d *jobDataSource) Read(ctx context.Context, req datasource.ReadRequest, re
 		reference = config.Name.ValueString()
 	}
 
-	result, etag, err := d.cli.Builds.GetJobWithETag(ctx, reference)
+	result, etag, err := d.cli.Jobs.GetWithETag(ctx, reference)
 	if err != nil {
 		if cicdmodels.IsNotFound(err) {
 			resp.Diagnostics.AddError(
