@@ -6,6 +6,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
@@ -146,10 +147,12 @@ var expectedDataSourceTypes = []string{
 	"btpservice_cicd_repository_webhook_config",
 	"btpservice_cicd_trigger",
 	"btpservice_cicd_triggers",
+	"btpservice_cicd_builds",
 }
 
 // expectedListResourceTypes lists every list resource type name the provider must expose.
 var expectedListResourceTypes = []string{
+	"btpservice_cicd_job",
 	"btpservice_cicd_trigger",
 	"btpservice_cicd_repository",
 }
@@ -212,6 +215,37 @@ func TestProvider_ListResources_TypeNames(t *testing.T) {
 	for _, name := range expectedListResourceTypes {
 		if !got[name] {
 			t.Errorf("missing list resource type %q", name)
+		}
+	}
+}
+
+// expectedActionTypes lists every action type name the provider must expose.
+var expectedActionTypes = []string{
+	"btpservice_cicd_run_build",
+	"btpservice_cicd_abort_build",
+	"btpservice_cicd_delete_build",
+}
+
+func TestProvider_Actions_TypeNames(t *testing.T) {
+	p, ok := New()().(interface {
+		Actions(context.Context) []func() action.Action
+	})
+	if !ok {
+		t.Fatal("provider does not implement ProviderWithActions")
+	}
+	ctx := context.Background()
+
+	got := make(map[string]bool)
+	for _, factory := range p.Actions(ctx) {
+		a := factory()
+		var meta action.MetadataResponse
+		a.Metadata(ctx, action.MetadataRequest{ProviderTypeName: "btpservice"}, &meta)
+		got[meta.TypeName] = true
+	}
+
+	for _, name := range expectedActionTypes {
+		if !got[name] {
+			t.Errorf("missing action type %q", name)
 		}
 	}
 }
