@@ -189,12 +189,14 @@ type jobDSModel struct {
 	MaxBuildsToKeep           types.Int64                     `tfsdk:"max_builds_to_keep"`
 	Branch                    types.String                    `tfsdk:"branch"`
 	RepositoryID              types.String                    `tfsdk:"repository_id"`
+	ETag                      types.String                    `tfsdk:"etag"`
 	NotificationConfiguration *notificationConfigurationModel `tfsdk:"notification_configuration"`
 }
 
 // jobDSValueFrom maps an API Job response to the data source state model.
 // pipeline_parameters is serialised to canonical YAML.
-func jobDSValueFrom(v cicdmodels.Job) (jobDSModel, error) {
+// etag is the raw ETag response header value (e.g. W/"1").
+func jobDSValueFrom(v cicdmodels.Job, etag string) (jobDSModel, error) {
 	yamlStr, err := mapToYAML(v.PipelineParameters)
 	if err != nil {
 		return jobDSModel{}, err
@@ -224,6 +226,7 @@ func jobDSValueFrom(v cicdmodels.Job) (jobDSModel, error) {
 		MaxBuildsToKeep:           types.Int64Value(int64(v.MaxBuildsToKeep)),
 		Branch:                    types.StringValue(v.Branch),
 		RepositoryID:              types.StringValue(v.RepositoryID),
+		ETag:                      types.StringValue(etag),
 		NotificationConfiguration: notifConfig,
 	}, nil
 }
@@ -275,10 +278,6 @@ func (m triggerResourceModel) toCreateRequest() cicdmodels.CreateTriggerRequest 
 	}
 	return req
 }
-
-// ---------------------------------------------------------------------------
-// Plural jobs data source models
-// ---------------------------------------------------------------------------
 
 // jobsDSModel is the Terraform state model for the jobs (plural) data source.
 type jobsDSModel struct {
@@ -443,4 +442,33 @@ func triggerDSValueFrom(job string, t cicdmodels.Trigger) triggerDSModel {
 		}
 	}
 	return m
+}
+
+// ---------------------------------------------------------------------------
+// Builds data source models
+// ---------------------------------------------------------------------------
+
+// buildsDSModel is the Terraform state model for btpservice_cicd_builds.
+type buildsDSModel struct {
+	ID     types.String  `tfsdk:"id"`
+	Job    types.String  `tfsdk:"job"`
+	Filter types.String  `tfsdk:"filter"`
+	Builds []buildDSItem `tfsdk:"builds"`
+}
+
+// buildDSItem is a single build inside the builds list.
+type buildDSItem struct {
+	ID     types.String `tfsdk:"id"`
+	Number types.Int64  `tfsdk:"number"`
+}
+
+func buildsDSItemsFrom(builds []cicdmodels.BuildStub) []buildDSItem {
+	items := make([]buildDSItem, 0, len(builds))
+	for _, b := range builds {
+		items = append(items, buildDSItem{
+			ID:     types.StringValue(b.ID),
+			Number: types.Int64Value(int64(b.Number)),
+		})
+	}
+	return items
 }

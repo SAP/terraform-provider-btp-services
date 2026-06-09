@@ -11,6 +11,24 @@ import (
 	"strings"
 )
 
+// ConflictError signals a 409 response from the CI/CD API (e.g. stale ETag on build trigger).
+type ConflictError struct {
+	Detail string
+}
+
+func (e *ConflictError) Error() string {
+	if e.Detail != "" {
+		return e.Detail
+	}
+	return "conflict: resource was modified"
+}
+
+// IsConflict returns true if err wraps a ConflictError.
+func IsConflict(err error) bool {
+	var ce *ConflictError
+	return errors.As(err, &ce)
+}
+
 // NotFoundError signals a 404 response from the CI/CD API.
 type NotFoundError struct {
 	Reference string
@@ -89,6 +107,14 @@ func CheckAPIResponse(resp *http.Response, reference string) error {
 			Title:     parsed.Title,
 			Detail:    parsed.Detail,
 		}
+	}
+
+	if resp.StatusCode == http.StatusConflict {
+		detail := parsed.Detail
+		if detail == "" {
+			detail = parsed.Title
+		}
+		return &ConflictError{Detail: detail}
 	}
 
 	return &cicdAPIError{

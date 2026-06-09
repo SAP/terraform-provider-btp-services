@@ -35,6 +35,7 @@ data "btpservice_cicd_job" "by_id" {
 - `branch` (String) Branch pattern the job is executed for.
 - `build_retention_days` (Number) Number of days build artifacts are retained.
 - `description` (String) Human-readable description of the job.
+- `etag` (String) Current ETag of the job. Pass this as `job_etag` in `btpservice_cicd_run_build` to guard against triggering a build if the job configuration was changed since the last plan.
 - `max_builds_to_keep` (Number) Maximum number of builds retained for this job.
 - `notification_configuration` (Attributes) Notification settings for the job. (see [below for nested schema](#nestedatt--notification_configuration))
 - `pipeline` (String) Pipeline type of the job (e.g. `cf-env`, `cpi`).

@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -21,6 +22,7 @@ import (
 
 var _ provider.Provider = &btpServicesProvider{}
 var _ provider.ProviderWithListResources = &btpServicesProvider{}
+var _ provider.ProviderWithActions = &btpServicesProvider{}
 
 func New() func() provider.Provider {
 	return func() provider.Provider {
@@ -91,6 +93,7 @@ func (p *btpServicesProvider) Configure(ctx context.Context, req provider.Config
 		resp.ResourceData = p.prebuiltClients
 		resp.DataSourceData = p.prebuiltClients
 		resp.ListResourceData = p.prebuiltClients
+		resp.ActionData = p.prebuiltClients
 		return
 	}
 
@@ -118,6 +121,7 @@ func (p *btpServicesProvider) Configure(ctx context.Context, req provider.Config
 	resp.ResourceData = clients
 	resp.DataSourceData = clients
 	resp.ListResourceData = clients
+	resp.ActionData = clients
 }
 
 // servicePackages is the single service registry.
@@ -126,11 +130,13 @@ func servicePackages() []interface {
 	Resources(context.Context) []func() resource.Resource
 	DataSources(context.Context) []func() datasource.DataSource
 	ListResources(context.Context) []func() list.ListResource
+	Actions(context.Context) []func() action.Action
 } {
 	return []interface {
 		Resources(context.Context) []func() resource.Resource
 		DataSources(context.Context) []func() datasource.DataSource
 		ListResources(context.Context) []func() list.ListResource
+		Actions(context.Context) []func() action.Action
 	}{
 		cicd.ServicePackage{},
 	}
@@ -156,6 +162,14 @@ func (p *btpServicesProvider) ListResources(ctx context.Context) []func() list.L
 	var all []func() list.ListResource
 	for _, pkg := range servicePackages() {
 		all = append(all, pkg.ListResources(ctx)...)
+	}
+	return all
+}
+
+func (p *btpServicesProvider) Actions(ctx context.Context) []func() action.Action {
+	var all []func() action.Action
+	for _, pkg := range servicePackages() {
+		all = append(all, pkg.Actions(ctx)...)
 	}
 	return all
 }

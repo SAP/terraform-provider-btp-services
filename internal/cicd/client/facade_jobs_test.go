@@ -137,3 +137,68 @@ func TestJobsFacade_ListByRepository(t *testing.T) {
 		}
 	})
 }
+
+func TestJobsFacade_GetWithETag(t *testing.T) {
+	t.Run("returns job and ETag header", func(t *testing.T) {
+		var srvCalled bool
+
+		job := cicdmodels.Job{
+			ID:   "job-id-1",
+			Name: "my-job",
+		}
+
+		uut, srv := prepareClientFacadeForTest(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			srvCalled = true
+			assertRequest(t, r, http.MethodGet, "/v2/jobs/my-job")
+			w.Header().Set("ETag", `W/"7"`)
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(job)
+		}))
+		defer srv.Close()
+
+		got, etag, err := uut.Jobs.GetWithETag(context.TODO(), "my-job")
+
+		if assert.True(t, srvCalled) && assert.NoError(t, err) {
+			assert.Equal(t, "my-job", got.Name)
+			assert.Equal(t, `W/"7"`, etag)
+			assert.Equal(t, `W/"7"`, got.ETag)
+		}
+	})
+
+	t.Run("returns empty string when ETag header absent", func(t *testing.T) {
+		uut, srv := prepareClientFacadeForTest(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(cicdmodels.Job{ID: "j1", Name: "j"})
+		}))
+		defer srv.Close()
+
+		_, etag, err := uut.Jobs.GetWithETag(context.TODO(), "j")
+		assert.NoError(t, err)
+		assert.Equal(t, "", etag)
+	})
+
+	t.Run("URL-encodes job reference", func(t *testing.T) {
+		var gotPath string
+
+		uut, srv := prepareClientFacadeForTest(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			gotPath = r.RequestURI
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(cicdmodels.Job{ID: "j1"})
+		}))
+		defer srv.Close()
+
+		_, _, err := uut.Jobs.GetWithETag(context.TODO(), "my job/name")
+		assert.NoError(t, err)
+		assert.Equal(t, "/v2/jobs/my%20job%2Fname", gotPath)
+	})
+
+	t.Run("returns NotFoundError on 404", func(t *testing.T) {
+		uut, srv := prepareClientFacadeForTest(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+		}))
+		defer srv.Close()
+
+		_, _, err := uut.Jobs.GetWithETag(context.TODO(), "missing")
+		assert.True(t, cicdmodels.IsNotFound(err))
+	})
+}

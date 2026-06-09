@@ -17,6 +17,8 @@ type Job struct {
 	Branch                    string                     `json:"branch,omitempty"`
 	RepositoryID              string                     `json:"repositoryId,omitempty"`
 	NotificationConfiguration *NotificationConfiguration `json:"notificationConfiguration,omitempty"`
+	// ETag is populated from the ETag response header, not the JSON body.
+	ETag string `json:"-"`
 }
 
 // NotificationConfiguration holds the notification settings for a job.
