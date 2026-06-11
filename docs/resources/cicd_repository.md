@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_repository Resource - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Manages a repository resource in the SAP BTP CI/CD service.
 ---

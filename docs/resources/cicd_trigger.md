@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_trigger Resource - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Manages a trigger for a CI/CD job in the SAP BTP CI/CD service. Currently only timer type triggers are supported.
 ---

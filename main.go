@@ -1,6 +1,4 @@
-//go:generate go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest
-//go:generate tfplugindocs generate --rendered-provider-name "SAP BTP Services" --provider-name "btpservice"
-
+//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest generate --rendered-provider-name "SAP BTP Services" --provider-name "btpservice"
 package main
 
 import (

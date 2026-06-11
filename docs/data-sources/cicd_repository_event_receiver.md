@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_repository_event_receiver Data Source - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Reads the event receiver configuration for a repository in the SAP BTP CI/CD service. Event receivers allow the service to receive webhook events from your source code management system to trigger builds.
 ---

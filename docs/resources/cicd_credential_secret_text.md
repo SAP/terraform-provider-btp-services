@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_credential_secret_text Resource - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Manages a Secret Text credential in the SAP BTP CI/CD service.
 ---

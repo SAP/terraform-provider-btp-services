@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_repository_webhook_config Data Source - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Reads the webhook configuration for a repository in the SAP BTP CI/CD service. The webhook URI is the target address to configure in your source code management system to send push events that trigger builds.
 ---

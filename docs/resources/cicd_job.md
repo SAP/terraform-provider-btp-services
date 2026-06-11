@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_job Resource - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Manages a CI/CD job in the SAP BTP CI/CD service.
 ---

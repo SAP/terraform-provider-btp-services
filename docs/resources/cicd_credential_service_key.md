@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_credential_service_key Resource - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Manages a Service Key credential in the SAP BTP CI/CD service.
 ---

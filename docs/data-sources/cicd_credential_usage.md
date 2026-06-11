@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_credential_usage Data Source - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Lists all jobs and repositories that reference a given credential in the SAP BTP CI/CD service.
 ---

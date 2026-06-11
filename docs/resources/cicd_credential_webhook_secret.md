@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_credential_webhook_secret Resource - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Manages a Webhook Secret credential in the SAP BTP CI/CD service.
 ---
