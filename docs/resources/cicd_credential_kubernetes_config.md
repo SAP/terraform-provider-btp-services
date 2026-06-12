@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_credential_kubernetes_config Resource - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Manages a Kubernetes configuration credential in the SAP BTP CI/CD service.
 ---

@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_credential_cert_based_auth_custom_idp Resource - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Manages a Certificate-Based Authentication with Custom Identity Provider credential in the SAP BTP CI/CD service.
 ---

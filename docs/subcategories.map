@@ -1,0 +1,4 @@
+# Maps filename prefixes to Terraform Registry subcategory labels.
+# Format: prefix:Label (label may contain spaces)
+# Add one line per service when new services are added.
+cicd:SAP CICD service

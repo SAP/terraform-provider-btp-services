@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_credential_cloud_connector Resource - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Manages a Cloud Connector credential in the SAP BTP CI/CD service.
 ---

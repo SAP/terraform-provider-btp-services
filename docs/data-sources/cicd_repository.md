@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_repository Data Source - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Reads a repository from the SAP BTP CI/CD service.
 ---

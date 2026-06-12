@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_job_credentials Data Source - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Lists the credential IDs that a build of a given job is allowed to use in the SAP BTP CI/CD service.
 ---

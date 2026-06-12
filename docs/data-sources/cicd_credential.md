@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_credential Data Source - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Reads credential from the SAP BTP CI/CD service. The password is never returned by the API.
 ---

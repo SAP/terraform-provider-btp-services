@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_credential_basic_auth Resource - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Manages a Basic Authentication credential in the SAP BTP CI/CD service.
 ---

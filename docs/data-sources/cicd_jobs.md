@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_jobs Data Source - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Lists all jobs in the SAP BTP CI/CD service.
 ---

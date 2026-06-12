@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_builds Data Source - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Lists builds for a CI/CD job filtered by latest (currently running or most recently triggered) or latestFinished (most recently completed).
 ---

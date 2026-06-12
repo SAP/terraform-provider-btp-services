@@ -1,6 +1,6 @@
 ---
 page_title: "btpservice_cicd_trigger Data Source - SAP BTP Services"
-subcategory: ""
+subcategory: "SAP CICD service"
 description: |-
   Reads a single trigger for a CI/CD job in the SAP BTP CI/CD service.
 ---
