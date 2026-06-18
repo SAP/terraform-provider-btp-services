@@ -1,0 +1,14 @@
+name: Integration Test - Terraform (All)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  main:
+    name: Main
+    uses: ./.github/workflows/tf-cicd-integration-test-main.yml
+    secrets: inherit
