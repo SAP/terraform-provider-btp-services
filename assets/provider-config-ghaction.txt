@@ -1,6 +1,6 @@
 provider_installation {
   dev_overrides {
-    "SAP/btp-services" = "/go/bin"
+    "SAP/btp-services" = "/home/runner/go/bin"
   }
 
   direct {}

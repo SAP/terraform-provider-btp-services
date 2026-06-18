@@ -1,0 +1,105 @@
+name: cicd Integration Test (Main) - Terraform Provider
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+env:
+  PATH_TO_TFSCRIPT: "tests/integration"
+  DEV_OVERRIDE: "assets/provider-config-ghaction.txt"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  test:
+    name: Cicd Integration Test with local provider
+    runs-on: ubuntu-latest
+
+    environment:
+      name: btp-services
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+          cache: false
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+        env:
+          BTP_CICD_ENDPOINT: ${{ secrets.BTP_CICD_ENDPOINT }}
+          BTP_CICD_TOKEN_URL: ${{ secrets.BTP_CICD_TOKEN_URL }}
+          BTP_CICD_CLIENT_ID: ${{ secrets.BTP_CICD_CLIENT_ID }}
+          BTP_CICD_CLIENT_SECRET: ${{ secrets.BTP_CICD_CLIENT_SECRET }}
+
+      - name: Build and install local provider
+        run: go mod tidy && make install
+
+      - name: Configure Terraform dev override
+        run: |
+          rm -rf ${{ env.PATH_TO_TFSCRIPT }}/.terraform
+          rm -rf ${{ env.PATH_TO_TFSCRIPT }}/.terraform.lock.hcl
+          cp ${{ env.DEV_OVERRIDE }} ~/.terraformrc
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform -chdir=${{ env.PATH_TO_TFSCRIPT }} plan \
+            -out=plan.tfplan \
+            -no-color \
+            -detailed-exitcode
+          echo "exitcode=$?" >> $GITHUB_OUTPUT
+        env:
+          BTP_CICD_ENDPOINT: ${{ secrets.BTP_CICD_ENDPOINT }}
+          BTP_CICD_TOKEN_URL: ${{ secrets.BTP_CICD_TOKEN_URL }}
+          BTP_CICD_CLIENT_ID: ${{ secrets.BTP_CICD_CLIENT_ID }}
+          BTP_CICD_CLIENT_SECRET: ${{ secrets.BTP_CICD_CLIENT_SECRET }}
+        continue-on-error: true
+
+      - name: Fail on plan error
+        if: steps.plan.outputs.exitcode == '1'
+        run: exit 1
+
+      - name: Terraform Apply
+        id: apply
+        if: steps.plan.outputs.exitcode == '0' || steps.plan.outputs.exitcode == '2'
+        run: |
+          for i in 1 2 3; do
+            echo "Apply attempt $i..."
+            terraform -chdir=${{ env.PATH_TO_TFSCRIPT }} apply \
+              -auto-approve \
+              -no-color && exit 0
+            [ $i -lt 3 ] && sleep 10
+          done
+          exit 1
+        env:
+          BTP_CICD_ENDPOINT: ${{ secrets.BTP_CICD_ENDPOINT }}
+          BTP_CICD_TOKEN_URL: ${{ secrets.BTP_CICD_TOKEN_URL }}
+          BTP_CICD_CLIENT_ID: ${{ secrets.BTP_CICD_CLIENT_ID }}
+          BTP_CICD_CLIENT_SECRET: ${{ secrets.BTP_CICD_CLIENT_SECRET }}
+
+      - name: Terraform Destroy
+        if: always()
+        run: |
+          for i in 1 2 3; do
+            echo "Destroy attempt $i..."
+            terraform -chdir=${{ env.PATH_TO_TFSCRIPT }} destroy \
+              -auto-approve \
+              -no-color && exit 0
+            [ $i -lt 3 ] && sleep 10
+          done
+          exit 1
+        env:
+          BTP_CICD_ENDPOINT: ${{ secrets.BTP_CICD_ENDPOINT }}
+          BTP_CICD_TOKEN_URL: ${{ secrets.BTP_CICD_TOKEN_URL }}
+          BTP_CICD_CLIENT_ID: ${{ secrets.BTP_CICD_CLIENT_ID }}
+          BTP_CICD_CLIENT_SECRET: ${{ secrets.BTP_CICD_CLIENT_SECRET }}
