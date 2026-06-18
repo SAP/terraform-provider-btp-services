@@ -20,6 +20,9 @@ jobs:
     name: Cicd Integration Test with local provider
     runs-on: ubuntu-latest
 
+    environment:
+      name: btp-services
+
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
