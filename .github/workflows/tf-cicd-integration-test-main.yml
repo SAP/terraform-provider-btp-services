@@ -1,6 +1,9 @@
 name: cicd Integration Test (Main) - Terraform Provider
 
 on:
+  push:
+    branches:
+      - feature/integration-tests
   workflow_dispatch:
   workflow_call:
 
