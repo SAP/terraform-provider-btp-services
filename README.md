@@ -8,7 +8,7 @@
 
 The Terraform provider for SAP BTP Services enables dedicated management of services available within [SAP Business Technology Platform](https://www.sap.com/products/technology-platform.html) via [Terraform](https://terraform.io/).
 
-You will find the detailed information about the provider in the official [Terraform registry](https://registry.terraform.io/).
+You will find the detailed information about the provider in the official [Terraform Registry](https://registry.terraform.io/providers/SAP/btp-services).
 
 You find usage examples in the [examples folder](./examples/) of this repository.
 
