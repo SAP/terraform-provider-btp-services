@@ -14,26 +14,7 @@ You find usage examples in the [examples folder](./examples/) of this repository
 
 ## Usage of the Provider
 
-Add the provider to your Terraform configuration:
-
-```hcl
-terraform {
-  required_providers {
-    btpservice = {
-      source = "sap/btp-services"
-    }
-  }
-}
-
-provider "btpservice" {
-  cicd {
-    endpoint      = "https://cicd-service-url.cfapps.us10.hana.ondemand.com"
-    token_url     = "https://your-subaccount.authentication.us10.hana.ondemand.com/oauth/token"
-    client_id     = "sb-clone-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx!b12345|cicd-service!b6789"
-    client_secret = "your-client-secret-value-here="
-  }
-}
-```
+Refer to the [Quick Start Guide](./guides/QUICKSTART.md) for instructions to efficiently begin utilizing the Terraform Provider for SAP BTP Services. For the best experience, we recommend applying the common best practices for Terraform adoption as described in the [HashiCorp documentation](https://developer.hashicorp.com/well-architected-framework/operational-excellence/operational-excellence-terraform-maturity).
 
 ## Developing & Contributing to the Provider
 
