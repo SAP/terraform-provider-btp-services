@@ -1,5 +1,4 @@
 ![Golang](https://img.shields.io/badge/Go-1.26-informational)
-[![Go Report Card](https://goreportcard.com/badge/github.com/SAP/terraform-provider-btp-services)](https://goreportcard.com/report/github.com/SAP/terraform-provider-btp-services)
 [![REUSE status](https://api.reuse.software/badge/github.com/SAP/terraform-provider-btp-services)](https://api.reuse.software/info/github.com/SAP/terraform-provider-btp-services)
 
 # Terraform Provider for SAP BTP Services
