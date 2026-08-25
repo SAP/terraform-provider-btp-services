@@ -30,7 +30,7 @@ type NotificationConfiguration struct {
 type AnsConfiguration struct {
 	Active       bool   `json:"active"`
 	CredentialID string `json:"credentialId"`
-	CustomTag    string `json:"customTag,omitempty"`
+	CustomTag    string `json:"customTag"`
 }
 
 // JobListResponse is the envelope returned by GET /v2/jobs and GET /v2/repositories/{reference}/jobs.
