@@ -47,4 +47,20 @@ Required:
 - `comment` (String) Human-readable note about why this space is allowed (max 255 characters).
 - `space_guid` (String) GUID of the Cloud Foundry space (UUID format).
 
+## Import
 
+Import is supported using the following syntax:
+
+```terraform
+# This is a singleton resource — any non-empty string may be used as the import ID.
+# terraform import btpservice_cicd_allowed_spaces.<resource_name> <any-string>
+
+terraform import btpservice_cicd_allowed_spaces.this cicd_allowed_spaces
+
+# terraform import using an import block
+
+import {
+  to = btpservice_cicd_allowed_spaces.this
+  id = "cicd_allowed_spaces"
+}
+```
