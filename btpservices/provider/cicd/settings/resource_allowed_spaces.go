@@ -16,6 +16,7 @@ import (
 
 var _ resource.Resource = &allowedSpacesResource{}
 var _ resource.ResourceWithConfigure = &allowedSpacesResource{}
+var _ resource.ResourceWithImportState = &allowedSpacesResource{}
 
 func NewAllowedSpacesResource() resource.Resource {
 	return &allowedSpacesResource{}
@@ -140,4 +141,16 @@ func (r *allowedSpacesResource) Delete(ctx context.Context, _ resource.DeleteReq
 	if err := r.cli.AllowedSpaces.Set(ctx, cicdmodels.AllowedSpaceListDTO{AllowedSpaces: []cicdmodels.AllowedSpace{}}); err != nil {
 		resp.Diagnostics.AddError("Error Clearing Allowed Spaces", err.Error())
 	}
+}
+
+// ImportState reads the current allowed-spaces list from the API.
+// Because this is a singleton resource with no real ID, any import address string is accepted.
+func (r *allowedSpacesResource) ImportState(ctx context.Context, _ resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	result, err := r.cli.AllowedSpaces.Get(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError("Error Importing Allowed Spaces", err.Error())
+		return
+	}
+	state := allowedSpacesValueFrom(*result)
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }

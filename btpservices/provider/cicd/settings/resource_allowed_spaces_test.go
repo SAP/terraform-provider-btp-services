@@ -64,6 +64,12 @@ resource "btpservice_cicd_allowed_spaces" "test" {
 						resource.TestCheckResourceAttrSet("btpservice_cicd_allowed_spaces.test", "allowed_spaces.#"),
 					),
 				},
+				{
+					// Step 3: Import — any string accepted as the singleton has no real ID.
+					// ImportStateVerify is omitted because the resource has no id attribute.
+					ResourceName: "btpservice_cicd_allowed_spaces.test",
+					ImportState:  true,
+				},
 			},
 		})
 	})
