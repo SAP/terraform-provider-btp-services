@@ -24,7 +24,7 @@ resource "btpservice_cicd_credential_webhook_secret" "example" {
 
 ### Required
 
-- `name` (String) Credential name. Must contain only lowercase letters, numbers, hyphens, and dots.
+- `name` (String) Credential name Must contain only lowercase letters, numbers, hyphens, and dots.
 - `token` (String, Sensitive) Webhook secret token. Not returned by the API on reads — stored only in Terraform state.
 
 ### Optional

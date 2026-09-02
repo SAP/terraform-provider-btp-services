@@ -43,7 +43,7 @@ func (r *webhookSecretResource) Schema(_ context.Context, _ resource.SchemaReque
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "Credential name. Must contain only lowercase letters, numbers, hyphens, and dots.",
+				MarkdownDescription: "Credential name Must contain only lowercase letters, numbers, hyphens, and dots.",
 				Required:            true,
 			},
 			"description": schema.StringAttribute{

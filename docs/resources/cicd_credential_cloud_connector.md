@@ -25,7 +25,7 @@ resource "btpservice_cicd_credential_cloud_connector" "example" {
 ### Required
 
 - `location_id` (String) Location ID of the Cloud Connector instance.
-- `name` (String) Credential name. Must contain only lowercase letters, numbers, hyphens, and dots.
+- `name` (String) Credential name Must contain only lowercase letters, numbers, hyphens, and dots.
 
 ### Optional
 

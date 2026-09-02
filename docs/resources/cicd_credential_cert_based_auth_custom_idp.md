@@ -28,7 +28,7 @@ resource "btpservice_cicd_credential_cert_based_auth_custom_idp" "example" {
 
 - `email_address` (String) The email address of the user.
 - `hostname` (String) The hostname of the IAS tenant (e.g. "my-idp.accounts.ondemand.com").
-- `name` (String) Credential name. Must contain only lowercase letters, numbers, hyphens, and dots.
+- `name` (String) Credential name Must contain only lowercase letters, numbers, hyphens, and dots.
 - `origin` (String) The custom identity provider's origin key (e.g. "my-idp_platform").
 
 ### Optional
