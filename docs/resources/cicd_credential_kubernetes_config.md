@@ -25,7 +25,7 @@ resource "btpservice_cicd_credential_kubernetes_config" "example" {
 ### Required
 
 - `content` (String, Sensitive) YAML-formatted kubeconfig content. Not returned by the API on reads — stored only in Terraform state.
-- `name` (String) Credential name. Must contain only lowercase letters, numbers, and hyphens.
+- `name` (String) Credential name. Must contain only lowercase letters, numbers, hyphens, and dots.
 
 ### Optional
 

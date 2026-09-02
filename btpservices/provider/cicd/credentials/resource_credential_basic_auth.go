@@ -43,7 +43,7 @@ func (r *basicAuthResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "Credential name. Must contain only lowercase letters, numbers, and hyphens.",
+				MarkdownDescription: "Credential name. Must contain only lowercase letters, numbers, hyphens, and dots.",
 				Required:            true,
 			},
 			"description": schema.StringAttribute{
