@@ -1,5 +1,8 @@
 ![Golang](https://img.shields.io/badge/Go-1.26-informational)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=SAP_terraform-provider-btp-services&metric=coverage)](https://sonarcloud.io/summary/new_code?id=SAP_terraform-provider-btp-services)
+[![CodeQL](https://github.com/SAP/terraform-provider-btp-services/actions/workflows/codeql.yml/badge.svg)](https://github.com/SAP/terraform-provider-btp-services/actions/workflows/codeql.yml)
 [![REUSE status](https://api.reuse.software/badge/github.com/SAP/terraform-provider-btp-services)](https://api.reuse.software/info/github.com/SAP/terraform-provider-btp-services)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/14630/badge)](https://www.bestpractices.dev/projects/14630)
 
 # Terraform Provider for SAP BTP Services
 
