@@ -52,9 +52,9 @@ func (r *containerRegistryResource) Schema(_ context.Context, _ resource.SchemaR
 				Computed:            true,
 			},
 			"content": schema.StringAttribute{
-				MarkdownDescription: "JSON-formatted container registry configuration. Not returned by the API on reads — stored only in Terraform state.",
+				MarkdownDescription: "JSON-formatted container registry configuration. Write-only; never stored in Terraform state.",
 				Required:            true,
-				Sensitive:           true,
+				WriteOnly:           true,
 			},
 		},
 	}
@@ -90,6 +90,14 @@ func (r *containerRegistryResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
+	// Write-only attributes are null in the plan; read from config.
+	var config containerRegistryResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plan.Content = config.Content
+
 	if err := r.cli.Credentials.Create(ctx, plan.toCreateRequest()); err != nil {
 		resp.Diagnostics.AddError("Error Creating Credential", err.Error())
 		return
@@ -101,9 +109,7 @@ func (r *containerRegistryResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	state := containerRegistryResourceValueFrom(*result)
-	state.Content = plan.Content
-	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, containerRegistryResourceValueFrom(*result))...)
 }
 
 func (r *containerRegistryResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -124,7 +130,6 @@ func (r *containerRegistryResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	data := containerRegistryResourceValueFrom(*result)
-	data.Content = state.Content
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
 }
 
@@ -141,6 +146,14 @@ func (r *containerRegistryResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
+	// Write-only attributes are null in the plan; read from config.
+	var config containerRegistryResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plan.Content = config.Content
+
 	if err := r.cli.Credentials.Patch(ctx, state.ID.ValueString(), plan.toPatchRequest()); err != nil {
 		resp.Diagnostics.AddError("Error Updating Credential", err.Error())
 		return
@@ -152,9 +165,7 @@ func (r *containerRegistryResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	updated := containerRegistryResourceValueFrom(*result)
-	updated.Content = plan.Content
-	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, containerRegistryResourceValueFrom(*result))...)
 }
 
 func (r *containerRegistryResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

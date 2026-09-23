@@ -52,9 +52,9 @@ func (r *webhookSecretResource) Schema(_ context.Context, _ resource.SchemaReque
 				Computed:            true,
 			},
 			"token": schema.StringAttribute{
-				MarkdownDescription: "Webhook secret token. Not returned by the API on reads — stored only in Terraform state.",
+				MarkdownDescription: "Webhook secret token. Write-only; never stored in Terraform state.",
 				Required:            true,
-				Sensitive:           true,
+				WriteOnly:           true,
 			},
 		},
 	}
@@ -90,6 +90,14 @@ func (r *webhookSecretResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
+	// Write-only attributes are null in the plan; read from config.
+	var config webhookSecretResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plan.Token = config.Token
+
 	if err := r.cli.Credentials.Create(ctx, plan.toCreateRequest()); err != nil {
 		resp.Diagnostics.AddError("Error Creating Credential", err.Error())
 		return
@@ -101,9 +109,7 @@ func (r *webhookSecretResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	state := webhookSecretResourceValueFrom(*result)
-	state.Token = plan.Token
-	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, webhookSecretResourceValueFrom(*result))...)
 }
 
 func (r *webhookSecretResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -124,7 +130,6 @@ func (r *webhookSecretResource) Read(ctx context.Context, req resource.ReadReque
 	}
 
 	updated := webhookSecretResourceValueFrom(*result)
-	updated.Token = state.Token
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
 }
 
@@ -141,6 +146,14 @@ func (r *webhookSecretResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
+	// Write-only attributes are null in the plan; read from config.
+	var config webhookSecretResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plan.Token = config.Token
+
 	if err := r.cli.Credentials.Patch(ctx, state.ID.ValueString(), plan.toPatchRequest()); err != nil {
 		resp.Diagnostics.AddError("Error Updating Credential", err.Error())
 		return
@@ -152,9 +165,7 @@ func (r *webhookSecretResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	updated := webhookSecretResourceValueFrom(*result)
-	updated.Token = plan.Token
-	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, webhookSecretResourceValueFrom(*result))...)
 }
 
 func (r *webhookSecretResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

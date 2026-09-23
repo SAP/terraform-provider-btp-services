@@ -26,8 +26,7 @@ type basicAuthResourceModel struct {
 	Name        types.String `tfsdk:"name"`
 	Description types.String `tfsdk:"description"`
 	Username    types.String `tfsdk:"username"`
-	// Password is never returned by the API on reads — preserved from prior state.
-	Password types.String `tfsdk:"password"`
+	Password    types.String `tfsdk:"password"`
 }
 
 func basicAuthResourceValueFrom(v cicdmodels.Credential) basicAuthResourceModel {
@@ -121,8 +120,7 @@ type webhookSecretResourceModel struct {
 	ID          types.String `tfsdk:"id"`
 	Name        types.String `tfsdk:"name"`
 	Description types.String `tfsdk:"description"`
-	// Token is never returned by the API on reads — preserved from prior state.
-	Token types.String `tfsdk:"token"`
+	Token       types.String `tfsdk:"token"`
 }
 
 func webhookSecretResourceValueFrom(v cicdmodels.Credential) webhookSecretResourceModel {
@@ -164,8 +162,7 @@ type containerRegistryResourceModel struct {
 	ID          types.String `tfsdk:"id"`
 	Name        types.String `tfsdk:"name"`
 	Description types.String `tfsdk:"description"`
-	// Content is never returned by the API on reads — preserved from prior state.
-	Content types.String `tfsdk:"content"`
+	Content     types.String `tfsdk:"content"`
 }
 
 func containerRegistryResourceValueFrom(v cicdmodels.Credential) containerRegistryResourceModel {
@@ -207,8 +204,7 @@ type kubernetesConfigResourceModel struct {
 	ID          types.String `tfsdk:"id"`
 	Name        types.String `tfsdk:"name"`
 	Description types.String `tfsdk:"description"`
-	// Content is never returned by the API on reads — preserved from prior state.
-	Content types.String `tfsdk:"content"`
+	Content     types.String `tfsdk:"content"`
 }
 
 func kubernetesConfigResourceValueFrom(v cicdmodels.Credential) kubernetesConfigResourceModel {

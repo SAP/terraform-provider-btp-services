@@ -56,9 +56,9 @@ func (r *basicAuthCIdPResource) Schema(_ context.Context, _ resource.SchemaReque
 				Required:            true,
 			},
 			"password": schema.StringAttribute{
-				MarkdownDescription: "Password for basic authentication. Not returned by the API on reads — stored only in Terraform state.",
+				MarkdownDescription: "Password for basic authentication. Write-only; never stored in Terraform state.",
 				Required:            true,
-				Sensitive:           true,
+				WriteOnly:           true,
 			},
 			"origin": schema.StringAttribute{
 				MarkdownDescription: "The custom identity provider's origin key (e.g. \"custom-platform\").",
@@ -97,6 +97,14 @@ func (r *basicAuthCIdPResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
+	// Write-only attributes are null in the plan; read from config.
+	var config basicAuthCIdPResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plan.Password = config.Password
+
 	if err := r.cli.Credentials.Create(ctx, plan.toCreateRequest()); err != nil {
 		resp.Diagnostics.AddError("Error Creating Credential", err.Error())
 		return
@@ -108,9 +116,7 @@ func (r *basicAuthCIdPResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	state := basicAuthCIdPResourceValueFrom(*result)
-	state.Password = plan.Password
-	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, basicAuthCIdPResourceValueFrom(*result))...)
 }
 
 func (r *basicAuthCIdPResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -131,7 +137,6 @@ func (r *basicAuthCIdPResource) Read(ctx context.Context, req resource.ReadReque
 	}
 
 	updated := basicAuthCIdPResourceValueFrom(*result)
-	updated.Password = state.Password
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
 }
 
@@ -148,6 +153,14 @@ func (r *basicAuthCIdPResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
+	// Write-only attributes are null in the plan; read from config.
+	var config basicAuthCIdPResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plan.Password = config.Password
+
 	if err := r.cli.Credentials.Patch(ctx, state.ID.ValueString(), plan.toPatchRequest()); err != nil {
 		resp.Diagnostics.AddError("Error Updating Credential", err.Error())
 		return
@@ -159,9 +172,7 @@ func (r *basicAuthCIdPResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	updated := basicAuthCIdPResourceValueFrom(*result)
-	updated.Password = plan.Password
-	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, basicAuthCIdPResourceValueFrom(*result))...)
 }
 
 func (r *basicAuthCIdPResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
