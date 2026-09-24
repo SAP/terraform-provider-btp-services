@@ -52,6 +52,13 @@ resource "btpservice_cicd_credential_webhook_secret" "test" {
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_webhook_secret.test", "description", "Updated description"),
 					),
 				},
+				{
+					ResourceName:            "btpservice_cicd_credential_webhook_secret.test",
+					ImportState:             true,
+					ImportStateVerify:       true,
+					ImportStateId:           "tf-test-webhook-secret",
+					ImportStateVerifyIgnore: []string{"token"},
+				},
 			},
 		})
 	})

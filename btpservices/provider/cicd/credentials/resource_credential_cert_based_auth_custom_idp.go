@@ -6,10 +6,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	cicdclient "github.com/SAP/terraform-provider-btp-services/internal/cicd/client"
 	cicdmodels "github.com/SAP/terraform-provider-btp-services/internal/cicd/models"
@@ -18,6 +21,8 @@ import (
 
 var _ resource.Resource = &certCIdPResource{}
 var _ resource.ResourceWithConfigure = &certCIdPResource{}
+var _ resource.ResourceWithImportState = &certCIdPResource{}
+var _ resource.ResourceWithIdentity = &certCIdPResource{}
 
 func NewCertCIdPResource() resource.Resource {
 	return &certCIdPResource{}
@@ -25,6 +30,10 @@ func NewCertCIdPResource() resource.Resource {
 
 type certCIdPResource struct {
 	cli *cicdclient.CicdClientFacade
+}
+
+type certCIdPIdentityModel struct {
+	ID types.String `tfsdk:"id"`
 }
 
 func (r *certCIdPResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -62,6 +71,16 @@ func (r *certCIdPResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 			"origin": schema.StringAttribute{
 				MarkdownDescription: "The custom identity provider's origin key (e.g. \"my-idp_platform\").",
 				Required:            true,
+			},
+		},
+	}
+}
+
+func (r *certCIdPResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
 			},
 		},
 	}
@@ -107,7 +126,9 @@ func (r *certCIdPResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, certCIdPResourceValueFrom(*result))...)
+	state := certCIdPResourceValueFrom(*result)
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, certCIdPIdentityModel{ID: state.ID})...)
 }
 
 func (r *certCIdPResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -127,7 +148,9 @@ func (r *certCIdPResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, certCIdPResourceValueFrom(*result))...)
+	updated := certCIdPResourceValueFrom(*result)
+	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, certCIdPIdentityModel{ID: updated.ID})...)
 }
 
 func (r *certCIdPResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -154,7 +177,9 @@ func (r *certCIdPResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, certCIdPResourceValueFrom(*result))...)
+	updated := certCIdPResourceValueFrom(*result)
+	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, certCIdPIdentityModel{ID: updated.ID})...)
 }
 
 func (r *certCIdPResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -169,4 +194,12 @@ func (r *certCIdPResource) Delete(ctx context.Context, req resource.DeleteReques
 			resp.Diagnostics.AddError("Error Deleting Credential", err.Error())
 		}
 	}
+}
+
+func (r *certCIdPResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.ID != "" {
+		resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+		return
+	}
+	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("id"), path.Root("id"), req, resp)
 }
