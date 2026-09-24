@@ -14,7 +14,7 @@ permissions:
   pull-requests: read
 
 jobs:
-  main:
+  semantic-pr:
     if: github.event.pull_request.draft == false
     name: Validate PR title
     runs-on: ubuntu-latest

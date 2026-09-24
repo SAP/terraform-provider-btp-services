@@ -8,7 +8,7 @@ permissions:
   issues: write
 
 jobs:
-  main:
-    name: Main
+  CICD-integration-test:
+    name: CICD Integration Test
     uses: ./.github/workflows/tf-cicd-integration-test-main.yml
     secrets: inherit
