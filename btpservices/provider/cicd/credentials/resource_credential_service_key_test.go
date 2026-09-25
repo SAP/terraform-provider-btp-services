@@ -28,14 +28,14 @@ func TestAccResourceCicdCredentialServiceKey(t *testing.T) {
 				{
 					Config: utils.HCLProviderBlock(creds) + `
 resource "btpservice_cicd_credential_service_key" "test" {
-  name        = "tf-test-service-key"
+  name        = "tf-acc-test-service-key"
   description = "Terraform acceptance test credential"
   key         = "{\"uri\":\"https://transport-service-app-backend.ts.cfapps.sap.hana.ondemand.com\",\"ua\":{\"uaadomain\":\"authentication.sap.hana.ondemand.com\",\"tenantode\":\"dedicated\"}}"
 }
 `,
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttrSet("btpservice_cicd_credential_service_key.test", "id"),
-						resource.TestCheckResourceAttr("btpservice_cicd_credential_service_key.test", "name", "tf-test-service-key"),
+						resource.TestCheckResourceAttr("btpservice_cicd_credential_service_key.test", "name", "tf-acc-test-service-key"),
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_service_key.test", "description", "Terraform acceptance test credential"),
 					),
 				},
@@ -43,7 +43,7 @@ resource "btpservice_cicd_credential_service_key" "test" {
 					// Step 2: Update description
 					Config: utils.HCLProviderBlock(creds) + `
 				resource "btpservice_cicd_credential_service_key" "test" {
-				  name        = "tf-test-service-key"
+				  name        = "tf-acc-test-service-key"
 				  description = "Updated description"
 				  key         = "{\"uri\":\"https://transport-service-app-backend.ts.cfapps.sap.hana.ondemand.com\",\"ua\":{\"uaadomain\":\"authentication.sap.hana.ondemand.com\",\"tenantode\":\"dedicated\"}}"
 				}
@@ -51,6 +51,13 @@ resource "btpservice_cicd_credential_service_key" "test" {
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_service_key.test", "description", "Updated description"),
 					),
+				},
+				{
+					ResourceName:            "btpservice_cicd_credential_service_key.test",
+					ImportState:             true,
+					ImportStateVerify:       true,
+					ImportStateId:           "tf-acc-test-service-key",
+					ImportStateVerifyIgnore: []string{"key"},
 				},
 			},
 		})

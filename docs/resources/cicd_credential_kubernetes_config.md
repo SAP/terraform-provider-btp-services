@@ -37,4 +37,28 @@ resource "btpservice_cicd_credential_kubernetes_config" "example" {
 
 - `id` (String) Unique identifier of the resource (assigned by the API).
 
+## Import
 
+Import is supported using the following syntax:
+
+```terraform
+# terraform import btpservice_cicd_credential_kubernetes_config.<resource_name> <credential_name>
+
+terraform import btpservice_cicd_credential_kubernetes_config.example my-kubernetes-config
+
+# terraform import using id attribute in import block
+
+import {
+  to = btpservice_cicd_credential_kubernetes_config.<resource_name>
+  id = "<credential_name>"
+}
+
+# this resource supports import using identity attribute from Terraform version 1.12 or higher
+
+import {
+  to = btpservice_cicd_credential_kubernetes_config.<resource_name>
+  identity = {
+    id = "<credential_name>"
+  }
+}
+```

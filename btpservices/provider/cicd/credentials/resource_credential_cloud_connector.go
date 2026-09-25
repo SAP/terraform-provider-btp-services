@@ -6,10 +6,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	cicdclient "github.com/SAP/terraform-provider-btp-services/internal/cicd/client"
 	cicdmodels "github.com/SAP/terraform-provider-btp-services/internal/cicd/models"
@@ -18,6 +21,8 @@ import (
 
 var _ resource.Resource = &cloudConnectorResource{}
 var _ resource.ResourceWithConfigure = &cloudConnectorResource{}
+var _ resource.ResourceWithImportState = &cloudConnectorResource{}
+var _ resource.ResourceWithIdentity = &cloudConnectorResource{}
 
 func NewCloudConnectorResource() resource.Resource {
 	return &cloudConnectorResource{}
@@ -25,6 +30,10 @@ func NewCloudConnectorResource() resource.Resource {
 
 type cloudConnectorResource struct {
 	cli *cicdclient.CicdClientFacade
+}
+
+type cloudConnectorIdentityModel struct {
+	ID types.String `tfsdk:"id"`
 }
 
 func (r *cloudConnectorResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -54,6 +63,16 @@ func (r *cloudConnectorResource) Schema(_ context.Context, _ resource.SchemaRequ
 			"location_id": schema.StringAttribute{
 				MarkdownDescription: "Location ID of the Cloud Connector instance.",
 				Required:            true,
+			},
+		},
+	}
+}
+
+func (r *cloudConnectorResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
 			},
 		},
 	}
@@ -100,7 +119,9 @@ func (r *cloudConnectorResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, cloudConnectorResourceValueFrom(*result))...)
+	state := cloudConnectorResourceValueFrom(*result)
+	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, cloudConnectorIdentityModel{ID: state.ID})...)
 }
 
 func (r *cloudConnectorResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -120,7 +141,9 @@ func (r *cloudConnectorResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, cloudConnectorResourceValueFrom(*result))...)
+	updated := cloudConnectorResourceValueFrom(*result)
+	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, cloudConnectorIdentityModel{ID: updated.ID})...)
 }
 
 func (r *cloudConnectorResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -147,7 +170,9 @@ func (r *cloudConnectorResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, cloudConnectorResourceValueFrom(*result))...)
+	updated := cloudConnectorResourceValueFrom(*result)
+	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, cloudConnectorIdentityModel{ID: updated.ID})...)
 }
 
 func (r *cloudConnectorResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -162,4 +187,12 @@ func (r *cloudConnectorResource) Delete(ctx context.Context, req resource.Delete
 			resp.Diagnostics.AddError("Error Deleting Credential", err.Error())
 		}
 	}
+}
+
+func (r *cloudConnectorResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.ID != "" {
+		resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+		return
+	}
+	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("id"), path.Root("id"), req, resp)
 }

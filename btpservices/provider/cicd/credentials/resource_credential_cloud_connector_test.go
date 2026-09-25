@@ -54,6 +54,12 @@ resource "btpservice_cicd_credential_cloud_connector" "test" {
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_cloud_connector.test", "location_id", "updated-location-id"),
 					),
 				},
+				{
+					ResourceName:      "btpservice_cicd_credential_cloud_connector.test",
+					ImportState:       true,
+					ImportStateVerify: true,
+					ImportStateId:     "tf-test-cloud-connector",
+				},
 			},
 		})
 	})

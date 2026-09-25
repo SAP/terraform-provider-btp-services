@@ -52,6 +52,13 @@ resource "btpservice_cicd_credential_kubernetes_config" "test" {
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_kubernetes_config.test", "description", "Updated description"),
 					),
 				},
+				{
+					ResourceName:            "btpservice_cicd_credential_kubernetes_config.test",
+					ImportState:             true,
+					ImportStateVerify:       true,
+					ImportStateId:           "tf-test-kubernetes-config",
+					ImportStateVerifyIgnore: []string{"content"},
+				},
 			},
 		})
 	})

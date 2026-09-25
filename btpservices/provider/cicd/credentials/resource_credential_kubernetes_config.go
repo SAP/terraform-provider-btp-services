@@ -6,10 +6,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	cicdclient "github.com/SAP/terraform-provider-btp-services/internal/cicd/client"
 	cicdmodels "github.com/SAP/terraform-provider-btp-services/internal/cicd/models"
@@ -18,6 +21,8 @@ import (
 
 var _ resource.Resource = &kubernetesConfigResource{}
 var _ resource.ResourceWithConfigure = &kubernetesConfigResource{}
+var _ resource.ResourceWithImportState = &kubernetesConfigResource{}
+var _ resource.ResourceWithIdentity = &kubernetesConfigResource{}
 
 func NewKubernetesConfigResource() resource.Resource {
 	return &kubernetesConfigResource{}
@@ -25,6 +30,10 @@ func NewKubernetesConfigResource() resource.Resource {
 
 type kubernetesConfigResource struct {
 	cli *cicdclient.CicdClientFacade
+}
+
+type kubernetesConfigIdentityModel struct {
+	ID types.String `tfsdk:"id"`
 }
 
 func (r *kubernetesConfigResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -55,6 +64,16 @@ func (r *kubernetesConfigResource) Schema(_ context.Context, _ resource.SchemaRe
 				MarkdownDescription: "YAML-formatted kubeconfig content. Write-only; never stored in Terraform state.",
 				Required:            true,
 				WriteOnly:           true,
+			},
+		},
+	}
+}
+
+func (r *kubernetesConfigResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
 			},
 		},
 	}
@@ -131,6 +150,7 @@ func (r *kubernetesConfigResource) Read(ctx context.Context, req resource.ReadRe
 
 	updated := kubernetesConfigResourceValueFrom(*result)
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, kubernetesConfigIdentityModel{ID: updated.ID})...)
 }
 
 func (r *kubernetesConfigResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -180,4 +200,12 @@ func (r *kubernetesConfigResource) Delete(ctx context.Context, req resource.Dele
 			resp.Diagnostics.AddError("Error Deleting Credential", err.Error())
 		}
 	}
+}
+
+func (r *kubernetesConfigResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.ID != "" {
+		resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+		return
+	}
+	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("id"), path.Root("id"), req, resp)
 }

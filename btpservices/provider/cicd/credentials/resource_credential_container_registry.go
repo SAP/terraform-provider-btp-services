@@ -6,10 +6,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	cicdclient "github.com/SAP/terraform-provider-btp-services/internal/cicd/client"
 	cicdmodels "github.com/SAP/terraform-provider-btp-services/internal/cicd/models"
@@ -18,6 +21,8 @@ import (
 
 var _ resource.Resource = &containerRegistryResource{}
 var _ resource.ResourceWithConfigure = &containerRegistryResource{}
+var _ resource.ResourceWithImportState = &containerRegistryResource{}
+var _ resource.ResourceWithIdentity = &containerRegistryResource{}
 
 func NewContainerRegistryResource() resource.Resource {
 	return &containerRegistryResource{}
@@ -25,6 +30,10 @@ func NewContainerRegistryResource() resource.Resource {
 
 type containerRegistryResource struct {
 	cli *cicdclient.CicdClientFacade
+}
+
+type containerRegistryIdentityModel struct {
+	ID types.String `tfsdk:"id"`
 }
 
 func (r *containerRegistryResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -55,6 +64,16 @@ func (r *containerRegistryResource) Schema(_ context.Context, _ resource.SchemaR
 				MarkdownDescription: "JSON-formatted container registry configuration. Write-only; never stored in Terraform state.",
 				Required:            true,
 				WriteOnly:           true,
+			},
+		},
+	}
+}
+
+func (r *containerRegistryResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
 			},
 		},
 	}
@@ -131,6 +150,7 @@ func (r *containerRegistryResource) Read(ctx context.Context, req resource.ReadR
 
 	data := containerRegistryResourceValueFrom(*result)
 	resp.Diagnostics.Append(resp.State.Set(ctx, data)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, containerRegistryIdentityModel{ID: data.ID})...)
 }
 
 func (r *containerRegistryResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -180,4 +200,12 @@ func (r *containerRegistryResource) Delete(ctx context.Context, req resource.Del
 			resp.Diagnostics.AddError("Error Deleting Credential", err.Error())
 		}
 	}
+}
+
+func (r *containerRegistryResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.ID != "" {
+		resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+		return
+	}
+	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("id"), path.Root("id"), req, resp)
 }

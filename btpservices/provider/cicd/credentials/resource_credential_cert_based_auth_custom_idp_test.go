@@ -60,6 +60,12 @@ resource "btpservice_cicd_credential_cert_based_auth_custom_idp" "test" {
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_cert_based_auth_custom_idp.test", "email_address", "test-user@example.com"),
 					),
 				},
+				{
+					ResourceName:      "btpservice_cicd_credential_cert_based_auth_custom_idp.test",
+					ImportState:       true,
+					ImportStateVerify: true,
+					ImportStateId:     "tf-test-cert-cidp",
+				},
 			},
 		})
 	})

@@ -6,10 +6,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	cicdclient "github.com/SAP/terraform-provider-btp-services/internal/cicd/client"
 	cicdmodels "github.com/SAP/terraform-provider-btp-services/internal/cicd/models"
@@ -18,6 +21,8 @@ import (
 
 var _ resource.Resource = &basicAuthResource{}
 var _ resource.ResourceWithConfigure = &basicAuthResource{}
+var _ resource.ResourceWithImportState = &basicAuthResource{}
+var _ resource.ResourceWithIdentity = &basicAuthResource{}
 
 func NewBasicAuthResource() resource.Resource {
 	return &basicAuthResource{}
@@ -25,6 +30,10 @@ func NewBasicAuthResource() resource.Resource {
 
 type basicAuthResource struct {
 	cli *cicdclient.CicdClientFacade
+}
+
+type basicAuthIdentityModel struct {
+	ID types.String `tfsdk:"id"`
 }
 
 func (r *basicAuthResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -59,6 +68,16 @@ func (r *basicAuthResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				MarkdownDescription: "Password for basic authentication. Write-only; never stored in Terraform state.",
 				Required:            true,
 				WriteOnly:           true,
+			},
+		},
+	}
+}
+
+func (r *basicAuthResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
 			},
 		},
 	}
@@ -135,6 +154,7 @@ func (r *basicAuthResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	updated := basicAuthResourceValueFrom(*result)
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, basicAuthIdentityModel{ID: updated.ID})...)
 }
 
 func (r *basicAuthResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -184,4 +204,12 @@ func (r *basicAuthResource) Delete(ctx context.Context, req resource.DeleteReque
 			resp.Diagnostics.AddError("Error Deleting Credential", err.Error())
 		}
 	}
+}
+
+func (r *basicAuthResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.ID != "" {
+		resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+		return
+	}
+	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("id"), path.Root("id"), req, resp)
 }
