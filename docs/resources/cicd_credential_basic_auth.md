@@ -25,8 +25,10 @@ resource "btpservice_cicd_credential_basic_auth" "example" {
 
 ### Required
 
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
 - `name` (String) Credential name Must contain only lowercase letters, numbers, hyphens, and dots.
-- `password` (String, Sensitive) Password for basic authentication. Not returned by the API on reads — stored only in Terraform state.
+- `password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Password for basic authentication. Write-only; never stored in Terraform state.
 - `username` (String) Username for basic authentication.
 
 ### Optional

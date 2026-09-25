@@ -61,9 +61,9 @@ func (r *secretTextResource) Schema(_ context.Context, _ resource.SchemaRequest,
 				Computed:            true,
 			},
 			"text": schema.StringAttribute{
-				MarkdownDescription: "The secret text value. Not returned by the API on reads — stored only in Terraform state.",
+				MarkdownDescription: "The secret text value. Write-only; never stored in Terraform state.",
 				Required:            true,
-				Sensitive:           true,
+				WriteOnly:           true,
 			},
 		},
 	}
@@ -108,6 +108,14 @@ func (r *secretTextResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
+	// Write-only attributes are null in the plan; read from config.
+	var config secretTextResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plan.Text = config.Text
+
 	if err := r.cli.Credentials.Create(ctx, plan.toCreateRequest()); err != nil {
 		resp.Diagnostics.AddError("Error Creating Credential", err.Error())
 		return
@@ -120,7 +128,6 @@ func (r *secretTextResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 
 	state := secretTextResourceValueFrom(*result)
-	state.Text = plan.Text
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, secretTextIdentityModel{ID: state.ID})...)
 }
@@ -143,7 +150,6 @@ func (r *secretTextResource) Read(ctx context.Context, req resource.ReadRequest,
 	}
 
 	updated := secretTextResourceValueFrom(*result)
-	updated.Text = state.Text
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, secretTextIdentityModel{ID: updated.ID})...)
 }
@@ -161,6 +167,14 @@ func (r *secretTextResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
+	// Write-only attributes are null in the plan; read from config.
+	var config secretTextResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plan.Text = config.Text
+
 	if err := r.cli.Credentials.Patch(ctx, state.ID.ValueString(), plan.toPatchRequest()); err != nil {
 		resp.Diagnostics.AddError("Error Updating Credential", err.Error())
 		return
@@ -173,7 +187,6 @@ func (r *secretTextResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	updated := secretTextResourceValueFrom(*result)
-	updated.Text = plan.Text
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, secretTextIdentityModel{ID: updated.ID})...)
 }

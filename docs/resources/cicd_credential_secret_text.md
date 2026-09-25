@@ -24,8 +24,10 @@ resource "btpservice_cicd_credential_secret_text" "example" {
 
 ### Required
 
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
 - `name` (String) Credential name Must contain only lowercase letters, numbers, hyphens, and dots.
-- `text` (String, Sensitive) The secret text value. Not returned by the API on reads — stored only in Terraform state.
+- `text` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The secret text value. Write-only; never stored in Terraform state.
 
 ### Optional
 

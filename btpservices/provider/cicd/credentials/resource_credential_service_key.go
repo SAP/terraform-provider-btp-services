@@ -61,9 +61,9 @@ func (r *serviceKeyResource) Schema(_ context.Context, _ resource.SchemaRequest,
 				Computed:            true,
 			},
 			"key": schema.StringAttribute{
-				MarkdownDescription: "Service key for a SAP BTP service instance. Must be valid JSON. Not returned by the API on reads — stored only in Terraform state.",
+				MarkdownDescription: "Service key for a SAP BTP service instance. Must be valid JSON. Write-only; never stored in Terraform state.",
 				Required:            true,
-				Sensitive:           true,
+				WriteOnly:           true,
 			},
 		},
 	}
@@ -108,6 +108,14 @@ func (r *serviceKeyResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
+	// Write-only attributes are null in the plan; read from config.
+	var config serviceKeyResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plan.Key = config.Key
+
 	if err := r.cli.Credentials.Create(ctx, plan.toCreateRequest()); err != nil {
 		resp.Diagnostics.AddError("Error Creating Credential", err.Error())
 		return
@@ -120,7 +128,6 @@ func (r *serviceKeyResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 
 	state := serviceKeyResourceValueFrom(*result)
-	state.Key = plan.Key
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, serviceKeyIdentityModel{ID: state.ID})...)
 }
@@ -143,7 +150,6 @@ func (r *serviceKeyResource) Read(ctx context.Context, req resource.ReadRequest,
 	}
 
 	updated := serviceKeyResourceValueFrom(*result)
-	updated.Key = state.Key
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, serviceKeyIdentityModel{ID: updated.ID})...)
 }
@@ -161,6 +167,14 @@ func (r *serviceKeyResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
+	// Write-only attributes are null in the plan; read from config.
+	var config serviceKeyResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plan.Key = config.Key
+
 	if err := r.cli.Credentials.Patch(ctx, state.ID.ValueString(), plan.toPatchRequest()); err != nil {
 		resp.Diagnostics.AddError("Error Updating Credential", err.Error())
 		return
@@ -173,7 +187,6 @@ func (r *serviceKeyResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	updated := serviceKeyResourceValueFrom(*result)
-	updated.Key = plan.Key
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, serviceKeyIdentityModel{ID: updated.ID})...)
 }
