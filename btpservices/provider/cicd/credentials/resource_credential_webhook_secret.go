@@ -6,10 +6,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	cicdclient "github.com/SAP/terraform-provider-btp-services/internal/cicd/client"
 	cicdmodels "github.com/SAP/terraform-provider-btp-services/internal/cicd/models"
@@ -18,6 +21,8 @@ import (
 
 var _ resource.Resource = &webhookSecretResource{}
 var _ resource.ResourceWithConfigure = &webhookSecretResource{}
+var _ resource.ResourceWithImportState = &webhookSecretResource{}
+var _ resource.ResourceWithIdentity = &webhookSecretResource{}
 
 func NewWebhookSecretResource() resource.Resource {
 	return &webhookSecretResource{}
@@ -25,6 +30,10 @@ func NewWebhookSecretResource() resource.Resource {
 
 type webhookSecretResource struct {
 	cli *cicdclient.CicdClientFacade
+}
+
+type webhookSecretIdentityModel struct {
+	ID types.String `tfsdk:"id"`
 }
 
 func (r *webhookSecretResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -55,6 +64,16 @@ func (r *webhookSecretResource) Schema(_ context.Context, _ resource.SchemaReque
 				MarkdownDescription: "Webhook secret token. Not returned by the API on reads — stored only in Terraform state.",
 				Required:            true,
 				Sensitive:           true,
+			},
+		},
+	}
+}
+
+func (r *webhookSecretResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
 			},
 		},
 	}
@@ -104,6 +123,7 @@ func (r *webhookSecretResource) Create(ctx context.Context, req resource.CreateR
 	state := webhookSecretResourceValueFrom(*result)
 	state.Token = plan.Token
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, webhookSecretIdentityModel{ID: state.ID})...)
 }
 
 func (r *webhookSecretResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -126,6 +146,7 @@ func (r *webhookSecretResource) Read(ctx context.Context, req resource.ReadReque
 	updated := webhookSecretResourceValueFrom(*result)
 	updated.Token = state.Token
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, webhookSecretIdentityModel{ID: updated.ID})...)
 }
 
 func (r *webhookSecretResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -155,6 +176,7 @@ func (r *webhookSecretResource) Update(ctx context.Context, req resource.UpdateR
 	updated := webhookSecretResourceValueFrom(*result)
 	updated.Token = plan.Token
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, webhookSecretIdentityModel{ID: updated.ID})...)
 }
 
 func (r *webhookSecretResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -169,4 +191,12 @@ func (r *webhookSecretResource) Delete(ctx context.Context, req resource.DeleteR
 			resp.Diagnostics.AddError("Error Deleting Credential", err.Error())
 		}
 	}
+}
+
+func (r *webhookSecretResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.ID != "" {
+		resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+		return
+	}
+	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("id"), path.Root("id"), req, resp)
 }

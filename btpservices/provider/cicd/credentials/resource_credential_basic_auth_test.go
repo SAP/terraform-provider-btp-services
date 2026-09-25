@@ -56,6 +56,13 @@ resource "btpservice_cicd_credential_basic_auth" "test" {
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_basic_auth.test", "username", "updated-user"),
 					),
 				},
+				{
+					ResourceName:            "btpservice_cicd_credential_basic_auth.test",
+					ImportState:             true,
+					ImportStateVerify:       true,
+					ImportStateId:           "tf-test-basic-auth",
+					ImportStateVerifyIgnore: []string{"password"},
+				},
 			},
 		})
 	})

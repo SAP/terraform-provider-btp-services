@@ -28,14 +28,14 @@ func TestAccResourceCicdCredentialSecretText(t *testing.T) {
 				{
 					Config: utils.HCLProviderBlock(creds) + `
 resource "btpservice_cicd_credential_secret_text" "test" {
-  name        = "tf-test-secret-text"
+  name        = "tf-acc-test-secret-text"
   description = "Terraform acceptance test credential"
   text        = "redacted-secret-value"
 }
 `,
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttrSet("btpservice_cicd_credential_secret_text.test", "id"),
-						resource.TestCheckResourceAttr("btpservice_cicd_credential_secret_text.test", "name", "tf-test-secret-text"),
+						resource.TestCheckResourceAttr("btpservice_cicd_credential_secret_text.test", "name", "tf-acc-test-secret-text"),
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_secret_text.test", "description", "Terraform acceptance test credential"),
 					),
 				},
@@ -43,7 +43,7 @@ resource "btpservice_cicd_credential_secret_text" "test" {
 					// Step 2: Update description
 					Config: utils.HCLProviderBlock(creds) + `
 resource "btpservice_cicd_credential_secret_text" "test" {
-  name        = "tf-test-secret-text"
+  name        = "tf-acc-test-secret-text"
   description = "Updated description"
   text        = "redacted-secret-value"
 }
@@ -51,6 +51,13 @@ resource "btpservice_cicd_credential_secret_text" "test" {
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_secret_text.test", "description", "Updated description"),
 					),
+				},
+				{
+					ResourceName:            "btpservice_cicd_credential_secret_text.test",
+					ImportState:             true,
+					ImportStateVerify:       true,
+					ImportStateId:           "tf-acc-test-secret-text",
+					ImportStateVerifyIgnore: []string{"text"},
 				},
 			},
 		})

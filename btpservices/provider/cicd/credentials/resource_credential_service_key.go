@@ -6,10 +6,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	cicdclient "github.com/SAP/terraform-provider-btp-services/internal/cicd/client"
 	cicdmodels "github.com/SAP/terraform-provider-btp-services/internal/cicd/models"
@@ -18,6 +21,8 @@ import (
 
 var _ resource.Resource = &serviceKeyResource{}
 var _ resource.ResourceWithConfigure = &serviceKeyResource{}
+var _ resource.ResourceWithImportState = &serviceKeyResource{}
+var _ resource.ResourceWithIdentity = &serviceKeyResource{}
 
 func NewServiceKeyResource() resource.Resource {
 	return &serviceKeyResource{}
@@ -25,6 +30,10 @@ func NewServiceKeyResource() resource.Resource {
 
 type serviceKeyResource struct {
 	cli *cicdclient.CicdClientFacade
+}
+
+type serviceKeyIdentityModel struct {
+	ID types.String `tfsdk:"id"`
 }
 
 func (r *serviceKeyResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -55,6 +64,16 @@ func (r *serviceKeyResource) Schema(_ context.Context, _ resource.SchemaRequest,
 				MarkdownDescription: "Service key for a SAP BTP service instance. Must be valid JSON. Not returned by the API on reads — stored only in Terraform state.",
 				Required:            true,
 				Sensitive:           true,
+			},
+		},
+	}
+}
+
+func (r *serviceKeyResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
 			},
 		},
 	}
@@ -103,6 +122,7 @@ func (r *serviceKeyResource) Create(ctx context.Context, req resource.CreateRequ
 	state := serviceKeyResourceValueFrom(*result)
 	state.Key = plan.Key
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, serviceKeyIdentityModel{ID: state.ID})...)
 }
 
 func (r *serviceKeyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -125,6 +145,7 @@ func (r *serviceKeyResource) Read(ctx context.Context, req resource.ReadRequest,
 	updated := serviceKeyResourceValueFrom(*result)
 	updated.Key = state.Key
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, serviceKeyIdentityModel{ID: updated.ID})...)
 }
 
 func (r *serviceKeyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -154,6 +175,7 @@ func (r *serviceKeyResource) Update(ctx context.Context, req resource.UpdateRequ
 	updated := serviceKeyResourceValueFrom(*result)
 	updated.Key = plan.Key
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, serviceKeyIdentityModel{ID: updated.ID})...)
 }
 
 func (r *serviceKeyResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -168,4 +190,12 @@ func (r *serviceKeyResource) Delete(ctx context.Context, req resource.DeleteRequ
 			resp.Diagnostics.AddError("Error Deleting Credential", err.Error())
 		}
 	}
+}
+
+func (r *serviceKeyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.ID != "" {
+		resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+		return
+	}
+	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("id"), path.Root("id"), req, resp)
 }

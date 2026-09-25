@@ -52,6 +52,13 @@ resource "btpservice_cicd_credential_container_registry" "test" {
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_container_registry.test", "description", "Updated description"),
 					),
 				},
+				{
+					ResourceName:            "btpservice_cicd_credential_container_registry.test",
+					ImportState:             true,
+					ImportStateVerify:       true,
+					ImportStateId:           "tf-test-container-registry",
+					ImportStateVerifyIgnore: []string{"content"},
+				},
 			},
 		})
 	})

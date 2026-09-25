@@ -28,7 +28,7 @@ func TestResourceCicdCredentialBasicAuthCustomIdP(t *testing.T) {
 				{
 					Config: utils.HCLProviderBlock(creds) + `
 resource "btpservice_cicd_credential_basic_auth_custom_idp" "test" {
-  name        = "tf-test-basic-auth-cidp"
+  name        = "tf-acc-test-basic-auth-cidp"
   description = "Terraform acceptance test credential"
   username    = "test-user"
   password    = "test-password"
@@ -37,7 +37,7 @@ resource "btpservice_cicd_credential_basic_auth_custom_idp" "test" {
 `,
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttrSet("btpservice_cicd_credential_basic_auth_custom_idp.test", "id"),
-						resource.TestCheckResourceAttr("btpservice_cicd_credential_basic_auth_custom_idp.test", "name", "tf-test-basic-auth-cidp"),
+						resource.TestCheckResourceAttr("btpservice_cicd_credential_basic_auth_custom_idp.test", "name", "tf-acc-test-basic-auth-cidp"),
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_basic_auth_custom_idp.test", "description", "Terraform acceptance test credential"),
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_basic_auth_custom_idp.test", "username", "test-user"),
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_basic_auth_custom_idp.test", "origin", "custom-platform"),
@@ -47,7 +47,7 @@ resource "btpservice_cicd_credential_basic_auth_custom_idp" "test" {
 					// Step 2: Update description and username
 					Config: utils.HCLProviderBlock(creds) + `
 resource "btpservice_cicd_credential_basic_auth_custom_idp" "test" {
-  name        = "tf-test-basic-auth-cidp"
+  name        = "tf-acc-test-basic-auth-cidp"
   description = "Updated description"
   username    = "updated-user"
   password    = "test-password"
@@ -58,6 +58,13 @@ resource "btpservice_cicd_credential_basic_auth_custom_idp" "test" {
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_basic_auth_custom_idp.test", "description", "Updated description"),
 						resource.TestCheckResourceAttr("btpservice_cicd_credential_basic_auth_custom_idp.test", "username", "updated-user"),
 					),
+				},
+				{
+					ResourceName:            "btpservice_cicd_credential_basic_auth_custom_idp.test",
+					ImportState:             true,
+					ImportStateVerify:       true,
+					ImportStateId:           "tf-acc-test-basic-auth-cidp",
+					ImportStateVerifyIgnore: []string{"password"},
 				},
 			},
 		})
