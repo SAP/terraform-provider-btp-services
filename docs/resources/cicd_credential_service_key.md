@@ -24,7 +24,9 @@ resource "btpservice_cicd_credential_service_key" "example" {
 
 ### Required
 
-- `key` (String, Sensitive) Service key for a SAP BTP service instance. Must be valid JSON. Not returned by the API on reads — stored only in Terraform state.
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
+- `key` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Service key for a SAP BTP service instance. Must be valid JSON. Write-only; never stored in Terraform state.
 - `name` (String) Credential name Must contain only lowercase letters, numbers, hyphens, and dots.
 
 ### Optional

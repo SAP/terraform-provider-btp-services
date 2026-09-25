@@ -61,9 +61,9 @@ func (r *kubernetesConfigResource) Schema(_ context.Context, _ resource.SchemaRe
 				Computed:            true,
 			},
 			"content": schema.StringAttribute{
-				MarkdownDescription: "YAML-formatted kubeconfig content. Not returned by the API on reads — stored only in Terraform state.",
+				MarkdownDescription: "YAML-formatted kubeconfig content. Write-only; never stored in Terraform state.",
 				Required:            true,
-				Sensitive:           true,
+				WriteOnly:           true,
 			},
 		},
 	}
@@ -109,6 +109,14 @@ func (r *kubernetesConfigResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
+	// Write-only attributes are null in the plan; read from config.
+	var config kubernetesConfigResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plan.Content = config.Content
+
 	if err := r.cli.Credentials.Create(ctx, plan.toCreateRequest()); err != nil {
 		resp.Diagnostics.AddError("Error Creating Credential", err.Error())
 		return
@@ -121,7 +129,6 @@ func (r *kubernetesConfigResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	state := kubernetesConfigResourceValueFrom(*result)
-	state.Content = plan.Content
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, kubernetesConfigIdentityModel{ID: state.ID})...)
 }
@@ -144,7 +151,6 @@ func (r *kubernetesConfigResource) Read(ctx context.Context, req resource.ReadRe
 	}
 
 	updated := kubernetesConfigResourceValueFrom(*result)
-	updated.Content = state.Content
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, kubernetesConfigIdentityModel{ID: updated.ID})...)
 }
@@ -162,6 +168,14 @@ func (r *kubernetesConfigResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
+	// Write-only attributes are null in the plan; read from config.
+	var config kubernetesConfigResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plan.Content = config.Content
+
 	if err := r.cli.Credentials.Patch(ctx, state.ID.ValueString(), plan.toPatchRequest()); err != nil {
 		resp.Diagnostics.AddError("Error Updating Credential", err.Error())
 		return
@@ -174,7 +188,6 @@ func (r *kubernetesConfigResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	updated := kubernetesConfigResourceValueFrom(*result)
-	updated.Content = plan.Content
 	resp.Diagnostics.Append(resp.State.Set(ctx, updated)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, kubernetesConfigIdentityModel{ID: updated.ID})...)
 }
