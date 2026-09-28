@@ -62,22 +62,28 @@ func (p *btpServicesProvider) Schema(_ context.Context, _ provider.SchemaRequest
 		MarkdownDescription: "Manages resources across SAP Business Technology Platform services.",
 		Blocks: map[string]schema.Block{
 			"cicd": schema.SingleNestedBlock{
-				MarkdownDescription: "Configuration for the SAP BTP CI/CD service.",
+				MarkdownDescription: "Configuration for the SAP BTP CI/CD service.\n\n" +
+					"All credentials come from a **service key** created on a CI/CD service instance in your BTP subaccount.\n" +
+					"Before configuring this block you need:\n\n" +
+					"1. A subaccount entitlement for **Continuous Integration & Delivery**.\n" +
+					"2. A service instance of that service (plan `default` or `free`).\n" +
+					"3. A service key on that instance — the JSON it returns maps to the attributes below.\n\n" +
+					"See the Quick Start Guide for step-by-step instructions.",
 				Attributes: map[string]schema.Attribute{
 					"endpoint": schema.StringAttribute{
-						MarkdownDescription: "CI/CD service base URL. Env: `BTP_CICD_ENDPOINT`.",
+						MarkdownDescription: "The CI/CD service base URL. Maps to the `api` field in the service key JSON. Env: `BTP_CICD_ENDPOINT`.",
 						Optional:            true,
 					},
 					"token_url": schema.StringAttribute{
-						MarkdownDescription: "OAuth2 token endpoint. Env: `BTP_CICD_TOKEN_URL`.",
+						MarkdownDescription: "The OAuth2 token endpoint. Construct by appending `/oauth/token` to the `uaa.url` field in the service key JSON. Env: `BTP_CICD_TOKEN_URL`.",
 						Optional:            true,
 					},
 					"client_id": schema.StringAttribute{
-						MarkdownDescription: "OAuth2 client ID. Env: `BTP_CICD_CLIENT_ID`.",
+						MarkdownDescription: "The OAuth2 client ID. Maps to the `uaa.clientid` field in the service key JSON. Env: `BTP_CICD_CLIENT_ID`.",
 						Optional:            true,
 					},
 					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "OAuth2 client secret. Env: `BTP_CICD_CLIENT_SECRET`.",
+						MarkdownDescription: "The OAuth2 client secret. Maps to the `uaa.clientsecret` field in the service key JSON. Env: `BTP_CICD_CLIENT_SECRET`.",
 						Optional:            true,
 						Sensitive:           true,
 					},
