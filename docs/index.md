@@ -36,29 +36,46 @@ provider "btpservice" {
 
 ### Optional
 
-- `cicd` (Block, Optional) Configuration for the SAP BTP CI/CD service. (see [below for nested schema](#nestedblock--cicd))
+- `cicd` (Block, Optional) Configuration for the SAP BTP CI/CD service.
+
+All credentials come from a **service key** created on a CI/CD service instance in your BTP subaccount.
+Before configuring this block you need:
+
+1. A subaccount entitlement for **Continuous Integration & Delivery**.
+2. A service instance of that service (plan `default` or `free`). You can create one with the [`btp_subaccount_service_instance`](https://registry.terraform.io/providers/SAP/btp/latest/docs/resources/subaccount_service_instance) resource from the SAP BTP Terraform Provider.
+3. A service key on that instance — the JSON it returns maps to the attributes below. You can create one with the [`btp_subaccount_service_binding`](https://registry.terraform.io/providers/SAP/btp/latest/docs/resources/subaccount_service_binding) resource.
+
+See the Quick Start Guide for step-by-step instructions. (see [below for nested schema](#nestedblock--cicd))
 
 <a id="nestedblock--cicd"></a>
 ### Nested Schema for `cicd`
 
 Optional:
 
-- `client_id` (String) OAuth2 client ID. Env: `BTP_CICD_CLIENT_ID`.
-- `client_secret` (String, Sensitive) OAuth2 client secret. Env: `BTP_CICD_CLIENT_SECRET`.
-- `endpoint` (String) CI/CD service base URL. Env: `BTP_CICD_ENDPOINT`.
+- `client_id` (String) The OAuth2 client ID. Maps to the `uaa.clientid` field in the service key JSON. Env: `BTP_CICD_CLIENT_ID`.
+- `client_secret` (String, Sensitive) The OAuth2 client secret. Maps to the `uaa.clientsecret` field in the service key JSON. Env: `BTP_CICD_CLIENT_SECRET`.
+- `endpoint` (String) The CI/CD service base URL. Maps to the `api` field in the service key JSON. Env: `BTP_CICD_ENDPOINT`.
 - `timeout` (Number) HTTP request timeout in seconds. Defaults to 60.
-- `token_url` (String) OAuth2 token endpoint. Env: `BTP_CICD_TOKEN_URL`.
+- `token_url` (String) The OAuth2 token endpoint. Construct by appending `/oauth/token` to the `uaa.url` field in the service key JSON. Env: `BTP_CICD_TOKEN_URL`.
 
 ## Authentication
 
 The provider uses OAuth2 client credentials flow to authenticate against SAP BTP services.
-Each service block (e.g. `cicd`) requires its own credentials:
+Each service block (e.g. `cicd`) requires its own credentials obtained from a **service key** on a BTP service instance.
 
-- `endpoint` — the service base URL
-- `token_url` — the OAuth2 token endpoint
-- `client_id` — OAuth2 client ID
-- `client_secret` — OAuth2 client secret
+For a step-by-step walkthrough — including how to entitle your subaccount, create the service instance, generate the service key, and map the JSON fields to provider attributes — see the [Quick Start Guide](../guides/QUICKSTART.md).
 
-All fields can also be supplied via environment variables (e.g. `BTP_CICD_ENDPOINT`, `BTP_CICD_TOKEN_URL`, `BTP_CICD_CLIENT_ID`, `BTP_CICD_CLIENT_SECRET`).
+### CI/CD service key field mapping
+
+When you view the service key in the BTP Cockpit or via the CLI you receive a JSON document. Map its fields to provider attributes as follows:
+
+| Provider attribute | Service key JSON field     | Notes                                     |
+|--------------------|----------------------------|-------------------------------------------|
+| `endpoint`         | `api`                      | Copy the value directly                   |
+| `client_id`        | `uaa.clientid`             | Copy the value directly                   |
+| `client_secret`    | `uaa.clientsecret`         | Copy the value directly                   |
+| `token_url`        | `uaa.url`                  | Append `/oauth/token` to the value        |
+
+All four attributes can also be supplied via environment variables (`BTP_CICD_ENDPOINT`, `BTP_CICD_TOKEN_URL`, `BTP_CICD_CLIENT_ID`, `BTP_CICD_CLIENT_SECRET`).
 
 We recommend sourcing credentials via environment variables rather than hardcoding them in Terraform configuration files.
