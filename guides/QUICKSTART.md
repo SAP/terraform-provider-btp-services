@@ -67,11 +67,13 @@ The CI/CD service offers both a web UI and an API. The Terraform provider only u
 
 This step creates the API-accessible instance that backs the service key.
 
+**Option A — BTP Cockpit**
+
 1. In your subaccount, go to **Services → Service Marketplace → Continuous Integration & Delivery**.
 2. Click **Create**.
 3. Choose the **`default`** (or `free`) plan, give the instance a name (e.g. `my-cicd-instance`), and click **Create**.
 
-Alternatively, use the BTP CLI:
+**Option B — BTP CLI**
 
 ```bash
 btp create services/instance \
@@ -81,20 +83,40 @@ btp create services/instance \
   --subaccount <subaccount-id>
 ```
 
-Or the Cloud Foundry CLI (if your subaccount has a CF environment):
+**Option C — Cloud Foundry CLI** *(if your subaccount has a CF environment)*
 
 ```bash
 cf create-service continuous-integration-and-delivery default my-cicd-instance
 ```
 
+**Option D — SAP BTP Terraform Provider**
+
+Use the [`btp_subaccount_service_plan`](https://registry.terraform.io/providers/SAP/btp/latest/docs/data-sources/subaccount_service_plan) data source and [`btp_subaccount_service_instance`](https://registry.terraform.io/providers/SAP/btp/latest/docs/resources/subaccount_service_instance) resource from the [SAP BTP Terraform Provider](https://registry.terraform.io/providers/SAP/btp/latest/docs):
+
+```terraform
+data "btp_subaccount_service_plan" "cicd" {
+  subaccount_id = "<subaccount-id>"
+  offering_name = "continuous-integration-and-delivery"
+  name          = "default"
+}
+
+resource "btp_subaccount_service_instance" "cicd" {
+  subaccount_id  = "<subaccount-id>"
+  serviceplan_id = data.btp_subaccount_service_plan.cicd.id
+  name           = "my-cicd-instance"
+}
+```
+
 #### Step 4 — Create a service key
 
-A service key generates the credential JSON you will use in the next step.
+A service key (or service binding) generates the credential JSON you will use in the next step.
+
+**Option A — BTP Cockpit**
 
 1. Open the service instance you created in Step 3 (**Services → Instances → my-cicd-instance**).
 2. Click **Create Service Key** (or **Service Keys → Create**), give it a name (e.g. `terraform-key`), and confirm.
 
-With the BTP CLI:
+**Option B — BTP CLI**
 
 ```bash
 btp create services/key \
@@ -103,10 +125,35 @@ btp create services/key \
   --subaccount <subaccount-id>
 ```
 
-With the CF CLI:
+**Option C — Cloud Foundry CLI**
 
 ```bash
 cf create-service-key my-cicd-instance terraform-key
+```
+
+**Option D — SAP BTP Terraform Provider**
+
+Use the [`btp_subaccount_service_binding`](https://registry.terraform.io/providers/SAP/btp/latest/docs/resources/subaccount_service_binding) resource. The credential JSON is exposed in the `credentials` attribute and can be decoded directly to configure this provider:
+
+```terraform
+resource "btp_subaccount_service_binding" "cicd" {
+  subaccount_id       = "<subaccount-id>"
+  service_instance_id = btp_subaccount_service_instance.cicd.id
+  name                = "terraform-key"
+}
+
+locals {
+  cicd_creds = jsondecode(btp_subaccount_service_binding.cicd.credentials)
+}
+
+provider "btpservice" {
+  cicd {
+    endpoint      = local.cicd_creds.api
+    client_id     = local.cicd_creds.uaa.clientid
+    client_secret = local.cicd_creds.uaa.clientsecret
+    token_url     = "${local.cicd_creds.uaa.url}/oauth/token"
+  }
+}
 ```
 
 #### Step 5 — Read the service key JSON

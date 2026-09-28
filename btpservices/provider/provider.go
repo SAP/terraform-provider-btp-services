@@ -66,8 +66,10 @@ func (p *btpServicesProvider) Schema(_ context.Context, _ provider.SchemaRequest
 					"All credentials come from a **service key** created on a CI/CD service instance in your BTP subaccount.\n" +
 					"Before configuring this block you need:\n\n" +
 					"1. A subaccount entitlement for **Continuous Integration & Delivery**.\n" +
-					"2. A service instance of that service (plan `default` or `free`).\n" +
-					"3. A service key on that instance — the JSON it returns maps to the attributes below.\n\n" +
+					"2. A service instance of that service (plan `default` or `free`). " +
+					"You can create one with the [`btp_subaccount_service_instance`](https://registry.terraform.io/providers/SAP/btp/latest/docs/resources/subaccount_service_instance) resource from the SAP BTP Terraform Provider.\n" +
+					"3. A service key on that instance — the JSON it returns maps to the attributes below. " +
+					"You can create one with the [`btp_subaccount_service_binding`](https://registry.terraform.io/providers/SAP/btp/latest/docs/resources/subaccount_service_binding) resource.\n\n" +
 					"See the Quick Start Guide for step-by-step instructions.",
 				Attributes: map[string]schema.Attribute{
 					"endpoint": schema.StringAttribute{

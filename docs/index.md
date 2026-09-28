@@ -42,8 +42,8 @@ All credentials come from a **service key** created on a CI/CD service instance 
 Before configuring this block you need:
 
 1. A subaccount entitlement for **Continuous Integration & Delivery**.
-2. A service instance of that service (plan `default` or `free`).
-3. A service key on that instance — the JSON it returns maps to the attributes below.
+2. A service instance of that service (plan `default` or `free`). You can create one with the [`btp_subaccount_service_instance`](https://registry.terraform.io/providers/SAP/btp/latest/docs/resources/subaccount_service_instance) resource from the SAP BTP Terraform Provider.
+3. A service key on that instance — the JSON it returns maps to the attributes below. You can create one with the [`btp_subaccount_service_binding`](https://registry.terraform.io/providers/SAP/btp/latest/docs/resources/subaccount_service_binding) resource.
 
 See the Quick Start Guide for step-by-step instructions. (see [below for nested schema](#nestedblock--cicd))
 
