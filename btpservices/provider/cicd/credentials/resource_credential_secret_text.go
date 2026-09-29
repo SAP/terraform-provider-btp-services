@@ -23,6 +23,7 @@ var _ resource.Resource = &secretTextResource{}
 var _ resource.ResourceWithConfigure = &secretTextResource{}
 var _ resource.ResourceWithImportState = &secretTextResource{}
 var _ resource.ResourceWithIdentity = &secretTextResource{}
+var _ resource.ResourceWithUpgradeState = &secretTextResource{}
 
 func NewSecretTextResource() resource.Resource {
 	return &secretTextResource{}
@@ -42,6 +43,7 @@ func (r *secretTextResource) Metadata(_ context.Context, req resource.MetadataRe
 
 func (r *secretTextResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a Secret Text credential in the SAP BTP CI/CD service.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -202,6 +204,32 @@ func (r *secretTextResource) Delete(ctx context.Context, req resource.DeleteRequ
 		if !cicdmodels.IsNotFound(err) {
 			resp.Diagnostics.AddError("Error Deleting Credential", err.Error())
 		}
+	}
+}
+
+func (r *secretTextResource) UpgradeState(_ context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		// v0: text was Sensitive and stored in state.
+		// v1: text is WriteOnly and must be null in state.
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: map[string]schema.Attribute{
+					"id":          schema.StringAttribute{Computed: true},
+					"name":        schema.StringAttribute{Required: true},
+					"description": schema.StringAttribute{Optional: true, Computed: true},
+					"text":        schema.StringAttribute{Required: true, Sensitive: true},
+				},
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var v0 secretTextResourceModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &v0)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				v0.Text = types.StringNull()
+				resp.Diagnostics.Append(resp.State.Set(ctx, v0)...)
+			},
+		},
 	}
 }
 

@@ -23,6 +23,7 @@ var _ resource.Resource = &webhookSecretResource{}
 var _ resource.ResourceWithConfigure = &webhookSecretResource{}
 var _ resource.ResourceWithImportState = &webhookSecretResource{}
 var _ resource.ResourceWithIdentity = &webhookSecretResource{}
+var _ resource.ResourceWithUpgradeState = &webhookSecretResource{}
 
 func NewWebhookSecretResource() resource.Resource {
 	return &webhookSecretResource{}
@@ -42,6 +43,7 @@ func (r *webhookSecretResource) Metadata(_ context.Context, req resource.Metadat
 
 func (r *webhookSecretResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a Webhook Secret credential in the SAP BTP CI/CD service.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -203,6 +205,32 @@ func (r *webhookSecretResource) Delete(ctx context.Context, req resource.DeleteR
 		if !cicdmodels.IsNotFound(err) {
 			resp.Diagnostics.AddError("Error Deleting Credential", err.Error())
 		}
+	}
+}
+
+func (r *webhookSecretResource) UpgradeState(_ context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		// v0: token was Sensitive and stored in state.
+		// v1: token is WriteOnly and must be null in state.
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: map[string]schema.Attribute{
+					"id":          schema.StringAttribute{Computed: true},
+					"name":        schema.StringAttribute{Required: true},
+					"description": schema.StringAttribute{Optional: true, Computed: true},
+					"token":       schema.StringAttribute{Required: true, Sensitive: true},
+				},
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var v0 webhookSecretResourceModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &v0)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				v0.Token = types.StringNull()
+				resp.Diagnostics.Append(resp.State.Set(ctx, v0)...)
+			},
+		},
 	}
 }
 
