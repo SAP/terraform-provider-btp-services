@@ -23,6 +23,7 @@ var _ resource.Resource = &containerRegistryResource{}
 var _ resource.ResourceWithConfigure = &containerRegistryResource{}
 var _ resource.ResourceWithImportState = &containerRegistryResource{}
 var _ resource.ResourceWithIdentity = &containerRegistryResource{}
+var _ resource.ResourceWithUpgradeState = &containerRegistryResource{}
 
 func NewContainerRegistryResource() resource.Resource {
 	return &containerRegistryResource{}
@@ -42,6 +43,7 @@ func (r *containerRegistryResource) Metadata(_ context.Context, req resource.Met
 
 func (r *containerRegistryResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Manages a Container Registry configuration credential in the SAP BTP CI/CD service.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -203,6 +205,32 @@ func (r *containerRegistryResource) Delete(ctx context.Context, req resource.Del
 		if !cicdmodels.IsNotFound(err) {
 			resp.Diagnostics.AddError("Error Deleting Credential", err.Error())
 		}
+	}
+}
+
+func (r *containerRegistryResource) UpgradeState(_ context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		// v0: content was Sensitive and stored in state.
+		// v1: content is WriteOnly and must be null in state.
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: map[string]schema.Attribute{
+					"id":          schema.StringAttribute{Computed: true},
+					"name":        schema.StringAttribute{Required: true},
+					"description": schema.StringAttribute{Optional: true, Computed: true},
+					"content":     schema.StringAttribute{Required: true, Sensitive: true},
+				},
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var v0 containerRegistryResourceModel
+				resp.Diagnostics.Append(req.State.Get(ctx, &v0)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				v0.Content = types.StringNull()
+				resp.Diagnostics.Append(resp.State.Set(ctx, v0)...)
+			},
+		},
 	}
 }
 
