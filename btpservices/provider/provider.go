@@ -127,7 +127,12 @@ func (p *btpServicesProvider) Configure(ctx context.Context, req provider.Config
 		if !data.Cicd.Timeout.IsNull() && !data.Cicd.Timeout.IsUnknown() {
 			cfg.Timeout = time.Duration(data.Cicd.Timeout.ValueInt64()) * time.Second
 		}
-		clients.Cicd = cicdclient.NewCicdClientFacade(cfg)
+		facade, err := cicdclient.NewCicdClientFacade(cfg)
+		if err != nil {
+			resp.Diagnostics.AddError("Invalid CI/CD Configuration", err.Error())
+			return
+		}
+		clients.Cicd = facade
 	}
 
 	resp.ResourceData = clients

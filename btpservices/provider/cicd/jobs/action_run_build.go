@@ -153,7 +153,8 @@ func (a *runBuildAction) Invoke(ctx context.Context, req action.InvokeRequest, r
 			)
 			return
 		}
-		resp.Diagnostics.AddError("Error Triggering Build", err.Error())
+		resp.Diagnostics.AddError("Error Triggering Build",
+			"The CI/CD API returned an error. Check the job name and parameter values, then retry.")
 		return
 	}
 }

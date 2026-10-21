@@ -3,6 +3,7 @@
 package tfutils
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"os"
@@ -103,6 +104,10 @@ func defaultRequestMatcher(t *testing.T, creds TestCredentials) func(r *http.Req
 // values from cassette bodies and request metadata before they are written to disk.
 // creds contains the live values so that hostnames can be replaced regardless of
 // which environment was used during recording.
+//
+// Credential body redaction uses a structural deny-all approach: any value nested
+// under a known credential wrapper key is replaced, and any field whose name matches
+// a secret-name pattern is also replaced — regardless of JSON nesting depth.
 func hookRedactSensitiveData(creds TestCredentials) func(i *cassette.Interaction) error {
 	// Extract hostnames from live endpoint and token_url so they are redacted
 	// even if they change between environments.
@@ -132,19 +137,114 @@ func hookRedactSensitiveData(creds TestCredentials) func(i *cassette.Interaction
 		redactJSONField(&i.Response.Body, "scope", "redacted-scope")
 		redactJSONField(&i.Response.Body, "jti", "redacted-jti")
 
-		// Credential request/response body
-		redactJSONField(&i.Request.Body, "password", "redacted-password")
-		redactJSONField(&i.Response.Body, "password", "redacted-password")
+		// Credential bodies: structural deny-all redaction.
+		// Redact all string values nested under known credential wrapper objects,
+		// and any field whose name matches a secret pattern at any depth.
+		redactCredentialBodies(&i.Request.Body)
+		redactCredentialBodies(&i.Response.Body)
 
 		// API response body: redact _links
 		redactJSONLinks(&i.Response.Body)
 
 		// Response headers
 		redactResponseHeader(i.Response.Headers, "X-Vcap-Request-Id", "redacted-vcap-request-id")
-		redactResponseHeader(i.Response.Headers, "Location", "redacted-location")
+		// Location header: replace only the hostname so the path (including resource ID) is preserved.
+		redactLocationHeader(i.Response.Headers, apiHost, "redacted-api-host")
 
 		return nil
 	}
+}
+
+// credentialWrapperKeys are top-level JSON keys whose entire nested object contains
+// credential secrets. All string leaf values beneath them are redacted.
+var credentialWrapperKeys = []string{
+	"basic",
+	"webhookToken",
+	"serviceKey",
+	"secretText",
+	"kubernetesConfiguration",
+	"containerRegistryConfiguration",
+}
+
+// secretFieldPatterns are field name substrings that indicate a secret value
+// at any JSON nesting depth.
+var secretFieldPatterns = []string{
+	"password", "token", "secret", "key", "credential", "kubeconfig",
+}
+
+// redactCredentialBodies applies structural deny-all redaction to a JSON body string.
+// It unmarshals the JSON, walks the object tree, and redacts:
+//  1. All string values inside known credential wrapper objects.
+//  2. All string values whose field name matches a secret pattern.
+//
+// If the body is not valid JSON it is left unchanged.
+func redactCredentialBodies(body *string) {
+	if body == nil || *body == "" {
+		return
+	}
+	var obj any
+	if err := json.Unmarshal([]byte(*body), &obj); err != nil {
+		return // not JSON — leave as-is
+	}
+	redactJSONValue(&obj, false)
+	b, err := json.Marshal(obj)
+	if err != nil {
+		return
+	}
+	*body = string(b)
+}
+
+// redactJSONValue walks a decoded JSON value and redacts sensitive string fields.
+// inWrapper is true when we are already inside a known credential wrapper object —
+// in that case every string leaf value is replaced.
+func redactJSONValue(v *any, inWrapper bool) {
+	switch val := (*v).(type) {
+	case map[string]any:
+		for k, child := range val {
+			childInWrapper := inWrapper || isCredentialWrapper(k)
+			if childInWrapper {
+				// Replace every string leaf inside the wrapper.
+				redactJSONValue(&child, true)
+			} else if isSecretField(k) {
+				// Replace this field's string value regardless of depth.
+				if _, ok := child.(string); ok {
+					child = "redacted"
+				} else {
+					redactJSONValue(&child, false)
+				}
+			} else {
+				redactJSONValue(&child, false)
+			}
+			val[k] = child
+		}
+	case []any:
+		for i := range val {
+			redactJSONValue(&val[i], inWrapper)
+		}
+	case string:
+		if inWrapper {
+			*v = "redacted"
+		}
+	}
+}
+
+func isCredentialWrapper(key string) bool {
+	for _, k := range credentialWrapperKeys {
+		if k == key {
+			return true
+		}
+	}
+	return false
+}
+
+func isSecretField(key string) bool {
+	lower := strings.ToLower(key)
+	for _, pat := range secretFieldPatterns {
+		if strings.Contains(lower, pat) {
+			return true
+		}
+	}
+	return false
 }
 
 // hookRedactAuthHeaders removes Authorization and session headers from saved cassettes.
@@ -171,6 +271,22 @@ func redactResponseHeader(headers map[string][]string, name, replacement string)
 	for key := range headers {
 		if strings.EqualFold(key, name) {
 			headers[key] = []string{replacement}
+		}
+	}
+}
+
+// redactLocationHeader replaces the hostname in a Location response header with
+// a redacted placeholder, preserving the path so resource IDs remain intact.
+func redactLocationHeader(headers map[string][]string, realHost, redactedHost string) {
+	if realHost == "" {
+		return
+	}
+	for key, vals := range headers {
+		if strings.EqualFold(key, "location") {
+			for i, v := range vals {
+				vals[i] = strings.ReplaceAll(v, realHost, redactedHost)
+			}
+			headers[key] = vals
 		}
 	}
 }

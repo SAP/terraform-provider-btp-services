@@ -2,7 +2,11 @@
 
 package cicdclient
 
-import "time"
+import (
+	"fmt"
+	"net/url"
+	"time"
+)
 
 // CicdClientConfig holds the configuration required to build a CicdClientFacade.
 // Values are resolved from HCL provider block fields or environment variables
@@ -32,3 +36,25 @@ type CicdClientConfig struct {
 
 // DefaultTimeout is used when CicdClientConfig.Timeout is not set.
 const DefaultTimeout = 60 * time.Second
+
+// Validate returns an error if Endpoint or TokenURL are missing or do not use https.
+func (c CicdClientConfig) Validate() error {
+	if err := requireHTTPS("endpoint", c.Endpoint); err != nil {
+		return err
+	}
+	return requireHTTPS("token_url", c.TokenURL)
+}
+
+func requireHTTPS(field, rawURL string) error {
+	if rawURL == "" {
+		return fmt.Errorf("%s must not be empty", field)
+	}
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return fmt.Errorf("%s is not a valid URL: %w", field, err)
+	}
+	if u.Scheme != "https" {
+		return fmt.Errorf("%s must use https (got %q)", field, u.Scheme)
+	}
+	return nil
+}

@@ -89,6 +89,10 @@ func (e *cicdAPIError) Error() string {
 	return sb.String()
 }
 
+// maxErrorBodyBytes caps how many bytes are read from an error response body to
+// prevent memory exhaustion from oversized or streaming API error payloads.
+const maxErrorBodyBytes = 1 * 1024 * 1024 // 1 MiB
+
 // CheckAPIResponse inspects an HTTP response and returns a typed error when
 // the status code indicates failure. Call this after every HTTP response.
 func CheckAPIResponse(resp *http.Response, reference string) error {
@@ -96,7 +100,7 @@ func CheckAPIResponse(resp *http.Response, reference string) error {
 		return nil
 	}
 
-	body, _ := io.ReadAll(resp.Body)
+	body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrorBodyBytes))
 
 	var parsed apiErrorBody
 	_ = json.Unmarshal(body, &parsed)

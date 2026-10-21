@@ -1,4 +1,4 @@
-//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest generate --rendered-provider-name "SAP BTP Services" --provider-name "btpservice"
+//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@v0.20.0 generate --rendered-provider-name "SAP BTP Services" --provider-name "btpservice"
 package main
 
 import (
