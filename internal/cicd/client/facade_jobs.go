@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"strings"
 
 	cicdmodels "github.com/SAP/terraform-provider-btp-services/internal/cicd/models"
 )
@@ -85,8 +86,9 @@ func (f *jobsFacade) ListByRepository(ctx context.Context, repositoryReference s
 }
 
 // CreateTrigger creates a new trigger under a job and returns the created trigger.
-// POST /v2/jobs/{job}/triggers returns 201 with no body and no Location header (per API spec),
-// so we list before and after to identify the newly created trigger by ID diff.
+// The API returns 201 with a Location header containing the new trigger URL.
+// The trigger ID is extracted from the Location header path segment.
+// Falls back to a before/after list diff if the Location header is absent.
 func (f *jobsFacade) CreateTrigger(ctx context.Context, jobRef string, req cicdmodels.CreateTriggerRequest) (*cicdmodels.Trigger, error) {
 	before, err := f.ListTriggers(ctx, jobRef)
 	if err != nil {
@@ -97,10 +99,24 @@ func (f *jobsFacade) CreateTrigger(ctx context.Context, jobRef string, req cicdm
 		existingIDs[t.ID] = struct{}{}
 	}
 
-	if err := f.hc.doPost(ctx, fmt.Sprintf("/v2/jobs/%s/triggers", url.PathEscape(jobRef)), req); err != nil {
+	location, err := f.hc.doPostGetLocation(ctx, fmt.Sprintf("/v2/jobs/%s/triggers", url.PathEscape(jobRef)), req)
+	if err != nil {
 		return nil, err
 	}
 
+	if location != "" {
+		// Extract the trigger ID from the last path segment of the Location URL.
+		parsed, err := url.Parse(location)
+		if err == nil {
+			segments := strings.Split(strings.TrimRight(parsed.Path, "/"), "/")
+			triggerID := segments[len(segments)-1]
+			if triggerID != "" {
+				return f.GetTrigger(ctx, jobRef, triggerID)
+			}
+		}
+	}
+
+	// Fallback: location header absent or unparseable — use before/after list diff.
 	after, err := f.ListTriggers(ctx, jobRef)
 	if err != nil {
 		return nil, fmt.Errorf("list triggers after create: %w", err)

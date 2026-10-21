@@ -27,7 +27,7 @@ func (f *repositoriesFacade) Create(ctx context.Context, req cicdmodels.CreateRe
 // Get sends GET /v2/repositories/{reference} where reference is the repository name or ID.
 func (f *repositoriesFacade) Get(ctx context.Context, reference string) (*cicdmodels.Repository, error) {
 	var result cicdmodels.Repository
-	err := f.hc.doGet(ctx, fmt.Sprintf("/v2/repositories/%s", reference), &result)
+	err := f.hc.doGet(ctx, fmt.Sprintf("/v2/repositories/%s", url.PathEscape(reference)), &result)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (f *repositoriesFacade) Update(ctx context.Context, req cicdmodels.UpdateRe
 // Delete sends DELETE /v2/repositories/{reference}.
 // The API returns 204 with no body.
 func (f *repositoriesFacade) Delete(ctx context.Context, reference string) error {
-	return f.hc.doDelete(ctx, fmt.Sprintf("/v2/repositories/%s", reference))
+	return f.hc.doDelete(ctx, fmt.Sprintf("/v2/repositories/%s", url.PathEscape(reference)))
 }
 
 // List sends GET /v2/repositories and returns all repositories in the subaccount.

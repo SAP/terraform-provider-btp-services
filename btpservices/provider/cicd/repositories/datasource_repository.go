@@ -57,8 +57,9 @@ func (d *repositoryDataSource) Schema(_ context.Context, _ datasource.SchemaRequ
 				},
 			},
 			"clone_url": schema.StringAttribute{
-				MarkdownDescription: "URL used to clone the repository.",
+				MarkdownDescription: "URL used to clone the repository. Marked sensitive as it may contain embedded credentials.",
 				Computed:            true,
+				Sensitive:           true,
 			},
 			"clone_credential_id": schema.StringAttribute{
 				MarkdownDescription: "ID of the credential used to authenticate against the Git server when cloning.",

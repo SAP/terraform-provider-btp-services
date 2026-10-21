@@ -161,6 +161,38 @@ func (c *cicdHTTPClient) doPost(ctx context.Context, path string, body any) erro
 	return c.doWithBody(ctx, http.MethodPost, path, body, nil)
 }
 
+// doPostGetLocation performs a POST and returns the Location response header value.
+// Used for APIs that return 201 with a Location header instead of a response body.
+func (c *cicdHTTPClient) doPostGetLocation(ctx context.Context, path string, body any) (string, error) {
+	token, err := c.bearerToken(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	b, err := json.Marshal(body)
+	if err != nil {
+		return "", fmt.Errorf("marshal request: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+path, bytes.NewReader(b))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", c.userAgent)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = resp.Body.Close() }()
+	if err := cicdmodels.CheckAPIResponse(resp, path); err != nil {
+		return "", err
+	}
+	return resp.Header.Get("Location"), nil
+}
+
 func (c *cicdHTTPClient) doPut(ctx context.Context, path string, body any) error {
 	return c.doWithBody(ctx, http.MethodPut, path, body, nil)
 }
@@ -263,10 +295,18 @@ func (t *retryTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		if err != nil || !isRetryable(resp) {
 			return resp, err
 		}
+		// Drain and close the retryable response body to free the connection
+		// before sleeping and re-issuing the request.
+		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, maxRetryDrainBytes))
+		_ = resp.Body.Close()
 		time.Sleep(t.retryDelay * time.Duration(attempt+1))
 	}
 	return resp, err
 }
+
+// maxRetryDrainBytes caps how many bytes we drain from a retryable response body
+// to avoid excessive memory use when the server sends a large error payload.
+const maxRetryDrainBytes = 4 * 1024
 
 func isRetryable(resp *http.Response) bool {
 	if resp == nil {

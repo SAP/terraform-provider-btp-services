@@ -27,7 +27,7 @@ func (f *credentialsFacade) Create(ctx context.Context, req cicdmodels.CreateCre
 // Get sends GET /v2/credentials/{reference} where reference is the credential name or ID.
 func (f *credentialsFacade) Get(ctx context.Context, reference string) (*cicdmodels.Credential, error) {
 	var result cicdmodels.Credential
-	err := f.hc.doGet(ctx, fmt.Sprintf("/v2/credentials/%s", reference), &result)
+	err := f.hc.doGet(ctx, fmt.Sprintf("/v2/credentials/%s", url.PathEscape(reference)), &result)
 	if err != nil {
 		return nil, err
 	}
@@ -37,19 +37,19 @@ func (f *credentialsFacade) Get(ctx context.Context, reference string) (*cicdmod
 // Update sends PUT /v2/credentials/{reference}.
 // The API returns 204 with no body.
 func (f *credentialsFacade) Update(ctx context.Context, reference string, req cicdmodels.UpdateCredentialRequest) error {
-	return f.hc.doPut(ctx, fmt.Sprintf("/v2/credentials/%s", reference), req)
+	return f.hc.doPut(ctx, fmt.Sprintf("/v2/credentials/%s", url.PathEscape(reference)), req)
 }
 
 // Delete sends DELETE /v2/credentials/{reference}.
 // The API returns 204 with no body.
 func (f *credentialsFacade) Delete(ctx context.Context, reference string) error {
-	return f.hc.doDelete(ctx, fmt.Sprintf("/v2/credentials/%s", reference))
+	return f.hc.doDelete(ctx, fmt.Sprintf("/v2/credentials/%s", url.PathEscape(reference)))
 }
 
 // Patch sends PATCH /v2/credentials/{reference} with merge-patch semantics.
 // Only fields set in req are updated; omitted fields are left unchanged by the API.
 func (f *credentialsFacade) Patch(ctx context.Context, reference string, req cicdmodels.PatchCredentialRequest) error {
-	return f.hc.doPatch(ctx, fmt.Sprintf("/v2/credentials/%s", reference), req)
+	return f.hc.doPatch(ctx, fmt.Sprintf("/v2/credentials/%s", url.PathEscape(reference)), req)
 }
 
 // List sends GET /v2/credentials and returns all credentials in the subaccount.
@@ -69,7 +69,7 @@ func (f *credentialsFacade) List(ctx context.Context) ([]cicdmodels.Credential, 
 // jobs and repositories that reference the given credential.
 // usertype is optional — pass "" to return all usage types, or "job"/"repository" to filter.
 func (f *credentialsFacade) GetUsages(ctx context.Context, reference, usertype string) ([]cicdmodels.CredentialUsage, error) {
-	path := fmt.Sprintf("/v2/credentials/%s/usages", reference)
+	path := fmt.Sprintf("/v2/credentials/%s/usages", url.PathEscape(reference))
 	if usertype != "" {
 		q := url.Values{}
 		q.Set("usertype", usertype)

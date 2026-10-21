@@ -32,7 +32,7 @@ data "btpservice_cicd_repository" "by_id" {
 ### Read-Only
 
 - `clone_credential_id` (String) ID of the credential used to authenticate against the Git server when cloning.
-- `clone_url` (String) URL used to clone the repository.
+- `clone_url` (String, Sensitive) URL used to clone the repository. Marked sensitive as it may contain embedded credentials.
 - `cloud_connector_credential_id` (String) ID of the credential containing the Cloud Connector Location ID used for cloning.
 - `event_receiver` (Attributes) Event receiver configuration for triggering builds via webhooks. (see [below for nested schema](#nestedatt--event_receiver))
 
