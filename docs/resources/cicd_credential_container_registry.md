@@ -30,9 +30,7 @@ resource "btpservice_cicd_credential_container_registry" "example" {
 
 ### Required
 
-> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
-
-- `content` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) JSON-formatted container registry configuration. Write-only; never stored in Terraform state.
+- `content` (String) JSON-formatted container registry configuration. Write-only; never stored in Terraform state.
 - `name` (String) Credential name Must contain only lowercase letters, numbers, hyphens, and dots.
 
 ### Optional

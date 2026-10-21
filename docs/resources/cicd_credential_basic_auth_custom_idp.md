@@ -26,11 +26,9 @@ resource "btpservice_cicd_credential_basic_auth_custom_idp" "example" {
 
 ### Required
 
-> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
-
 - `name` (String) Credential name Must contain only lowercase letters, numbers, hyphens, and dots.
 - `origin` (String) The custom identity provider's origin key (e.g. "custom-platform").
-- `password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) Password for basic authentication. Write-only; never stored in Terraform state.
+- `password` (String) Password for basic authentication. Write-only; never stored in Terraform state.
 - `username` (String) Username for basic authentication.
 
 ### Optional

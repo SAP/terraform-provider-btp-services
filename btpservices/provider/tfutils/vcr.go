@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -229,12 +230,7 @@ func redactJSONValue(v *any, inWrapper bool) {
 }
 
 func isCredentialWrapper(key string) bool {
-	for _, k := range credentialWrapperKeys {
-		if k == key {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(credentialWrapperKeys, key)
 }
 
 func isSecretField(key string) bool {
