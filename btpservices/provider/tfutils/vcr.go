@@ -32,9 +32,29 @@ type TestCredentials map[string]string
 func SetupVCR(t *testing.T, cassetteName string, liveEnvVars map[string]string, redacted TestCredentials) (*recorder.Recorder, TestCredentials) {
 	t.Helper()
 
+	return SetupVCRWithOptions(t, cassetteName, liveEnvVars, redacted, VCROptions{})
+}
+
+// SetupVCRWithOptions extends SetupVCR with optional matching and redaction rules.
+// Callers remain responsible for stopping the recorder after test cleanup.
+func SetupVCRWithOptions(t *testing.T, cassetteName string, liveEnvVars map[string]string, redacted TestCredentials, options VCROptions) (*recorder.Recorder, TestCredentials) {
+	t.Helper()
+
 	mode := recorder.ModeRecordOnce
+	if options.RequireExplicitRecording {
+		mode = recorder.ModeReplayOnly
+	}
+
 	if force, _ := strconv.ParseBool(os.Getenv("TEST_FORCE_REC")); force {
 		mode = recorder.ModeRecordOnly
+	}
+
+	if mode == recorder.ModeReplayOnly {
+		if _, err := os.Stat(cassetteName + ".yaml"); os.IsNotExist(err) {
+			t.Skipf("Live recording required for %s: set TEST_FORCE_REC=true and the service's recording environment variables.", cassetteName)
+		} else if err != nil {
+			t.Fatal(err)
+		}
 	}
 
 	rec, err := recorder.NewWithOptions(&recorder.Options{
@@ -65,9 +85,7 @@ func SetupVCR(t *testing.T, cassetteName string, liveEnvVars map[string]string, 
 		t.Logf("Replaying cassette '%s'", cassetteName)
 	}
 
-	rec.SetMatcher(defaultRequestMatcher(t, creds))
-	rec.AddHook(hookRedactSensitiveData(creds), recorder.BeforeSaveHook)
-	rec.AddHook(hookRedactAuthHeaders(), recorder.BeforeSaveHook)
+	configureVCR(t, rec, creds, redacted, options)
 
 	return rec, creds
 }
@@ -183,16 +201,33 @@ func redactCredentialBodies(body *string) {
 	if body == nil || *body == "" {
 		return
 	}
-	var obj any
-	if err := json.Unmarshal([]byte(*body), &obj); err != nil {
-		return // not JSON — leave as-is
+
+	*body = transformJSONBody(*body, func(value *any) {
+		redactJSONValue(value, false)
+	})
+}
+
+// transformJSONBody preserves integer precision while normalizing JSON bodies.
+// Non-JSON bodies are returned unchanged.
+func transformJSONBody(body string, transform func(*any)) string {
+	if !json.Valid([]byte(body)) {
+		return body
 	}
-	redactJSONValue(&obj, false)
+
+	var obj any
+	decoder := json.NewDecoder(strings.NewReader(body))
+	decoder.UseNumber()
+	if err := decoder.Decode(&obj); err != nil {
+		return body
+	}
+
+	transform(&obj)
 	b, err := json.Marshal(obj)
 	if err != nil {
-		return
+		return body
 	}
-	*body = string(b)
+
+	return string(b)
 }
 
 // redactJSONValue walks a decoded JSON value and redacts sensitive string fields.
