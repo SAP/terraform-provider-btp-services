@@ -38,3 +38,10 @@ When you view the service key in the BTP Cockpit or via the CLI you receive a JS
 All four attributes can also be supplied via environment variables (`BTP_CICD_ENDPOINT`, `BTP_CICD_TOKEN_URL`, `BTP_CICD_CLIENT_ID`, `BTP_CICD_CLIENT_SECRET`).
 
 We recommend sourcing credentials via environment variables rather than hardcoding them in Terraform configuration files.
+
+### Cloud Transport Management
+
+Configure a `ctms` block to use CTMS nodes, routes, destination metadata, and UI links.
+CTMS requires Terraform 1.14 or later. The optional `timeout` defaults to 60 seconds
+per HTTP request. See the [CTMS guide](../guides/CTMS.md) for environment variables,
+ephemeral credentials, scoped imports, ownership semantics, and discovery.

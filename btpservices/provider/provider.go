@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -15,10 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/cicd"
-	cicdclient "github.com/SAP/terraform-provider-btp-services/internal/cicd/client"
+	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/ctms"
 	"github.com/SAP/terraform-provider-btp-services/internal/shared"
 	"github.com/SAP/terraform-provider-btp-services/internal/version"
 )
@@ -43,14 +41,7 @@ type btpServicesProvider struct {
 
 type providerModel struct {
 	Cicd *cicdProviderModel `tfsdk:"cicd"`
-}
-
-type cicdProviderModel struct {
-	Endpoint     types.String `tfsdk:"endpoint"`
-	TokenURL     types.String `tfsdk:"token_url"`
-	ClientID     types.String `tfsdk:"client_id"`
-	ClientSecret types.String `tfsdk:"client_secret"`
-	Timeout      types.Int64  `tfsdk:"timeout"`
+	Ctms *ctmsProviderModel `tfsdk:"ctms"`
 }
 
 func (p *btpServicesProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -61,40 +52,8 @@ func (p *btpServicesProvider) Schema(_ context.Context, _ provider.SchemaRequest
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages resources across SAP Business Technology Platform services.",
 		Blocks: map[string]schema.Block{
-			"cicd": schema.SingleNestedBlock{
-				MarkdownDescription: "Configuration for the SAP BTP CI/CD service.\n\n" +
-					"All credentials come from a **service key** created on a CI/CD service instance in your BTP subaccount.\n" +
-					"Before configuring this block you need:\n\n" +
-					"1. A subaccount entitlement for **Continuous Integration & Delivery**.\n" +
-					"2. A service instance of that service (plan `default` or `free`). " +
-					"You can create one with the [`btp_subaccount_service_instance`](https://registry.terraform.io/providers/SAP/btp/latest/docs/resources/subaccount_service_instance) resource from the SAP BTP Terraform Provider.\n" +
-					"3. A service key on that instance — the JSON it returns maps to the attributes below. " +
-					"You can create one with the [`btp_subaccount_service_binding`](https://registry.terraform.io/providers/SAP/btp/latest/docs/resources/subaccount_service_binding) resource.\n\n" +
-					"See the Quick Start Guide for step-by-step instructions.",
-				Attributes: map[string]schema.Attribute{
-					"endpoint": schema.StringAttribute{
-						MarkdownDescription: "The CI/CD service base URL. Maps to the `api` field in the service key JSON. Env: `BTP_CICD_ENDPOINT`.",
-						Optional:            true,
-					},
-					"token_url": schema.StringAttribute{
-						MarkdownDescription: "The OAuth2 token endpoint. Construct by appending `/oauth/token` to the `uaa.url` field in the service key JSON. Env: `BTP_CICD_TOKEN_URL`.",
-						Optional:            true,
-					},
-					"client_id": schema.StringAttribute{
-						MarkdownDescription: "The OAuth2 client ID. Maps to the `uaa.clientid` field in the service key JSON. Env: `BTP_CICD_CLIENT_ID`.",
-						Optional:            true,
-					},
-					"client_secret": schema.StringAttribute{
-						MarkdownDescription: "The OAuth2 client secret. Maps to the `uaa.clientsecret` field in the service key JSON. Env: `BTP_CICD_CLIENT_SECRET`.",
-						Optional:            true,
-						Sensitive:           true,
-					},
-					"timeout": schema.Int64Attribute{
-						MarkdownDescription: "HTTP request timeout in seconds. Defaults to 60.",
-						Optional:            true,
-					},
-				},
-			},
+			"ctms": ctmsProviderBlock(),
+			"cicd": cicdProviderBlock(),
 		},
 	}
 }
@@ -117,22 +76,17 @@ func (p *btpServicesProvider) Configure(ctx context.Context, req provider.Config
 	clients := &shared.ProviderClients{}
 
 	if data.Cicd != nil {
-		cfg := cicdclient.CicdClientConfig{
-			Endpoint:     resolveString(data.Cicd.Endpoint, "BTP_CICD_ENDPOINT"),
-			TokenURL:     resolveString(data.Cicd.TokenURL, "BTP_CICD_TOKEN_URL"),
-			ClientID:     resolveString(data.Cicd.ClientID, "BTP_CICD_CLIENT_ID"),
-			ClientSecret: resolveString(data.Cicd.ClientSecret, "BTP_CICD_CLIENT_SECRET"),
-			UserAgent:    buildUserAgent(req.TerraformVersion),
-		}
-		if !data.Cicd.Timeout.IsNull() && !data.Cicd.Timeout.IsUnknown() {
-			cfg.Timeout = time.Duration(data.Cicd.Timeout.ValueInt64()) * time.Second
-		}
-		facade, err := cicdclient.NewCicdClientFacade(cfg)
-		if err != nil {
-			resp.Diagnostics.AddError("Invalid CI/CD Configuration", err.Error())
+		configureCICD(ctx, data.Cicd, req.TerraformVersion, clients, &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
 			return
 		}
-		clients.Cicd = facade
+	}
+
+	if data.Ctms != nil {
+		configureCTMS(ctx, data.Ctms, req.TerraformVersion, clients, &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	resp.ResourceData = clients
@@ -156,6 +110,7 @@ func servicePackages() []interface {
 		Actions(context.Context) []func() action.Action
 	}{
 		cicd.ServicePackage{},
+		ctms.ServicePackage{},
 	}
 }
 
@@ -189,13 +144,6 @@ func (p *btpServicesProvider) Actions(ctx context.Context) []func() action.Actio
 		all = append(all, pkg.Actions(ctx)...)
 	}
 	return all
-}
-
-func resolveString(v types.String, envKey string) string {
-	if !v.IsNull() && !v.IsUnknown() {
-		return v.ValueString()
-	}
-	return os.Getenv(envKey)
 }
 
 // buildUserAgent constructs the User-Agent header value:
