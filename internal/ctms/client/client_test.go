@@ -46,7 +46,7 @@ func TestConstructorsAndConcurrentTokenCache(t *testing.T) {
 		assert.Equal(t, "/v2/nodes/1", r.URL.Path)
 		assert.Equal(t, "Bearer cached", r.Header.Get("Authorization"))
 		assert.Equal(t, "terraform/test", r.Header.Get("User-Agent"))
-		assert.Equal(t, "automation", r.Header.Get("tms-named-user"))
+		assert.Empty(t, r.Header.Get("tms-named-user"))
 		w.WriteHeader(204)
 	}))
 	defer srv.Close()
@@ -54,7 +54,6 @@ func TestConstructorsAndConcurrentTokenCache(t *testing.T) {
 	cfg := CtmsClientConfig{
 		Endpoint:  srv.URL,
 		TokenURL:  srv.URL + "/oauth/token",
-		NamedUser: "automation",
 		UserAgent: "terraform/test",
 	}
 	c := NewCtmsClientFacade(cfg)
@@ -63,7 +62,7 @@ func TestConstructorsAndConcurrentTokenCache(t *testing.T) {
 	require.True(t, ok)
 	require.Equal(t, 3, rt.maxRetries)
 	require.Equal(t, 2*time.Second, rt.retryDelay)
-	cfg.NamedUser = "modified externally"
+	cfg.UserAgent = "modified externally"
 
 	var wg sync.WaitGroup
 	for range 20 {
@@ -128,39 +127,30 @@ func TestTokenFailuresAreNotResourceNotFound(t *testing.T) {
 	}
 }
 
-func TestNamedUserValidationAndClientIsolation(t *testing.T) {
-	invalid := []string{
-		strings.Repeat("x", 61),
-		"line\nfeed",
-		"carriage\rreturn",
-		string([]byte{0}),
-		string([]byte{127}),
-		string([]byte{255}),
-	}
-	for _, value := range invalid {
-		t.Run(fmt.Sprintf("invalid-%q", value), func(t *testing.T) {
-			var calls int
-			transport := roundTripFunc(func(r *http.Request) (*http.Response, error) {
-				calls++
-				return response(204, ""), nil
-			})
-			cfg := CtmsClientConfig{Endpoint: "https://api.test", NamedUser: value}
-			c := NewCtmsClientFacadeWithHTTP(cfg, &http.Client{Transport: transport})
-			require.Error(t, c.Nodes.Delete(context.Background(), 1))
-			require.Zero(t, calls)
-		})
-	}
-
+func TestClientIsolation(t *testing.T) {
 	var wg sync.WaitGroup
-	for _, value := range []string{"", strings.Repeat("ä", 60), "alias-one", "alias-two"} {
-		c := prepareClientFacadeForTest(t, value, func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, value, r.Header.Get("tms-named-user"))
-			w.WriteHeader(204)
+	for _, alias := range []string{"alias-one", "alias-two"} {
+		transport := roundTripFunc(func(r *http.Request) (*http.Response, error) {
+			assert.Empty(t, r.Header.Get("tms-named-user"))
+			if r.URL.Host == "auth.test" {
+				id, secret, ok := r.BasicAuth()
+				assert.True(t, ok)
+				assert.Equal(t, alias, id)
+				assert.Equal(t, alias+"-secret", secret)
+				return response(200, fmt.Sprintf(`{"access_token":%q,"expires_in":3600}`, alias)), nil
+			}
+			assert.Equal(t, alias+".test", r.URL.Host)
+			assert.Equal(t, "Bearer "+alias, r.Header.Get("Authorization"))
+			return response(204, ""), nil
 		})
+		c := NewCtmsClientFacadeWithHTTP(CtmsClientConfig{
+			Endpoint:     "https://" + alias + ".test",
+			TokenURL:     "https://auth.test/token",
+			ClientID:     alias,
+			ClientSecret: alias + "-secret",
+		}, &http.Client{Transport: transport})
 		for range 5 {
-			wg.Go(func() {
-				assert.NoError(t, c.Routes.Delete(context.Background(), 1))
-			})
+			wg.Go(func() { assert.NoError(t, c.Routes.Delete(context.Background(), 1)) })
 		}
 	}
 	wg.Wait()
@@ -190,7 +180,7 @@ func TestRetryPolicyAndBodyReplay(t *testing.T) {
 						assert.NoError(t, err)
 						assert.Equal(t, `{"payload":true}`, string(b))
 						_ = r.Body.Close()
-						assert.Equal(t, "automation", r.Header.Get("tms-named-user"))
+						assert.Equal(t, "Bearer token", r.Header.Get("Authorization"))
 						body := &trackedBody{Reader: strings.NewReader("reply")}
 						bodies = append(bodies, body)
 						return &http.Response{StatusCode: status, Body: body}, nil
@@ -199,7 +189,7 @@ func TestRetryPolicyAndBodyReplay(t *testing.T) {
 				req, err := http.NewRequestWithContext(context.Background(), method,
 					"https://api.test", strings.NewReader(`{"payload":true}`))
 				require.NoError(t, err)
-				req.Header.Set("tms-named-user", "automation")
+				req.Header.Set("Authorization", "Bearer token")
 				resp, err := transport.RoundTrip(req)
 				require.NoError(t, err)
 				expected := 1
@@ -269,7 +259,7 @@ func TestTimeoutAndCancelledCalls(t *testing.T) {
 	require.ErrorIs(t, err, context.Canceled)
 }
 
-func TestTokenRetriesReplayCredentialsAndSkipResourceAttribution(t *testing.T) {
+func TestTokenRetriesReplayCredentials(t *testing.T) {
 	var tokens int
 	transport := &retryTransport{
 		maxRetries: 3,
@@ -298,7 +288,6 @@ func TestTokenRetriesReplayCredentialsAndSkipResourceAttribution(t *testing.T) {
 		TokenURL:     "https://auth.test/token",
 		ClientID:     "id",
 		ClientSecret: "secret",
-		NamedUser:    "automation",
 	}
 	c := NewCtmsClientFacadeWithHTTP(cfg, &http.Client{Transport: transport})
 	_, err := c.Nodes.Get(context.Background(), 1)

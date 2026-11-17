@@ -15,10 +15,6 @@ type CtmsClientConfig struct {
 	Timeout time.Duration
 	// UserAgent identifies the provider and Terraform versions on API requests.
 	UserAgent string
-	// NamedUser is displayed in CTMS for node/route mutations. Empty omits the
-	// header, using the authentication user. Maximum length is 60 characters.
-	// It is provider-level request metadata, never resource state.
-	NamedUser string
 }
 
 const DefaultTimeout = 60 * time.Second

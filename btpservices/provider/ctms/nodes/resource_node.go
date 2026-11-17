@@ -34,7 +34,7 @@ func (r *nodeResource) Metadata(_ context.Context, req resource.MetadataRequest,
 func (r *nodeResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Manages a CTMS node. Requires Terraform 1.14+. Import using its decimal ID or an identity containing " +
-			"endpoint, subaccount_id, and id. Omitted optional settings remain managed by CTMS.",
+			"endpoint and id. Omitted optional settings remain managed by CTMS.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,

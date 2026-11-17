@@ -15,12 +15,12 @@ import (
 )
 
 // Local token endpoint plus an injected HTTP client, following the CI/CD tests.
-func prepareClientFacadeForTest(t *testing.T, namedUser string, handler http.HandlerFunc) *CtmsClientFacade {
+func prepareClientFacadeForTest(t *testing.T, handler http.HandlerFunc) *CtmsClientFacade {
 	t.Helper()
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Empty(t, r.Header.Get("tms-named-user"))
 		if r.URL.Path == "/oauth/token" {
 			assert.Equal(t, http.MethodPost, r.Method)
-			assert.Empty(t, r.Header.Get("tms-named-user"))
 			id, secret, ok := r.BasicAuth()
 			assert.True(t, ok)
 			assert.Equal(t, "test-id", id)
@@ -41,7 +41,6 @@ func prepareClientFacadeForTest(t *testing.T, namedUser string, handler http.Han
 		TokenURL:     srv.URL + "/oauth/token",
 		ClientID:     "test-id",
 		ClientSecret: "test-secret",
-		NamedUser:    namedUser,
 		UserAgent:    "terraform/test",
 	}
 	return NewCtmsClientFacadeWithHTTP(cfg, srv.Client())
@@ -81,7 +80,7 @@ func prepareLandscapeFacadeForTest(t *testing.T, collection string) (*CtmsClient
 	t.Helper()
 	var mu sync.Mutex
 	var stored map[string]json.RawMessage
-	client := prepareClientFacadeForTest(t, "automation", func(w http.ResponseWriter, r *http.Request) {
+	client := prepareClientFacadeForTest(t, func(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()
 		defer mu.Unlock()
 		assert.True(t, strings.HasPrefix(r.URL.Path, "/v2/"+collection))
@@ -123,7 +122,6 @@ func newFacadeForImportTest(client *CtmsClientFacade) *CtmsClientFacade {
 		TokenURL:     client.httpClient.tokenURL,
 		ClientID:     "test-id",
 		ClientSecret: "test-secret",
-		NamedUser:    "automation",
 		UserAgent:    "terraform/test",
 	}, client.httpClient.httpClient)
 }

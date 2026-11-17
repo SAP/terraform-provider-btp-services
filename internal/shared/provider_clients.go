@@ -17,9 +17,8 @@ type ProviderClients struct {
 	CtmsScope CtmsScope
 }
 
-// CtmsScope identifies the landscape associated with the configured credentials.
-// SubaccountID is caller supplied; the landscape API does not return this scope.
+// CtmsScope records the service endpoint used in resource identities.
+// Credentials determine the tenant; the endpoint may be shared across tenants.
 type CtmsScope struct {
-	Endpoint     string
-	SubaccountID string
+	Endpoint string
 }

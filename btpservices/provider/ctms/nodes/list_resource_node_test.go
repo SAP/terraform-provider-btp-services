@@ -18,9 +18,8 @@ func TestListResourceCTMSNode(t *testing.T) {
 	rec := testutils.SetupVCR(t, "list_resource_node")
 	id := rec.CreateVirtualNode(t, "tf-ctms-query-node")
 	identity := map[string]knownvalue.Check{
-		"id":            knownvalue.StringExact(strconv.FormatInt(id, 10)),
-		"endpoint":      knownvalue.StringExact(strings.TrimRight(rec.Values["endpoint"], "/")),
-		"subaccount_id": knownvalue.StringExact(rec.Values["subaccount_id"]),
+		"id":       knownvalue.StringExact(strconv.FormatInt(id, 10)),
+		"endpoint": knownvalue.StringExact(strings.TrimRight(rec.Values["endpoint"], "/")),
 	}
 
 	resource.Test(t, rec.TestCase(
