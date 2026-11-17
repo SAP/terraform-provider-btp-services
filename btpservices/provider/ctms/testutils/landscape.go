@@ -10,7 +10,7 @@ import (
 // CreateVirtualNode creates a disposable discovery-test node and records its cleanup.
 func (r *Recording) CreateVirtualNode(t *testing.T, name string) int64 {
 	t.Helper()
-	client := r.Client("terraform-provider-ctms-test")
+	client := r.Client()
 	virtual := true
 	node, err := client.Nodes.Create(context.Background(), ctmsmodels.NodeCreateRequest{
 		Name:    name,

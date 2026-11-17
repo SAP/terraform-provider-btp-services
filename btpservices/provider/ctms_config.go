@@ -7,7 +7,6 @@ import (
 	"os"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -24,8 +23,6 @@ type ctmsProviderModel struct {
 	TokenURL     types.String `tfsdk:"token_url"`
 	ClientID     types.String `tfsdk:"client_id"`
 	ClientSecret types.String `tfsdk:"client_secret"`
-	SubaccountID types.String `tfsdk:"subaccount_id"`
-	NamedUser    types.String `tfsdk:"named_user"`
 	Timeout      types.Int64  `tfsdk:"timeout"`
 }
 
@@ -52,17 +49,6 @@ func ctmsProviderBlock() schema.SingleNestedBlock {
 				Sensitive:           true,
 				MarkdownDescription: "OAuth client secret. Use an ephemeral variable or BTP_CTMS_CLIENT_SECRET to avoid persisting the input in a saved plan.",
 			},
-			"subaccount_id": schema.StringAttribute{
-				Optional: true,
-				MarkdownDescription: "ID of the subaccount associated with the credentials. Required through configuration or " +
-					"BTP_CTMS_SUBACCOUNT_ID. Used with endpoint and object ID for resource identity; it does not select " +
-					"the authenticated account and cannot be verified by the landscape API.",
-			},
-			"named_user": schema.StringAttribute{
-				Optional: true,
-				MarkdownDescription: "Attribution shown in CTMS for node/route mutations, including deletion. At most 60 characters. Empty " +
-					"uses the authentication user. Changes alone do not cause resource updates. Env: BTP_CTMS_NAMED_USER.",
-			},
 			"timeout": schema.Int64Attribute{
 				Optional:            true,
 				MarkdownDescription: "Optional HTTP request timeout in seconds. Defaults to 60. This limits requests, not the overall Terraform resource operation.",
@@ -80,7 +66,7 @@ func configureCTMS(_ context.Context, data *ctmsProviderModel, terraformVersion 
 		}
 	}
 
-	resolve := func(name string, value types.String, required bool) string {
+	resolve := func(name string, value types.String) string {
 		p := path.Root("ctms").AtName(name)
 		if value.IsUnknown() {
 			diags.AddAttributeError(p, "Unknown CTMS Configuration", "CTMS configuration must be known before making API requests.")
@@ -92,7 +78,7 @@ func configureCTMS(_ context.Context, data *ctmsProviderModel, terraformVersion 
 			result = value.ValueString()
 		}
 
-		if required && strings.TrimSpace(result) == "" {
+		if strings.TrimSpace(result) == "" {
 			diags.AddAttributeError(p, "Missing CTMS Configuration", fmt.Sprintf("Set %s or BTP_CTMS_%s.", name, strings.ToUpper(name)))
 		}
 
@@ -100,17 +86,15 @@ func configureCTMS(_ context.Context, data *ctmsProviderModel, terraformVersion 
 	}
 
 	cfg := ctmsclient.CtmsClientConfig{
-		Endpoint:     strings.TrimRight(resolve("endpoint", data.Endpoint, true), "/"),
-		TokenURL:     resolve("token_url", data.TokenURL, true),
-		ClientID:     resolve("client_id", data.ClientID, true),
-		ClientSecret: resolve("client_secret", data.ClientSecret, true),
-		NamedUser:    resolve("named_user", data.NamedUser, false),
+		Endpoint:     strings.TrimRight(resolve("endpoint", data.Endpoint), "/"),
+		TokenURL:     resolve("token_url", data.TokenURL),
+		ClientID:     resolve("client_id", data.ClientID),
+		ClientSecret: resolve("client_secret", data.ClientSecret),
 		UserAgent:    buildUserAgent(terraformVersion),
 	}
 
 	scope := shared.CtmsScope{
-		Endpoint:     cfg.Endpoint,
-		SubaccountID: resolve("subaccount_id", data.SubaccountID, true),
+		Endpoint: cfg.Endpoint,
 	}
 
 	for name, value := range map[string]string{
@@ -131,16 +115,6 @@ func configureCTMS(_ context.Context, data *ctmsProviderModel, terraformVersion 
 				"Use the service root without /v2; the client adds the API version.",
 			)
 		}
-	}
-
-	if utf8.RuneCountInString(cfg.NamedUser) > 60 || strings.ContainsFunc(cfg.NamedUser, func(r rune) bool {
-		return r < 32 || r == 127
-	}) {
-		diags.AddAttributeError(
-			path.Root("ctms").AtName("named_user"),
-			"Invalid CTMS Named User",
-			"Use at most 60 characters without HTTP header control characters.",
-		)
 	}
 
 	if data.Timeout.IsUnknown() {

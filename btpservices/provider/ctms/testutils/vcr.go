@@ -34,7 +34,6 @@ func SetupVCR(t *testing.T, name string, extra ...string) *Recording {
 		"token_url":     "https://redacted-auth.example/oauth/token",
 		"client_id":     "redacted-client-id",
 		"client_secret": "redacted-client-secret",
-		"subaccount_id": "redacted-subaccount-id",
 	}
 
 	for _, key := range extra {
@@ -49,7 +48,6 @@ func SetupVCR(t *testing.T, name string, extra ...string) *Recording {
 	rec, values := tfutils.SetupVCRWithOptions(t, "../fixtures/"+name, liveEnvVars, redacted, tfutils.VCROptions{
 		RequireExplicitRecording: true,
 		MatchRequestBody:         true,
-		MatchHeaders:             []string{"Tms-Named-User"},
 		Redaction: &tfutils.VCRRedaction{
 			URLKeys:      []string{"endpoint", "token_url"},
 			NormalizeURL: normalizeCTMSURL,
@@ -90,7 +88,7 @@ func normalizeCTMSURL(parsed *url.URL, values tfutils.TestCredentials) {
 func redactCTMSString(key, value string, values tfutils.TestCredentials) string {
 	lower := strings.ToLower(key)
 	if strings.Contains(lower, "token") || strings.Contains(lower, "secret") || strings.Contains(lower, "password") ||
-		lower == "client_id" || lower == "clientid" || lower == "subaccount_id" {
+		lower == "client_id" || lower == "clientid" {
 		return "redacted"
 	}
 
@@ -106,7 +104,7 @@ func redactCTMSString(key, value string, values tfutils.TestCredentials) string 
 }
 
 // Client creates a fresh facade using the cassette transport.
-func (r *Recording) Client(namedUser string) *ctmsclient.CtmsClientFacade {
+func (r *Recording) Client() *ctmsclient.CtmsClientFacade {
 	httpClient := r.rec.GetDefaultClient()
 	httpClient.Timeout = 60 * time.Second
 	return ctmsclient.NewCtmsClientFacadeWithHTTP(
@@ -115,7 +113,6 @@ func (r *Recording) Client(namedUser string) *ctmsclient.CtmsClientFacade {
 			TokenURL:     r.Values["token_url"],
 			ClientID:     r.Values["client_id"],
 			ClientSecret: r.Values["client_secret"],
-			NamedUser:    namedUser,
 		},
 		httpClient,
 	)
@@ -127,10 +124,9 @@ func (r *Recording) factories() map[string]func() (tfprotov6.ProviderServer, err
 			// A fresh facade on each factory call also exercises imports without a
 			// preceding create on that client.
 			return providerserver.NewProtocol6WithError(btpservicesprovider.NewWithClients(&shared.ProviderClients{
-				Ctms: r.Client("terraform-provider-ctms-test"),
+				Ctms: r.Client(),
 				CtmsScope: shared.CtmsScope{
-					Endpoint:     strings.TrimRight(r.Values["endpoint"], "/"),
-					SubaccountID: r.Values["subaccount_id"],
+					Endpoint: strings.TrimRight(r.Values["endpoint"], "/"),
 				},
 			}))()
 		},

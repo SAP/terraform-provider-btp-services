@@ -189,13 +189,13 @@ func TestResourceCTMSNodeDriftAndDeletion(t *testing.T) {
 	change := func() {
 		t.Helper()
 		description := "external"
-		if _, err := rec.Client("terraform-provider-ctms-test").Nodes.Update(context.Background(), id, ctmsmodels.NodeUpdateRequest{Description: &description}); err != nil {
+		if _, err := rec.Client().Nodes.Update(context.Background(), id, ctmsmodels.NodeUpdateRequest{Description: &description}); err != nil {
 			t.Fatal(err)
 		}
 	}
 	remove := func() {
 		t.Helper()
-		if err := rec.Client("terraform-provider-ctms-test").Nodes.Delete(context.Background(), id); err != nil {
+		if err := rec.Client().Nodes.Delete(context.Background(), id); err != nil {
 			t.Fatal(err)
 		}
 	}

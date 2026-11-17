@@ -40,8 +40,8 @@ func (c *Connection) Configure(data any) diag.Diagnostics {
 		return diags
 	}
 
-	if clients.CtmsScope.Endpoint == "" || clients.CtmsScope.SubaccountID == "" {
-		diags.AddError("Missing CTMS Scope", "CTMS endpoint and subaccount_id are required for the landscape scope.")
+	if clients.CtmsScope.Endpoint == "" {
+		diags.AddError("Missing CTMS Scope", "A CTMS endpoint is required for the landscape scope.")
 		return diags
 	}
 
@@ -51,9 +51,8 @@ func (c *Connection) Configure(data any) diag.Diagnostics {
 }
 
 type Identity struct {
-	Endpoint     types.String `tfsdk:"endpoint"`
-	SubaccountID types.String `tfsdk:"subaccount_id"`
-	ID           types.String `tfsdk:"id"`
+	Endpoint types.String `tfsdk:"endpoint"`
+	ID       types.String `tfsdk:"id"`
 }
 
 func IdentitySchema() identityschema.Schema {
@@ -62,10 +61,6 @@ func IdentitySchema() identityschema.Schema {
 			"endpoint": identityschema.StringAttribute{
 				RequiredForImport: true,
 				Description:       "CTMS service root.",
-			},
-			"subaccount_id": identityschema.StringAttribute{
-				RequiredForImport: true,
-				Description:       "Subaccount associated with the provider credentials.",
 			},
 			"id": identityschema.StringAttribute{
 				RequiredForImport: true,
@@ -77,9 +72,8 @@ func IdentitySchema() identityschema.Schema {
 
 func (c Connection) Identity(id types.String) Identity {
 	return Identity{
-		Endpoint:     types.StringValue(c.Scope.Endpoint),
-		SubaccountID: types.StringValue(c.Scope.SubaccountID),
-		ID:           id,
+		Endpoint: types.StringValue(c.Scope.Endpoint),
+		ID:       id,
 	}
 }
 
@@ -96,11 +90,11 @@ func (c Connection) CheckIdentity(ctx context.Context, identity *tfsdk.ResourceI
 		return diags
 	}
 
-	if saved.Endpoint.ValueString() != c.Scope.Endpoint || saved.SubaccountID.ValueString() != c.Scope.SubaccountID || !saved.ID.Equal(id) {
+	if saved.Endpoint.ValueString() != c.Scope.Endpoint || !saved.ID.Equal(id) {
 		diags.AddError(
 			"CTMS Identity Scope Mismatch",
-			"The saved endpoint, subaccount_id, or object ID differs from the configured scope. Use the provider "+
-				"alias for the original landscape; changing credentials or scope must not adopt another object.",
+			"The saved endpoint or object ID differs from the configured scope. Use the provider "+
+				"alias for the original endpoint and import the intended object ID.",
 		)
 	}
 

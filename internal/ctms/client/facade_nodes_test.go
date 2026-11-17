@@ -16,51 +16,45 @@ import (
 const nodeResponseJSON = `{"id":9007199254740993,"name":"node","uploadAllowed":false,"description":"","targets":[]}`
 
 func TestNodesFacade_Create(t *testing.T) {
-	for _, namedUser := range []string{"", "terraform-automation"} {
-		t.Run("named_user="+namedUser, func(t *testing.T) {
-			t.Run("constructs the request correctly and handles the response", func(t *testing.T) {
-				var srvCalled bool
-				uut := prepareClientFacadeForTest(t, namedUser, func(w http.ResponseWriter, r *http.Request) {
-					srvCalled = true
-					assertRequest(t, r, http.MethodPost, "/v2/nodes")
-					assert.Empty(t, r.URL.RawQuery)
-					assert.Equal(t, namedUser, r.Header.Get("tms-named-user"))
-					assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
-					var body json.RawMessage
-					assertRequestBody(t, r, &body)
-					assert.JSONEq(t, `{"name":"node"}`, string(body))
+	t.Run("constructs the request correctly and handles the response", func(t *testing.T) {
+		var srvCalled bool
+		uut := prepareClientFacadeForTest(t, func(w http.ResponseWriter, r *http.Request) {
+			srvCalled = true
+			assertRequest(t, r, http.MethodPost, "/v2/nodes")
+			assert.Empty(t, r.URL.RawQuery)
+			assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+			var body json.RawMessage
+			assertRequestBody(t, r, &body)
+			assert.JSONEq(t, `{"name":"node"}`, string(body))
 
-					w.WriteHeader(http.StatusCreated)
-					_, _ = w.Write([]byte(nodeResponseJSON))
-				})
-				got, err := uut.Nodes.Create(context.Background(), ctmsmodels.NodeCreateRequest{Name: "node"})
-				require.True(t, srvCalled)
-				require.NoError(t, err)
-				assertResponseBody(t, got, nodeResponseJSON)
-			})
-
-			t.Run("returns NotFoundError on 404", func(t *testing.T) {
-				var srvCalled bool
-				uut := prepareClientFacadeForTest(t, namedUser, func(w http.ResponseWriter, r *http.Request) {
-					srvCalled = true
-					assertRequest(t, r, http.MethodPost, "/v2/nodes")
-					assert.Empty(t, r.URL.RawQuery)
-					assert.Equal(t, namedUser, r.Header.Get("tms-named-user"))
-					assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
-					var body json.RawMessage
-					assertRequestBody(t, r, &body)
-					assert.JSONEq(t, `{"name":"node"}`, string(body))
-
-					w.WriteHeader(http.StatusNotFound)
-					_, _ = w.Write([]byte(`{"errorType":"NotFound","message":"gone"}`))
-				})
-				got, err := uut.Nodes.Create(context.Background(), ctmsmodels.NodeCreateRequest{Name: "node"})
-				require.True(t, srvCalled)
-				require.True(t, ctmsmodels.IsNotFound(err), "%v", err)
-				require.Nil(t, got)
-			})
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(nodeResponseJSON))
 		})
-	}
+		got, err := uut.Nodes.Create(context.Background(), ctmsmodels.NodeCreateRequest{Name: "node"})
+		require.True(t, srvCalled)
+		require.NoError(t, err)
+		assertResponseBody(t, got, nodeResponseJSON)
+	})
+
+	t.Run("returns NotFoundError on 404", func(t *testing.T) {
+		var srvCalled bool
+		uut := prepareClientFacadeForTest(t, func(w http.ResponseWriter, r *http.Request) {
+			srvCalled = true
+			assertRequest(t, r, http.MethodPost, "/v2/nodes")
+			assert.Empty(t, r.URL.RawQuery)
+			assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+			var body json.RawMessage
+			assertRequestBody(t, r, &body)
+			assert.JSONEq(t, `{"name":"node"}`, string(body))
+
+			w.WriteHeader(http.StatusNotFound)
+			_, _ = w.Write([]byte(`{"errorType":"NotFound","message":"gone"}`))
+		})
+		got, err := uut.Nodes.Create(context.Background(), ctmsmodels.NodeCreateRequest{Name: "node"})
+		require.True(t, srvCalled)
+		require.True(t, ctmsmodels.IsNotFound(err), "%v", err)
+		require.Nil(t, got)
+	})
 
 	t.Run("does not adopt an existing resource after an uncertain create", func(t *testing.T) {
 		calls := 0
@@ -90,50 +84,44 @@ func TestNodesFacade_Create(t *testing.T) {
 }
 
 func TestNodesFacade_Get(t *testing.T) {
-	for _, namedUser := range []string{"", "terraform-automation"} {
-		t.Run("named_user="+namedUser, func(t *testing.T) {
-			t.Run("constructs the request correctly and handles the response", func(t *testing.T) {
-				var srvCalled bool
-				uut := prepareClientFacadeForTest(t, namedUser, func(w http.ResponseWriter, r *http.Request) {
-					srvCalled = true
-					assertRequest(t, r, http.MethodGet, "/v2/nodes/9007199254740993")
-					assert.Empty(t, r.URL.RawQuery)
-					assert.Empty(t, r.Header.Get("tms-named-user"))
-					assertEmptyRequestBody(t, r)
+	t.Run("constructs the request correctly and handles the response", func(t *testing.T) {
+		var srvCalled bool
+		uut := prepareClientFacadeForTest(t, func(w http.ResponseWriter, r *http.Request) {
+			srvCalled = true
+			assertRequest(t, r, http.MethodGet, "/v2/nodes/9007199254740993")
+			assert.Empty(t, r.URL.RawQuery)
+			assertEmptyRequestBody(t, r)
 
-					w.WriteHeader(http.StatusOK)
-					_, _ = w.Write([]byte(nodeResponseJSON))
-				})
-				got, err := uut.Nodes.Get(context.Background(), 9007199254740993)
-				require.True(t, srvCalled)
-				require.NoError(t, err)
-				assertResponseBody(t, got, nodeResponseJSON)
-			})
-
-			t.Run("returns NotFoundError on 404", func(t *testing.T) {
-				var srvCalled bool
-				uut := prepareClientFacadeForTest(t, namedUser, func(w http.ResponseWriter, r *http.Request) {
-					srvCalled = true
-					assertRequest(t, r, http.MethodGet, "/v2/nodes/9007199254740993")
-					assert.Empty(t, r.URL.RawQuery)
-					assert.Empty(t, r.Header.Get("tms-named-user"))
-					assertEmptyRequestBody(t, r)
-
-					w.WriteHeader(http.StatusNotFound)
-					_, _ = w.Write([]byte(`{"errorType":"NotFound","message":"gone"}`))
-				})
-				got, err := uut.Nodes.Get(context.Background(), 9007199254740993)
-				require.True(t, srvCalled)
-				require.True(t, ctmsmodels.IsNotFound(err), "%v", err)
-				require.Nil(t, got)
-			})
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(nodeResponseJSON))
 		})
-	}
+		got, err := uut.Nodes.Get(context.Background(), 9007199254740993)
+		require.True(t, srvCalled)
+		require.NoError(t, err)
+		assertResponseBody(t, got, nodeResponseJSON)
+	})
+
+	t.Run("returns NotFoundError on 404", func(t *testing.T) {
+		var srvCalled bool
+		uut := prepareClientFacadeForTest(t, func(w http.ResponseWriter, r *http.Request) {
+			srvCalled = true
+			assertRequest(t, r, http.MethodGet, "/v2/nodes/9007199254740993")
+			assert.Empty(t, r.URL.RawQuery)
+			assertEmptyRequestBody(t, r)
+
+			w.WriteHeader(http.StatusNotFound)
+			_, _ = w.Write([]byte(`{"errorType":"NotFound","message":"gone"}`))
+		})
+		got, err := uut.Nodes.Get(context.Background(), 9007199254740993)
+		require.True(t, srvCalled)
+		require.True(t, ctmsmodels.IsNotFound(err), "%v", err)
+		require.Nil(t, got)
+	})
 
 	t.Run("rejects malformed responses and missing or mismatched identity", func(t *testing.T) {
 		for _, body := range []string{"", "null", "[]", "{broken", "{}", `{"id":null}`, `{"id":2}`} {
 			t.Run(body, func(t *testing.T) {
-				uut := prepareClientFacadeForTest(t, "", func(w http.ResponseWriter, r *http.Request) {
+				uut := prepareClientFacadeForTest(t, func(w http.ResponseWriter, r *http.Request) {
 					_, _ = w.Write([]byte(body))
 				})
 				got, err := uut.Nodes.Get(context.Background(), 1)
@@ -145,148 +133,130 @@ func TestNodesFacade_Get(t *testing.T) {
 }
 
 func TestNodesFacade_Update(t *testing.T) {
-	for _, namedUser := range []string{"", "terraform-automation"} {
-		t.Run("named_user="+namedUser, func(t *testing.T) {
-			t.Run("constructs the request correctly and handles the response", func(t *testing.T) {
-				var srvCalled bool
-				uut := prepareClientFacadeForTest(t, namedUser, func(w http.ResponseWriter, r *http.Request) {
-					srvCalled = true
-					assertRequest(t, r, http.MethodPatch, "/v2/nodes/9007199254740993")
-					assert.Empty(t, r.URL.RawQuery)
-					assert.Equal(t, namedUser, r.Header.Get("tms-named-user"))
-					assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
-					var body json.RawMessage
-					assertRequestBody(t, r, &body)
-					assert.JSONEq(t, `{"uploadAllowed":false,"description":"","targets":[]}`, string(body))
+	t.Run("constructs the request correctly and handles the response", func(t *testing.T) {
+		var srvCalled bool
+		uut := prepareClientFacadeForTest(t, func(w http.ResponseWriter, r *http.Request) {
+			srvCalled = true
+			assertRequest(t, r, http.MethodPatch, "/v2/nodes/9007199254740993")
+			assert.Empty(t, r.URL.RawQuery)
+			assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+			var body json.RawMessage
+			assertRequestBody(t, r, &body)
+			assert.JSONEq(t, `{"uploadAllowed":false,"description":"","targets":[]}`, string(body))
 
-					w.WriteHeader(http.StatusOK)
-					_, _ = w.Write([]byte(nodeResponseJSON))
-				})
-				got, err := uut.Nodes.Update(context.Background(), 9007199254740993, ctmsmodels.NodeUpdateRequest{
-					UploadAllowed: new(false),
-					Description:   new(""),
-					Targets:       new([]ctmsmodels.DeployTarget{}),
-				})
-				require.True(t, srvCalled)
-				require.NoError(t, err)
-				assertResponseBody(t, got, nodeResponseJSON)
-			})
-
-			t.Run("returns NotFoundError on 404", func(t *testing.T) {
-				var srvCalled bool
-				uut := prepareClientFacadeForTest(t, namedUser, func(w http.ResponseWriter, r *http.Request) {
-					srvCalled = true
-					assertRequest(t, r, http.MethodPatch, "/v2/nodes/9007199254740993")
-					assert.Empty(t, r.URL.RawQuery)
-					assert.Equal(t, namedUser, r.Header.Get("tms-named-user"))
-					assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
-					var body json.RawMessage
-					assertRequestBody(t, r, &body)
-					assert.JSONEq(t, `{"uploadAllowed":false,"description":"","targets":[]}`, string(body))
-
-					w.WriteHeader(http.StatusNotFound)
-					_, _ = w.Write([]byte(`{"errorType":"NotFound","message":"gone"}`))
-				})
-				got, err := uut.Nodes.Update(context.Background(), 9007199254740993, ctmsmodels.NodeUpdateRequest{
-					UploadAllowed: new(false),
-					Description:   new(""),
-					Targets:       new([]ctmsmodels.DeployTarget{}),
-				})
-				require.True(t, srvCalled)
-				require.True(t, ctmsmodels.IsNotFound(err), "%v", err)
-				require.Nil(t, got)
-			})
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(nodeResponseJSON))
 		})
-	}
+		got, err := uut.Nodes.Update(context.Background(), 9007199254740993, ctmsmodels.NodeUpdateRequest{
+			UploadAllowed: new(false),
+			Description:   new(""),
+			Targets:       new([]ctmsmodels.DeployTarget{}),
+		})
+		require.True(t, srvCalled)
+		require.NoError(t, err)
+		assertResponseBody(t, got, nodeResponseJSON)
+	})
+
+	t.Run("returns NotFoundError on 404", func(t *testing.T) {
+		var srvCalled bool
+		uut := prepareClientFacadeForTest(t, func(w http.ResponseWriter, r *http.Request) {
+			srvCalled = true
+			assertRequest(t, r, http.MethodPatch, "/v2/nodes/9007199254740993")
+			assert.Empty(t, r.URL.RawQuery)
+			assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
+			var body json.RawMessage
+			assertRequestBody(t, r, &body)
+			assert.JSONEq(t, `{"uploadAllowed":false,"description":"","targets":[]}`, string(body))
+
+			w.WriteHeader(http.StatusNotFound)
+			_, _ = w.Write([]byte(`{"errorType":"NotFound","message":"gone"}`))
+		})
+		got, err := uut.Nodes.Update(context.Background(), 9007199254740993, ctmsmodels.NodeUpdateRequest{
+			UploadAllowed: new(false),
+			Description:   new(""),
+			Targets:       new([]ctmsmodels.DeployTarget{}),
+		})
+		require.True(t, srvCalled)
+		require.True(t, ctmsmodels.IsNotFound(err), "%v", err)
+		require.Nil(t, got)
+	})
 }
 
 func TestNodesFacade_Delete(t *testing.T) {
-	for _, namedUser := range []string{"", "terraform-automation"} {
-		t.Run("named_user="+namedUser, func(t *testing.T) {
-			t.Run("constructs the request correctly and handles the response", func(t *testing.T) {
-				var srvCalled bool
-				uut := prepareClientFacadeForTest(t, namedUser, func(w http.ResponseWriter, r *http.Request) {
-					srvCalled = true
-					assertRequest(t, r, http.MethodDelete, "/v2/nodes/9007199254740993")
-					assert.Empty(t, r.URL.RawQuery)
-					assert.Equal(t, namedUser, r.Header.Get("tms-named-user"))
-					assertEmptyRequestBody(t, r)
+	t.Run("constructs the request correctly and handles the response", func(t *testing.T) {
+		var srvCalled bool
+		uut := prepareClientFacadeForTest(t, func(w http.ResponseWriter, r *http.Request) {
+			srvCalled = true
+			assertRequest(t, r, http.MethodDelete, "/v2/nodes/9007199254740993")
+			assert.Empty(t, r.URL.RawQuery)
+			assertEmptyRequestBody(t, r)
 
-					w.WriteHeader(http.StatusNoContent)
-					_, _ = w.Write([]byte(""))
-				})
-				err := uut.Nodes.Delete(context.Background(), 9007199254740993)
-				require.True(t, srvCalled)
-				require.NoError(t, err)
-			})
-
-			t.Run("returns NotFoundError on 404", func(t *testing.T) {
-				var srvCalled bool
-				uut := prepareClientFacadeForTest(t, namedUser, func(w http.ResponseWriter, r *http.Request) {
-					srvCalled = true
-					assertRequest(t, r, http.MethodDelete, "/v2/nodes/9007199254740993")
-					assert.Empty(t, r.URL.RawQuery)
-					assert.Equal(t, namedUser, r.Header.Get("tms-named-user"))
-					assertEmptyRequestBody(t, r)
-
-					w.WriteHeader(http.StatusNotFound)
-					_, _ = w.Write([]byte(`{"errorType":"NotFound","message":"gone"}`))
-				})
-				err := uut.Nodes.Delete(context.Background(), 9007199254740993)
-				require.True(t, srvCalled)
-				require.True(t, ctmsmodels.IsNotFound(err), "%v", err)
-			})
+			w.WriteHeader(http.StatusNoContent)
+			_, _ = w.Write([]byte(""))
 		})
-	}
+		err := uut.Nodes.Delete(context.Background(), 9007199254740993)
+		require.True(t, srvCalled)
+		require.NoError(t, err)
+	})
+
+	t.Run("returns NotFoundError on 404", func(t *testing.T) {
+		var srvCalled bool
+		uut := prepareClientFacadeForTest(t, func(w http.ResponseWriter, r *http.Request) {
+			srvCalled = true
+			assertRequest(t, r, http.MethodDelete, "/v2/nodes/9007199254740993")
+			assert.Empty(t, r.URL.RawQuery)
+			assertEmptyRequestBody(t, r)
+
+			w.WriteHeader(http.StatusNotFound)
+			_, _ = w.Write([]byte(`{"errorType":"NotFound","message":"gone"}`))
+		})
+		err := uut.Nodes.Delete(context.Background(), 9007199254740993)
+		require.True(t, srvCalled)
+		require.True(t, ctmsmodels.IsNotFound(err), "%v", err)
+	})
 }
 
 // Local lifecycle coverage includes ID-only import reads, external drift, and resets.
 
 func TestNodesFacade_List(t *testing.T) {
-	for _, namedUser := range []string{"", "terraform-automation"} {
-		t.Run("named_user="+namedUser, func(t *testing.T) {
-			t.Run("constructs the request correctly and handles the response", func(t *testing.T) {
-				var srvCalled bool
-				uut := prepareClientFacadeForTest(t, namedUser, func(w http.ResponseWriter, r *http.Request) {
-					srvCalled = true
-					assertRequest(t, r, http.MethodGet, "/v2/nodes")
-					assert.Empty(t, r.URL.RawQuery)
-					assert.Empty(t, r.Header.Get("tms-named-user"))
-					assertEmptyRequestBody(t, r)
+	t.Run("constructs the request correctly and handles the response", func(t *testing.T) {
+		var srvCalled bool
+		uut := prepareClientFacadeForTest(t, func(w http.ResponseWriter, r *http.Request) {
+			srvCalled = true
+			assertRequest(t, r, http.MethodGet, "/v2/nodes")
+			assert.Empty(t, r.URL.RawQuery)
+			assertEmptyRequestBody(t, r)
 
-					w.WriteHeader(http.StatusOK)
-					_, _ = w.Write([]byte(`{"nodes":[` + nodeResponseJSON + `]}`))
-				})
-				got, err := uut.Nodes.List(context.Background())
-				require.True(t, srvCalled)
-				require.NoError(t, err)
-				assertResponseBody(t, got, `[`+nodeResponseJSON+`]`)
-			})
-
-			t.Run("returns NotFoundError on 404", func(t *testing.T) {
-				var srvCalled bool
-				uut := prepareClientFacadeForTest(t, namedUser, func(w http.ResponseWriter, r *http.Request) {
-					srvCalled = true
-					assertRequest(t, r, http.MethodGet, "/v2/nodes")
-					assert.Empty(t, r.URL.RawQuery)
-					assert.Empty(t, r.Header.Get("tms-named-user"))
-					assertEmptyRequestBody(t, r)
-
-					w.WriteHeader(http.StatusNotFound)
-					_, _ = w.Write([]byte(`{"errorType":"NotFound","message":"gone"}`))
-				})
-				got, err := uut.Nodes.List(context.Background())
-				require.True(t, srvCalled)
-				require.True(t, ctmsmodels.IsNotFound(err), "%v", err)
-				require.Nil(t, got)
-			})
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"nodes":[` + nodeResponseJSON + `]}`))
 		})
-	}
+		got, err := uut.Nodes.List(context.Background())
+		require.True(t, srvCalled)
+		require.NoError(t, err)
+		assertResponseBody(t, got, `[`+nodeResponseJSON+`]`)
+	})
+
+	t.Run("returns NotFoundError on 404", func(t *testing.T) {
+		var srvCalled bool
+		uut := prepareClientFacadeForTest(t, func(w http.ResponseWriter, r *http.Request) {
+			srvCalled = true
+			assertRequest(t, r, http.MethodGet, "/v2/nodes")
+			assert.Empty(t, r.URL.RawQuery)
+			assertEmptyRequestBody(t, r)
+
+			w.WriteHeader(http.StatusNotFound)
+			_, _ = w.Write([]byte(`{"errorType":"NotFound","message":"gone"}`))
+		})
+		got, err := uut.Nodes.List(context.Background())
+		require.True(t, srvCalled)
+		require.True(t, ctmsmodels.IsNotFound(err), "%v", err)
+		require.Nil(t, got)
+	})
 
 	t.Run("returns an empty slice for absent null or empty collections", func(t *testing.T) {
 		for _, body := range []string{`{}`, `{"nodes":null}`, `{"nodes":[]}`} {
 			t.Run(body, func(t *testing.T) {
-				uut := prepareClientFacadeForTest(t, "", func(w http.ResponseWriter, r *http.Request) {
+				uut := prepareClientFacadeForTest(t, func(w http.ResponseWriter, r *http.Request) {
 					_, _ = w.Write([]byte(body))
 				})
 				got, err := uut.Nodes.List(context.Background())

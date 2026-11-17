@@ -4,7 +4,6 @@ package provider
 
 import (
 	"context"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/action"
@@ -291,8 +290,6 @@ func TestProvider_CTMSConfiguration(t *testing.T) {
 			TokenURL:     types.StringValue("https://auth.example/oauth/token"),
 			ClientID:     types.StringValue("test-client-id"),
 			ClientSecret: types.StringValue("test-client-secret"),
-			SubaccountID: types.StringValue("test-subaccount"),
-			NamedUser:    types.StringNull(),
 			Timeout:      types.Int64Null(),
 		}
 	}
@@ -366,33 +363,6 @@ func TestProvider_CTMSConfiguration(t *testing.T) {
 			wantError: true,
 		},
 		{
-			name: "empty scope",
-			edit: func(c *ctmsProviderModel) {
-				c.SubaccountID = types.StringValue("")
-			},
-			wantError: true,
-		},
-		{
-			name: "named user",
-			edit: func(c *ctmsProviderModel) {
-				c.NamedUser = types.StringValue("terraform-test")
-			},
-		},
-		{
-			name: "header injection",
-			edit: func(c *ctmsProviderModel) {
-				c.NamedUser = types.StringValue("actor\r\ninjected: value")
-			},
-			wantError: true,
-		},
-		{
-			name: "long named user",
-			edit: func(c *ctmsProviderModel) {
-				c.NamedUser = types.StringValue(strings.Repeat("a", 61))
-			},
-			wantError: true,
-		},
-		{
 			name:      "older Terraform",
 			version:   "1.13.0",
 			wantError: true,
@@ -422,7 +392,7 @@ func TestProvider_CTMSConfiguration(t *testing.T) {
 					}
 					return
 				}
-				if clients.Ctms == nil || clients.CtmsScope.Endpoint != "https://ctms.example" || clients.CtmsScope.SubaccountID != "test-subaccount" {
+				if clients.Ctms == nil || clients.CtmsScope.Endpoint != "https://ctms.example" {
 					t.Fatalf("unexpected CTMS client or scope: %#v", clients.CtmsScope)
 				}
 				if clients.Cicd != nil {
@@ -439,8 +409,6 @@ func TestProvider_CTMSEnvironmentFallback(t *testing.T) {
 		"TOKEN_URL":     "https://auth.example/oauth/token",
 		"CLIENT_ID":     "test-client-id",
 		"CLIENT_SECRET": "test-client-secret",
-		"SUBACCOUNT_ID": "env-subaccount",
-		"NAMED_USER":    "env-user",
 	} {
 		t.Setenv("BTP_CTMS_"+key, value)
 	}
@@ -449,21 +417,18 @@ func TestProvider_CTMSEnvironmentFallback(t *testing.T) {
 		TokenURL:     types.StringNull(),
 		ClientID:     types.StringNull(),
 		ClientSecret: types.StringNull(),
-		SubaccountID: types.StringNull(),
-		NamedUser:    types.StringNull(),
 		Timeout:      types.Int64Null(),
 	}
 	first := &shared.ProviderClients{}
 	var diagnostics diag.Diagnostics
 	configureCTMS(context.Background(), &data, "1.14.0", first, &diagnostics)
-	if diagnostics.HasError() || first.Ctms == nil || first.CtmsScope.SubaccountID != "env-subaccount" {
+	if diagnostics.HasError() || first.Ctms == nil || first.CtmsScope.Endpoint != "https://ctms.example" {
 		t.Fatalf("environment fallback failed: %v", diagnostics)
 	}
-	data.SubaccountID = types.StringValue("explicit-subaccount")
-	data.NamedUser = types.StringValue("") // Explicit empty disables the environment attribution.
+	data.Endpoint = types.StringValue("https://explicit-ctms.example/")
 	second := &shared.ProviderClients{}
 	configureCTMS(context.Background(), &data, "1.14.0", second, &diagnostics)
-	if diagnostics.HasError() || second.Ctms == nil || second.Ctms == first.Ctms || second.CtmsScope.SubaccountID != "explicit-subaccount" || first.CtmsScope.SubaccountID != "env-subaccount" {
+	if diagnostics.HasError() || second.Ctms == nil || second.Ctms == first.Ctms || second.CtmsScope.Endpoint != "https://explicit-ctms.example" || first.CtmsScope.Endpoint != "https://ctms.example" {
 		t.Fatalf("explicit configuration or client isolation failed: %v", diagnostics)
 	}
 	data.ClientSecret = types.StringUnknown() // Unknown must not silently fall back to the environment.

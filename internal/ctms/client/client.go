@@ -12,7 +12,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"unicode/utf8"
 
 	ctmsmodels "github.com/SAP/terraform-provider-btp-services/internal/ctms/models"
 )
@@ -27,7 +26,6 @@ type ctmsHTTPClient struct {
 	clientID     string
 	clientSecret string
 	userAgent    string
-	namedUser    string
 	token        string
 	tokenExpiry  time.Time
 }
@@ -51,7 +49,6 @@ func newCtmsHTTPClient(cfg CtmsClientConfig) *ctmsHTTPClient {
 		clientID:     cfg.ClientID,
 		clientSecret: cfg.ClientSecret,
 		userAgent:    cfg.UserAgent,
-		namedUser:    cfg.NamedUser,
 	}
 }
 
@@ -122,25 +119,7 @@ func (c *ctmsHTTPClient) doWithBody(ctx context.Context, method, path string, bo
 	return c.do(ctx, method, path, body, out)
 }
 
-func validateNamedUser(value string) error {
-	if !utf8.ValidString(value) || utf8.RuneCountInString(value) > 60 {
-		return fmt.Errorf("CTMS named user must be valid UTF-8 with at most 60 characters")
-	}
-	for i := range len(value) {
-		if (value[i] < 32 && value[i] != '\t') || value[i] == 127 {
-			return fmt.Errorf("CTMS named user contains an invalid HTTP header character")
-		}
-	}
-	return nil
-}
-
 func (c *ctmsHTTPClient) do(ctx context.Context, method, path string, body, out any) error {
-	mutation := method != http.MethodGet
-	if mutation {
-		if err := validateNamedUser(c.namedUser); err != nil {
-			return err
-		}
-	}
 	var reader io.Reader
 	if body != nil {
 		b, err := json.Marshal(body)
@@ -161,9 +140,6 @@ func (c *ctmsHTTPClient) do(ctx context.Context, method, path string, body, out 
 	req.Header.Set("User-Agent", c.userAgent)
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
-	}
-	if mutation && c.namedUser != "" {
-		req.Header.Set("tms-named-user", c.namedUser)
 	}
 	resp, err := c.httpClient.Do(req)
 	if err != nil {

@@ -19,7 +19,7 @@ func TestListResourceCTMSRoute(t *testing.T) {
 	rec := testutils.SetupVCR(t, "list_resource_route")
 	sourceID := rec.CreateVirtualNode(t, "tf-ctms-query-route-source")
 	targetID := rec.CreateVirtualNode(t, "tf-ctms-query-route-target")
-	client := rec.Client("terraform-provider-ctms-test")
+	client := rec.Client()
 	route, err := client.Routes.Create(context.Background(), ctmsmodels.RouteCreateRequest{
 		Name:         "tf-ctms-query-route",
 		SourceNodeId: sourceID,
@@ -37,9 +37,8 @@ func TestListResourceCTMSRoute(t *testing.T) {
 		}
 	})
 	identity := map[string]knownvalue.Check{
-		"id":            knownvalue.StringExact(strconv.FormatInt(*route.Id, 10)),
-		"endpoint":      knownvalue.StringExact(strings.TrimRight(rec.Values["endpoint"], "/")),
-		"subaccount_id": knownvalue.StringExact(rec.Values["subaccount_id"]),
+		"id":       knownvalue.StringExact(strconv.FormatInt(*route.Id, 10)),
+		"endpoint": knownvalue.StringExact(strings.TrimRight(rec.Values["endpoint"], "/")),
 	}
 
 	resource.Test(t, rec.TestCase(
