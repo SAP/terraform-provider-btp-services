@@ -46,6 +46,7 @@ Before configuring this block you need:
 3. A service key on that instance — the JSON it returns maps to the attributes below. You can create one with the [`btp_subaccount_service_binding`](https://registry.terraform.io/providers/SAP/btp/latest/docs/resources/subaccount_service_binding) resource.
 
 See the Quick Start Guide for step-by-step instructions. (see [below for nested schema](#nestedblock--cicd))
+- `ctms` (Block, Optional) Configuration for SAP Cloud Transport Management. Requires Terraform 1.14 or later. Configure this block (which may be empty when using environment variables) to enable CTMS. Each provider alias has its own client and landscape scope. (see [below for nested schema](#nestedblock--ctms))
 
 <a id="nestedblock--cicd"></a>
 ### Nested Schema for `cicd`
@@ -57,6 +58,18 @@ Optional:
 - `endpoint` (String) The CI/CD service base URL. Maps to the `api` field in the service key JSON. Env: `BTP_CICD_ENDPOINT`.
 - `timeout` (Number) HTTP request timeout in seconds. Defaults to 60.
 - `token_url` (String) The OAuth2 token endpoint. Construct by appending `/oauth/token` to the `uaa.url` field in the service key JSON. Env: `BTP_CICD_TOKEN_URL`.
+
+
+<a id="nestedblock--ctms"></a>
+### Nested Schema for `ctms`
+
+Optional:
+
+- `client_id` (String) OAuth client ID. Env: BTP_CTMS_CLIENT_ID.
+- `client_secret` (String, Sensitive) OAuth client secret. Use an ephemeral variable or BTP_CTMS_CLIENT_SECRET to avoid persisting the input in a saved plan.
+- `endpoint` (String) CTMS service root without /v2. Env: BTP_CTMS_ENDPOINT.
+- `timeout` (Number) Optional HTTP request timeout in seconds. Defaults to 60. This limits requests, not the overall Terraform resource operation.
+- `token_url` (String) Complete OAuth token endpoint. Env: BTP_CTMS_TOKEN_URL.
 
 ## Authentication
 
@@ -79,3 +92,10 @@ When you view the service key in the BTP Cockpit or via the CLI you receive a JS
 All four attributes can also be supplied via environment variables (`BTP_CICD_ENDPOINT`, `BTP_CICD_TOKEN_URL`, `BTP_CICD_CLIENT_ID`, `BTP_CICD_CLIENT_SECRET`).
 
 We recommend sourcing credentials via environment variables rather than hardcoding them in Terraform configuration files.
+
+### Cloud Transport Management
+
+Configure a `ctms` block to use CTMS nodes, routes, destination metadata, and UI links.
+CTMS requires Terraform 1.14 or later. The optional `timeout` defaults to 60 seconds
+per HTTP request. See the [CTMS guide](../guides/CTMS.md) for environment variables,
+ephemeral credentials, scoped imports, ownership semantics, and discovery.
