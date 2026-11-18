@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/ctms/utils"
@@ -33,11 +34,17 @@ var routeAttrTypes = map[string]attr.Type{
 
 func routeValueFrom(ctx context.Context, v ctmsmodels.RouteResponse) (routeModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
+	// Represent absent descriptions as empty strings for consistent apply,
+	// refresh, and import.
+	description := ""
+	if v.Description != nil {
+		description = *v.Description
+	}
 
 	m := routeModel{
 		ID:           utils.IDValue(v.Id),
 		Name:         types.StringPointerValue(v.Name),
-		Description:  types.StringPointerValue(v.Description),
+		Description:  types.StringValue(description),
 		SourceNodeID: utils.IDValue(v.SourceNodeId),
 		TargetNodeID: utils.IDValue(v.TargetNodeId),
 	}
@@ -52,4 +59,15 @@ func routeValueFrom(ctx context.Context, v ctmsmodels.RouteResponse) (routeModel
 	}
 
 	return m, diags
+}
+
+// Report an ignored reset while preserving the description returned by CTMS.
+func routeDescriptionResetDiagnostics(requested, returned types.String) diag.Diagnostics {
+	var diags diag.Diagnostics
+	if requested.Equal(types.StringValue("")) && returned.ValueString() != "" {
+		diags.AddAttributeError(path.Root("description"), "CTMS Route Description Reset Failed",
+			"CTMS returned a non-empty description after receiving description: null. "+
+				"The API did not confirm the reset. The returned description and route identity have been retained in state.")
+	}
+	return diags
 }

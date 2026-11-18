@@ -12,7 +12,7 @@ package ctmsmodels
 // Nil omits a field; a pointer to false, zero, or an empty value preserves that value.
 // Retain this correction when regenerating; Terraform null/unknown conversion belongs to callers.
 type RoutePatchRequest struct {
-	// Route description
+	// Route description. MarshalJSON encodes an explicit empty string as null.
 	Description *string `json:"description,omitempty"`
 	// Route name
 	Name *string `json:"name,omitempty"`

@@ -40,7 +40,27 @@ func TestPatchPresence(t *testing.T) {
 				Description:  new(""),
 				SourceNodeId: new(int64(0)),
 			},
-			want: `{"description":"","sourceNodeId":0}`,
+			want: `{"description":null,"sourceNodeId":0}`,
+		},
+		{
+			name: "route create omitted description",
+			body: RouteCreateRequest{Name: "route", SourceNodeId: 183, TargetNodeId: 184},
+			want: `{"name":"route","sourceNodeId":183,"targetNodeId":184}`,
+		},
+		{
+			name: "route create empty description",
+			body: RouteCreateRequest{Name: "route", SourceNodeId: 183, TargetNodeId: 184, Description: new("")},
+			want: `{"name":"route","sourceNodeId":183,"targetNodeId":184,"description":null}`,
+		},
+		{
+			name: "route create non-empty description",
+			body: RouteCreateRequest{Name: "route", SourceNodeId: 183, TargetNodeId: 184, Description: new("Development to Test")},
+			want: `{"name":"route","sourceNodeId":183,"targetNodeId":184,"description":"Development to Test"}`,
+		},
+		{
+			name: "route update non-empty description",
+			body: RoutePatchRequest{Description: new("Development to Test")},
+			want: `{"description":"Development to Test"}`,
 		},
 		{
 			name: "create omitted description",

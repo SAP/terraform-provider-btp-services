@@ -1,0 +1,889 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 29
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-auth.example
+        remote_addr: ""
+        request_uri: ""
+        body: grant_type=client_credentials
+        form: {}
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://redacted-auth.example/oauth/token
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"access_token":"redacted","expires_in":43199,"jti":"redacted","scope":"redacted","token_type":"redacted"}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 197.093042ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 46
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"tf-ctms-route-source","virtual":true}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://redacted-api.example/v2/nodes
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 207
+        uncompressed: false
+        body: '{"autoImport":false,"forwardMode":"AUTO","id":429,"importDisabled":false,"importDisabledReason":"","name":"tf-ctms-route-source","notificationEnabled":false,"targets":[],"uploadAllowed":false,"virtual":true}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 201 Created
+        code: 201
+        duration: 186.82925ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 46
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: '{"name":"tf-ctms-route-target","virtual":true}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://redacted-api.example/v2/nodes
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 207
+        uncompressed: false
+        body: '{"autoImport":false,"forwardMode":"AUTO","id":431,"importDisabled":false,"importDisabledReason":"","name":"tf-ctms-route-target","notificationEnabled":false,"targets":[],"uploadAllowed":false,"virtual":true}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 201 Created
+        code: 201
+        duration: 201.898541ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 93
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: '{"description":"My Description","name":"tf-ctms-route","sourceNodeId":429,"targetNodeId":431}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://redacted-api.example/v2/routes
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 102
+        uncompressed: false
+        body: '{"description":"My Description","id":433,"name":"tf-ctms-route","sourceNodeId":429,"targetNodeId":431}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 201 Created
+        code: 201
+        duration: 116.56625ms
+    - id: 4
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 29
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-auth.example
+        remote_addr: ""
+        request_uri: ""
+        body: grant_type=client_credentials
+        form: {}
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://redacted-auth.example/oauth/token
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"access_token":"redacted","expires_in":43199,"jti":"redacted","scope":"redacted","token_type":"redacted"}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 136.202001ms
+    - id: 5
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/nodes/431
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 207
+        uncompressed: false
+        body: '{"autoImport":false,"forwardMode":"AUTO","id":431,"importDisabled":false,"importDisabledReason":"","name":"tf-ctms-route-target","notificationEnabled":false,"targets":[],"uploadAllowed":false,"virtual":true}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 100.666459ms
+    - id: 6
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/nodes/429
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 207
+        uncompressed: false
+        body: '{"autoImport":false,"forwardMode":"AUTO","id":429,"importDisabled":false,"importDisabledReason":"","name":"tf-ctms-route-source","notificationEnabled":false,"targets":[],"uploadAllowed":false,"virtual":true}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 106.154208ms
+    - id: 7
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/routes/433
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 102
+        uncompressed: false
+        body: '{"description":"My Description","id":433,"name":"tf-ctms-route","sourceNodeId":429,"targetNodeId":431}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 94.62375ms
+    - id: 8
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 29
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-auth.example
+        remote_addr: ""
+        request_uri: ""
+        body: grant_type=client_credentials
+        form: {}
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://redacted-auth.example/oauth/token
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"access_token":"redacted","expires_in":43199,"jti":"redacted","scope":"redacted","token_type":"redacted"}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 47.198375ms
+    - id: 9
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/nodes/429
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 207
+        uncompressed: false
+        body: '{"autoImport":false,"forwardMode":"AUTO","id":429,"importDisabled":false,"importDisabledReason":"","name":"tf-ctms-route-source","notificationEnabled":false,"targets":[],"uploadAllowed":false,"virtual":true}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 622.692126ms
+    - id: 10
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/nodes/431
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 207
+        uncompressed: false
+        body: '{"autoImport":false,"forwardMode":"AUTO","id":431,"importDisabled":false,"importDisabledReason":"","name":"tf-ctms-route-target","notificationEnabled":false,"targets":[],"uploadAllowed":false,"virtual":true}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 622.739833ms
+    - id: 11
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/routes/433
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 102
+        uncompressed: false
+        body: '{"description":"My Description","id":433,"name":"tf-ctms-route","sourceNodeId":429,"targetNodeId":431}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 88.696917ms
+    - id: 12
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 29
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-auth.example
+        remote_addr: ""
+        request_uri: ""
+        body: grant_type=client_credentials
+        form: {}
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://redacted-auth.example/oauth/token
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"access_token":"redacted","expires_in":43199,"jti":"redacted","scope":"redacted","token_type":"redacted"}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 37.828625ms
+    - id: 13
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 71
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: '{"description":"My Description Updated","name":"tf-ctms-route-renamed"}'
+        form: {}
+        headers:
+            Content-Type:
+                - application/json
+        url: https://redacted-api.example/v2/routes/433
+        method: PATCH
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 118
+        uncompressed: false
+        body: '{"description":"My Description Updated","id":433,"name":"tf-ctms-route-renamed","sourceNodeId":429,"targetNodeId":431}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 110.342333ms
+    - id: 14
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 29
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-auth.example
+        remote_addr: ""
+        request_uri: ""
+        body: grant_type=client_credentials
+        form: {}
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://redacted-auth.example/oauth/token
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"access_token":"redacted","expires_in":43199,"jti":"redacted","scope":"redacted","token_type":"redacted"}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 37.962084ms
+    - id: 15
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/nodes/429
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 207
+        uncompressed: false
+        body: '{"autoImport":false,"forwardMode":"AUTO","id":429,"importDisabled":false,"importDisabledReason":"","name":"tf-ctms-route-source","notificationEnabled":false,"targets":[],"uploadAllowed":false,"virtual":true}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 80.648584ms
+    - id: 16
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/nodes/431
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 207
+        uncompressed: false
+        body: '{"autoImport":false,"forwardMode":"AUTO","id":431,"importDisabled":false,"importDisabledReason":"","name":"tf-ctms-route-target","notificationEnabled":false,"targets":[],"uploadAllowed":false,"virtual":true}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 99.811916ms
+    - id: 17
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/routes/433
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 118
+        uncompressed: false
+        body: '{"description":"My Description Updated","id":433,"name":"tf-ctms-route-renamed","sourceNodeId":429,"targetNodeId":431}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 86.50975ms
+    - id: 18
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 29
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-auth.example
+        remote_addr: ""
+        request_uri: ""
+        body: grant_type=client_credentials
+        form: {}
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://redacted-auth.example/oauth/token
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"access_token":"redacted","expires_in":43199,"jti":"redacted","scope":"redacted","token_type":"redacted"}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 39.961ms
+    - id: 19
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/routes/433
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 118
+        uncompressed: false
+        body: '{"description":"My Description Updated","id":433,"name":"tf-ctms-route-renamed","sourceNodeId":429,"targetNodeId":431}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 93.012125ms
+    - id: 20
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 29
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-auth.example
+        remote_addr: ""
+        request_uri: ""
+        body: grant_type=client_credentials
+        form: {}
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://redacted-auth.example/oauth/token
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"access_token":"redacted","expires_in":43199,"jti":"redacted","scope":"redacted","token_type":"redacted"}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 45.610791ms
+    - id: 21
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/nodes/431
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 207
+        uncompressed: false
+        body: '{"autoImport":false,"forwardMode":"AUTO","id":431,"importDisabled":false,"importDisabledReason":"","name":"tf-ctms-route-target","notificationEnabled":false,"targets":[],"uploadAllowed":false,"virtual":true}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 85.503292ms
+    - id: 22
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/nodes/429
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 207
+        uncompressed: false
+        body: '{"autoImport":false,"forwardMode":"AUTO","id":429,"importDisabled":false,"importDisabledReason":"","name":"tf-ctms-route-source","notificationEnabled":false,"targets":[],"uploadAllowed":false,"virtual":true}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 108.652042ms
+    - id: 23
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/routes/433
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 118
+        uncompressed: false
+        body: '{"description":"My Description Updated","id":433,"name":"tf-ctms-route-renamed","sourceNodeId":429,"targetNodeId":431}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 458.619084ms
+    - id: 24
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 29
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-auth.example
+        remote_addr: ""
+        request_uri: ""
+        body: grant_type=client_credentials
+        form: {}
+        headers:
+            Content-Type:
+                - application/x-www-form-urlencoded
+        url: https://redacted-auth.example/oauth/token
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: false
+        body: '{"access_token":"redacted","expires_in":43199,"jti":"redacted","scope":"redacted","token_type":"redacted"}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 124.432417ms
+    - id: 25
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/routes/433
+        method: DELETE
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers: {}
+        status: 204 No Content
+        code: 204
+        duration: 97.650583ms
+    - id: 26
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/nodes/431
+        method: DELETE
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers: {}
+        status: 204 No Content
+        code: 204
+        duration: 121.596958ms
+    - id: 27
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/nodes/429
+        method: DELETE
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers: {}
+        status: 204 No Content
+        code: 204
+        duration: 121.646875ms

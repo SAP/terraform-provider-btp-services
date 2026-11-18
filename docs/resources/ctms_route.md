@@ -40,7 +40,7 @@ resource "btpservice_ctms_route" "development_to_quality" {
 
 ### Optional
 
-- `description` (String) Route description. Omit to leave it managed by CTMS.
+- `description` (String) Route description, up to 512 characters. Supports Latin letters, numbers, spaces, and -._~:\/?#[]@!$&()*+,;=%. Empty descriptions are sent as JSON null. Omit to leave it managed by CTMS.
 
 ### Read-Only
 

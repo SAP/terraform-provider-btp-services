@@ -111,7 +111,7 @@ func TestRoutesFacade_Update(t *testing.T) {
 			assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
 			var body json.RawMessage
 			assertRequestBody(t, r, &body)
-			assert.JSONEq(t, `{"description":""}`, string(body))
+			assert.JSONEq(t, `{"description":null}`, string(body))
 
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(routeResponseJSON))
@@ -131,7 +131,7 @@ func TestRoutesFacade_Update(t *testing.T) {
 			assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
 			var body json.RawMessage
 			assertRequestBody(t, r, &body)
-			assert.JSONEq(t, `{"description":""}`, string(body))
+			assert.JSONEq(t, `{"description":null}`, string(body))
 
 			w.WriteHeader(http.StatusNotFound)
 			_, _ = w.Write([]byte(`{"errorType":"NotFound","message":"gone"}`))
@@ -258,7 +258,7 @@ func TestRoutesFacade_Lifecycle(t *testing.T) {
 	require.Equal(t, new(int64(1)), updated.Id)
 	observed, err = imported.Routes.Get(ctx, 1)
 	require.NoError(t, err)
-	require.Equal(t, new(""), observed.Description)
+	require.Nil(t, observed.Description)
 	require.Equal(t, new(int64(10)), observed.SourceNodeId)
 	require.Equal(t, new(int64(20)), observed.TargetNodeId)
 
