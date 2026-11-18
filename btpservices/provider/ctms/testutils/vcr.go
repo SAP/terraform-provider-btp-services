@@ -88,7 +88,7 @@ func normalizeCTMSURL(parsed *url.URL, values tfutils.TestCredentials) {
 func redactCTMSString(key, value string, values tfutils.TestCredentials) string {
 	lower := strings.ToLower(key)
 	if strings.Contains(lower, "token") || strings.Contains(lower, "secret") || strings.Contains(lower, "password") ||
-		lower == "client_id" || lower == "clientid" {
+		lower == "client_id" || lower == "clientid" || lower == "jti" || lower == "scope" {
 		return "redacted"
 	}
 

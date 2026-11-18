@@ -12,19 +12,17 @@ import (
 )
 
 type nodeModel struct {
-	ID                   types.String `tfsdk:"id"`
-	Name                 types.String `tfsdk:"name"`
-	Description          types.String `tfsdk:"description"`
-	UploadAllowed        types.Bool   `tfsdk:"upload_allowed"`
-	ForwardMode          types.String `tfsdk:"forward_mode"`
-	NotificationEnabled  types.Bool   `tfsdk:"notification_enabled"`
-	ImportDisabled       types.Bool   `tfsdk:"import_disabled"`
-	ImportDisabledReason types.String `tfsdk:"import_disabled_reason"`
-	Virtual              types.Bool   `tfsdk:"virtual"`
-	AutoImport           types.Bool   `tfsdk:"auto_import"`
-	ControlledBy         types.String `tfsdk:"controlled_by"`
-	JobID                types.Int64  `tfsdk:"job_id"`
-	Targets              types.List   `tfsdk:"targets"`
+	ID                  types.String `tfsdk:"id"`
+	Name                types.String `tfsdk:"name"`
+	Description         types.String `tfsdk:"description"`
+	UploadAllowed       types.Bool   `tfsdk:"upload_allowed"`
+	ForwardMode         types.String `tfsdk:"forward_mode"`
+	NotificationEnabled types.Bool   `tfsdk:"notification_enabled"`
+	Virtual             types.Bool   `tfsdk:"virtual"`
+	AutoImport          types.Bool   `tfsdk:"auto_import"`
+	ControlledBy        types.String `tfsdk:"controlled_by"`
+	JobID               types.Int64  `tfsdk:"job_id"`
+	Targets             types.List   `tfsdk:"targets"`
 }
 
 type nodesModel struct {
@@ -32,36 +30,38 @@ type nodesModel struct {
 }
 
 var nodeAttrTypes = map[string]attr.Type{
-	"id":                     types.StringType,
-	"name":                   types.StringType,
-	"description":            types.StringType,
-	"upload_allowed":         types.BoolType,
-	"forward_mode":           types.StringType,
-	"notification_enabled":   types.BoolType,
-	"import_disabled":        types.BoolType,
-	"import_disabled_reason": types.StringType,
-	"virtual":                types.BoolType,
-	"auto_import":            types.BoolType,
-	"controlled_by":          types.StringType,
-	"job_id":                 types.Int64Type,
-	"targets":                types.ListType{ElemType: targetType},
+	"id":                   types.StringType,
+	"name":                 types.StringType,
+	"description":          types.StringType,
+	"upload_allowed":       types.BoolType,
+	"forward_mode":         types.StringType,
+	"notification_enabled": types.BoolType,
+	"virtual":              types.BoolType,
+	"auto_import":          types.BoolType,
+	"controlled_by":        types.StringType,
+	"job_id":               types.Int64Type,
+	"targets":              types.ListType{ElemType: targetType},
 }
 
 func nodeValueFrom(ctx context.Context, v ctmsmodels.NodeResponseTarget) (nodeModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
+	// CTMS returns null for a cleared description. Keep the Terraform empty
+	// string representation stable through apply, refresh, and import.
+	description := ""
+	if v.Description != nil {
+		description = *v.Description
+	}
 	m := nodeModel{
-		ID:                   utils.IDValue(v.Id),
-		Name:                 types.StringPointerValue(v.Name),
-		Description:          types.StringPointerValue(v.Description),
-		UploadAllowed:        types.BoolPointerValue(v.UploadAllowed),
-		ForwardMode:          utils.EnumValue(v.ForwardMode),
-		NotificationEnabled:  types.BoolPointerValue(v.NotificationEnabled),
-		ImportDisabled:       types.BoolPointerValue(v.ImportDisabled),
-		ImportDisabledReason: types.StringPointerValue(v.ImportDisabledReason),
-		Virtual:              types.BoolPointerValue(v.Virtual),
-		AutoImport:           types.BoolPointerValue(v.AutoImport),
-		ControlledBy:         utils.EnumValue(v.ControlledBy),
-		JobID:                types.Int64PointerValue(v.JobId),
+		ID:                  utils.IDValue(v.Id),
+		Name:                types.StringPointerValue(v.Name),
+		Description:         types.StringValue(description),
+		UploadAllowed:       types.BoolPointerValue(v.UploadAllowed),
+		ForwardMode:         utils.EnumValue(v.ForwardMode),
+		NotificationEnabled: types.BoolPointerValue(v.NotificationEnabled),
+		Virtual:             types.BoolPointerValue(v.Virtual),
+		AutoImport:          types.BoolPointerValue(v.AutoImport),
+		ControlledBy:        utils.EnumValue(v.ControlledBy),
+		JobID:               types.Int64PointerValue(v.JobId),
 	}
 	if v.Id == nil || v.Name == nil {
 		diags.AddError("Incomplete CTMS Response", "The API response must contain an ID and name.")

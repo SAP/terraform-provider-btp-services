@@ -24,7 +24,7 @@ func TestPatchPresence(t *testing.T) {
 			AutoImport:           new(false),
 			Targets:              new([]DeployTarget{}),
 		}, `{
-  "description": "",
+  "description": null,
   "uploadAllowed": false,
   "notificationEnabled": false,
   "importDisabled": false,
@@ -41,6 +41,26 @@ func TestPatchPresence(t *testing.T) {
 				SourceNodeId: new(int64(0)),
 			},
 			want: `{"description":"","sourceNodeId":0}`,
+		},
+		{
+			name: "create omitted description",
+			body: NodeCreateRequest{Name: "node"},
+			want: `{"name":"node"}`,
+		},
+		{
+			name: "create empty description",
+			body: NodeCreateRequest{Name: "node", Description: new("")},
+			want: `{"name":"node","description":null}`,
+		},
+		{
+			name: "create non-empty description",
+			body: NodeCreateRequest{Name: "node", Description: new("Development Space")},
+			want: `{"name":"node","description":"Development Space"}`,
+		},
+		{
+			name: "update non-empty description",
+			body: NodeUpdateRequest{Description: new("Development Space")},
+			want: `{"description":"Development Space"}`,
 		},
 		{
 			name: "create explicit defaults",

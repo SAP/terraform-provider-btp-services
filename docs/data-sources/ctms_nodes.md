@@ -27,13 +27,11 @@ data "btpservice_ctms_nodes" "example" {}
 
 Read-Only:
 
-- `auto_import` (Boolean) Automatically import eligible requests. Enabling this can immediately import queued requests and deactivate existing schedules. It can coexist with import_disabled; imports resume when that flag is cleared.
+- `auto_import` (Boolean) Automatically import eligible requests. Enabling this can immediately import queued requests and deactivate existing schedules.
 - `controlled_by` (String) Application controlling the node. Read-only until the API reset contract is confirmed.
 - `description` (String) Node description. Omit to leave it managed by CTMS.
 - `forward_mode` (String) Forwarding mode: AUTO (pre-import), POST_IMPORT, ON_SUCCESS, or MANUAL.
 - `id` (String) Decimal node ID assigned by CTMS.
-- `import_disabled` (Boolean) Disable imports, including scheduled and automatic imports; forwarding can still occur.
-- `import_disabled_reason` (String) Optional reason for disabling imports.
 - `job_id` (Number) Import scheduler job ID, if present.
 - `name` (String) Case-sensitive node name. Changing it replaces the node.
 - `notification_enabled` (Boolean) Enable notifications. Requires an Alert Notification subscription and configuration in the subaccount.

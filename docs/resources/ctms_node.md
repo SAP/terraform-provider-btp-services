@@ -24,9 +24,8 @@ resource "btpservice_ctms_node" "source" {
 }
 
 resource "btpservice_ctms_node" "target" {
-  name            = "QUALITY"
-  import_disabled = true
-  auto_import     = false
+  name        = "QUALITY"
+  auto_import = false
 
   targets = [{
     content_type     = "MTA"
@@ -47,11 +46,9 @@ resource "btpservice_ctms_node" "target" {
 
 ### Optional
 
-- `auto_import` (Boolean) Automatically import eligible requests. Enabling this can immediately import queued requests and deactivate existing schedules. It can coexist with import_disabled; imports resume when that flag is cleared.
-- `description` (String) Node description. Omit to leave it managed by CTMS.
+- `auto_import` (Boolean) Automatically import eligible requests. Enabling this can immediately import queued requests and deactivate existing schedules.
+- `description` (String) Node description, up to 512 characters. Supports Latin letters, numbers, spaces, and -._~:\/?#[]@!$&()*+,;=%. An empty string clears the description using API null. Omit to leave it managed by CTMS.
 - `forward_mode` (String) Forwarding mode: AUTO (pre-import), POST_IMPORT, ON_SUCCESS, or MANUAL.
-- `import_disabled` (Boolean) Disable imports, including scheduled and automatic imports; forwarding can still occur.
-- `import_disabled_reason` (String) Optional reason for disabling imports.
 - `notification_enabled` (Boolean) Enable notifications. Requires an Alert Notification subscription and configuration in the subaccount.
 - `targets` (Attributes List) Deployment targets in API order. Omit to leave targets managed by CTMS; an explicit empty list requests clearing them. Virtual nodes cannot have targets. (see [below for nested schema](#nestedatt--targets))
 - `upload_allowed` (Boolean) Allow file uploads to this node.

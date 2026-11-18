@@ -142,7 +142,7 @@ func TestNodesFacade_Update(t *testing.T) {
 			assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
 			var body json.RawMessage
 			assertRequestBody(t, r, &body)
-			assert.JSONEq(t, `{"uploadAllowed":false,"description":"","targets":[]}`, string(body))
+			assert.JSONEq(t, `{"uploadAllowed":false,"description":null,"targets":[]}`, string(body))
 
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(nodeResponseJSON))
@@ -166,7 +166,7 @@ func TestNodesFacade_Update(t *testing.T) {
 			assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
 			var body json.RawMessage
 			assertRequestBody(t, r, &body)
-			assert.JSONEq(t, `{"uploadAllowed":false,"description":"","targets":[]}`, string(body))
+			assert.JSONEq(t, `{"uploadAllowed":false,"description":null,"targets":[]}`, string(body))
 
 			w.WriteHeader(http.StatusNotFound)
 			_, _ = w.Write([]byte(`{"errorType":"NotFound","message":"gone"}`))
@@ -304,7 +304,7 @@ func TestNodesFacade_Lifecycle(t *testing.T) {
 	require.Equal(t, new(int64(1)), updated.Id)
 	observed, err = imported.Nodes.Get(ctx, 1)
 	require.NoError(t, err)
-	require.Equal(t, new(""), observed.Description)
+	require.Nil(t, observed.Description)
 	require.Equal(t, new(false), observed.UploadAllowed)
 	require.NotNil(t, observed.Targets)
 	require.Empty(t, *observed.Targets)
