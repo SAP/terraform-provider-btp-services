@@ -60,14 +60,6 @@ func (d *nodesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 							Computed:            true,
 							MarkdownDescription: "Enable notifications. Requires an Alert Notification subscription and configuration in the subaccount.",
 						},
-						"import_disabled": schema.BoolAttribute{
-							Computed:            true,
-							MarkdownDescription: "Disable imports, including scheduled and automatic imports; forwarding can still occur.",
-						},
-						"import_disabled_reason": schema.StringAttribute{
-							Computed:            true,
-							MarkdownDescription: "Optional reason for disabling imports.",
-						},
 						"virtual": schema.BoolAttribute{
 							Computed:            true,
 							MarkdownDescription: "Virtual nodes cannot have deployment targets.",
@@ -75,8 +67,7 @@ func (d *nodesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 						"auto_import": schema.BoolAttribute{
 							Computed: true,
 							MarkdownDescription: "Automatically import eligible requests. Enabling this can immediately import queued requests and " +
-								"deactivate existing schedules. It can coexist with import_disabled; imports resume when that flag is " +
-								"cleared.",
+								"deactivate existing schedules.",
 						},
 						"controlled_by": schema.StringAttribute{
 							Computed:            true,

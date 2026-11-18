@@ -27,12 +27,10 @@ data "btpservice_ctms_node" "example" {
 
 ### Read-Only
 
-- `auto_import` (Boolean) Automatically import eligible requests. Enabling this can immediately import queued requests and deactivate existing schedules. It can coexist with import_disabled; imports resume when that flag is cleared.
+- `auto_import` (Boolean) Automatically import eligible requests. Enabling this can immediately import queued requests and deactivate existing schedules.
 - `controlled_by` (String) Application controlling the node. Read-only until the API reset contract is confirmed.
 - `description` (String) Node description. Omit to leave it managed by CTMS.
 - `forward_mode` (String) Forwarding mode: AUTO (pre-import), POST_IMPORT, ON_SUCCESS, or MANUAL.
-- `import_disabled` (Boolean) Disable imports, including scheduled and automatic imports; forwarding can still occur.
-- `import_disabled_reason` (String) Optional reason for disabling imports.
 - `job_id` (Number) Import scheduler job ID, if present.
 - `notification_enabled` (Boolean) Enable notifications. Requires an Alert Notification subscription and configuration in the subaccount.
 - `targets` (Attributes List) Deployment targets in API order. Omit to leave targets managed by CTMS; an explicit empty list requests clearing them. Virtual nodes cannot have targets. (see [below for nested schema](#nestedatt--targets))

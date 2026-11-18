@@ -16,7 +16,7 @@ type NodeCreateRequest struct {
 	// Node name, must be unique
 	Name    string          `json:"name"`
 	Targets *[]DeployTarget `json:"targets,omitempty"`
-	// Node description
+	// Node description. MarshalJSON encodes an explicit empty string as null.
 	Description *string `json:"description,omitempty"`
 	// Upload to node is allowed
 	UploadAllowed *bool         `json:"uploadAllowed,omitempty"`

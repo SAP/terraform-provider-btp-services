@@ -1,0 +1,4281 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "The Cloud Transport Management API offers operations for the export/upload, and import of files to Cloud Transport Management, as well as for logging/monitoring. In case of a physical file transport, the 'File Upload' is always the first operation, followed by 'Node Export' or 'Node Upload'. It is also possible to perform a transport based on a reference, where a 'File Upload' is not needed. Use 'Node Export', if you want to enable the transport of content directly in your application. The previously uploaded file or a specified reference is attached to a new transport request which is added to the import queues of the follow-on transport nodes of the export node. Use 'Node Upload' in continuous integration scenarios, for example, where you have an external content or application archive (MTA, for example) that you want to upload in the first transport node of your transport landscape. You can also use 'Node Upload' to upload content or applications to a specific subaccount that is not part of your standard transport landscape, for example, a training subaccount. In addition, the Cloud Transport Management API offers operations for importing, forwarding and resetting one or many specified transport requests as well as an operation for importing all transport requests of a node. Each of these operations produces a transport action which you can retrieve using the 'Get transport action' operation. The 'Get transport requests' operation is available for imports to get transport requests of a specified node. Typically, an import is an asynchronous operation, which you should monitor by retrieving the import action while the action status is 'running'. Use the 'Get transport logs' operation to get the logs of a transport action, and the 'Get transport request logs' operation to get transport request-specific logs. Use the Cloud Transport Management Versioning API to ensure that the version of this API is supported by Cloud Transport Management.\n",
+    "title": "Cloud Transport Management",
+    "version": "2.5.0"
+  },
+  "x-sap-shortText": "Transport development artifacts and application-specific content.",
+  "host": "sandbox.api.sap.com",
+  "basePath": "/CloudTransportManagement/v2",
+  "securityDefinitions": {
+    "OAuth2": {
+      "type": "oauth2",
+      "description": "To use this API, you must get OAuth client credentials (client ID and client secret) from SAP BTP by using the cockpit or the URL  https://<tenant_name>.authentication.<region>.hana.ondemand.com/oauth/token?grant_type=client_credentials. You must then input the the client credentials to the SAP BTP token  endpoint to obtain an access token. \n",
+      "flow": "application",
+      "tokenUrl": "https://{subdomain}.authentication.{region}.hana.ondemand.com/oauth/token",
+      "scopes": {}
+    }
+  },
+  "security": [
+    {
+      "OAuth2": []
+    }
+  ],
+  "x-servers": [
+    {
+      "url": "https://transport-service-app-backend.ts.cfapps.{region}.hana.ondemand.com/v2",
+      "description": "Cloud Transport Management Production URL",
+      "templates": {
+        "region": {
+          "description": "The SAP BTP region (domain) where the application is deployed"
+        },
+        "subdomain": {
+          "description": "Tenant subdomain. The subdomain can be seen on SAP BTP Cockpit as part of Subaccount Details"
+        }
+      }
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/files/upload": {
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "required": true,
+            "type": "file",
+            "description": "File with application content"
+          },
+          {
+            "name": "namedUser",
+            "in": "formData",
+            "required": false,
+            "type": "string",
+            "maxLength": 60,
+            "description": "User displayed in Cloud Transport Management UI. If not given, the authentication user will be shown in Cloud Transport Management UI."
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "A new file was created",
+            "examples": {
+              "fileId": 573,
+              "fileName": "example.mtar"
+            },
+            "schema": {
+              "$ref": "#/definitions/FileInfo"
+            }
+          },
+          "400": {
+            "description": "Request could not be processed (Bad Request)",
+            "schema": {
+              "$ref": "#/definitions/ExceptionObject"
+            }
+          },
+          "401": {
+            "description": "Unauthorized to trigger this action",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "schema": {
+              "$ref": "#/definitions/ExceptionObject"
+            }
+          },
+          "500": {
+            "description": "Request could not be processed (Internal Server Error)",
+            "schema": {
+              "$ref": "#/definitions/ExceptionObject"
+            }
+          }
+        },
+        "tags": [
+          "Files"
+        ],
+        "description": "Uploads a file (application or content archive) to Cloud Transport Management and returns a file ID. You can reference the file ID in Node Export and Node Upload requests.\n",
+        "operationId": "FILE_UPLOAD_V2",
+        "summary": "File Upload"
+      }
+    },
+    "/files/{fileId}": {
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "description": "File ID as returned by POST /files/upload",
+            "in": "path",
+            "name": "fileId",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 789
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully deleted"
+          },
+          "401": {
+            "description": "Unauthorized to trigger this action",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "The file {fileId} does not exist (Not Found)",
+            "schema": {
+              "$ref": "#/definitions/ExceptionObject"
+            }
+          },
+          "500": {
+            "description": "Request could not be processed (Internal Server Error)",
+            "schema": {
+              "$ref": "#/definitions/ExceptionObject"
+            }
+          }
+        },
+        "tags": [
+          "Files"
+        ],
+        "description": "Deletes a file (application or content archive) that was uploaded to Cloud Transport Management but is not related to a Transport Request.",
+        "summary": "File Deletion",
+        "operationId": "FILE_DELETE"
+      }
+    },
+    "/nodes/export": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "description": "Request body",
+            "schema": {
+              "$ref": "#/definitions/NodeExportBodyEntityName"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "schema": {
+              "$ref": "#/definitions/ExportEntity"
+            }
+          },
+          "400": {
+            "description": "Request could not be processed (Bad Request)",
+            "schema": {
+              "$ref": "#/definitions/ExceptionObject"
+            }
+          },
+          "401": {
+            "description": "Unauthorized to trigger this action",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Node does not exist",
+            "schema": {
+              "$ref": "#/definitions/ExceptionObject"
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "schema": {
+              "$ref": "#/definitions/ExceptionObject"
+            }
+          },
+          "500": {
+            "description": "Request could not be processed (Internal Server Error)",
+            "schema": {
+              "$ref": "#/definitions/ExceptionObject"
+            }
+          }
+        },
+        "tags": [
+          "Export & Upload"
+        ],
+        "description": "Creates a transport request containing (multiple) file or application-specific references.  The export node is identified by its name. The transport request is added to the queues of the follow-on nodes of export node.",
+        "operationId": "NODE_EXPORT_BY_NAME_V2",
+        "summary": "Node Export"
+      }
+    },
+    "/nodes/upload": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "description": "Request body",
+            "schema": {
+              "$ref": "#/definitions/NodeExportBodyEntityName"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "schema": {
+              "$ref": "#/definitions/ExportEntity"
+            }
+          },
+          "400": {
+            "description": "Request could not be processed (Bad Request)",
+            "schema": {
+              "$ref": "#/definitions/ExceptionObject"
+            }
+          },
+          "401": {
+            "description": "Unauthorized to trigger this action",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Node does not exist",
+            "schema": {
+              "$ref": "#/definitions/ExceptionObject"
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "schema": {
+              "$ref": "#/definitions/ExceptionObject"
+            }
+          },
+          "500": {
+            "description": "Request could not be processed (Internal Server Error)",
+            "schema": {
+              "$ref": "#/definitions/ExceptionObject"
+            }
+          }
+        },
+        "tags": [
+          "Export & Upload"
+        ],
+        "description": "Creates a transport request with content specified by the File Upload operation or a by an application-specific reference.  The upload node is identified by its name. The transport request is added to the queue of the upload node.",
+        "operationId": "NODE_UPLOAD_BY_NAME_V2",
+        "summary": "Node Upload"
+      }
+    },
+    "/nodes/{nodeId}/transportRequests": {
+      "get": {
+        "tags": [
+          "Import"
+        ],
+        "summary": "Get transport requests",
+        "description": "Returns transport requests for a node",
+        "operationId": "NODE_TRS_GET_V2",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Transport request status (one of in,ru,re,su,sk,wa,er,fa,de):\n  * `in` - Initial\n  * `ru` - Running\n  * `re` - Repeatable\n  * `su` - Succeeded\n  * `sk` - Skipped\n  * `wa` - Warning\n  * `er` - Error\n  * `fa` - Fatal\n  * `de` - Deleted\n",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "createdAtFrom",
+            "in": "query",
+            "description": "Start date and time of transport request creation. Must have format \"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\"",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "createdAtTo",
+            "in": "query",
+            "description": "End date and time of transport request creation. Must have format \"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\"",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "queuedAtFrom",
+            "in": "query",
+            "description": "Start date and time of queue entry creation. Must have format \"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\"",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "queuedAtTo",
+            "in": "query",
+            "description": "End date and time of queue entry creation. Must have format \"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\"",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "description": "Transport request owner",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/TransportRequestsResponse2"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/nodes/{nodeId}/transportRequests/{transportRequestId}": {
+      "get": {
+        "tags": [
+          "Import"
+        ],
+        "summary": "Get transport request",
+        "description": "Returns details of a transport requests in a node",
+        "operationId": "NODE_TR_GET_V2",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          },
+          {
+            "name": "transportRequestId",
+            "in": "path",
+            "description": "Transport Request ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 30
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/TransportRequestDetailsResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/nodes/{nodeId}/transportRequests/import": {
+      "post": {
+        "tags": [
+          "Import"
+        ],
+        "summary": "Import specified transport requests",
+        "description": "Imports transport requests specified in request body. Request body must contain valid for import transport request IDs. If one of the IDs is invalid, the operation will fail\n",
+        "operationId": "NODE_IMPORT_SELECTED_V2",
+        "consumes": [
+          "application/json;charset=UTF-8"
+        ],
+        "produces": [
+          "application/json;charset=UTF-8"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          },
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "Request body",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/TransportRequestsBodyEntity2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ImportResponse2"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          },
+          "423": {
+            "description": "Locked. The import queue is locked because another import process is already running",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/nodes/{nodeId}/transportRequests/importAll": {
+      "post": {
+        "tags": [
+          "Import"
+        ],
+        "summary": "Import all transport requests",
+        "description": "Import all importable transport requests of a node",
+        "operationId": "NODE_IMPORT_ALL_V2",
+        "consumes": [
+          "application/json;charset=UTF-8"
+        ],
+        "produces": [
+          "application/json;charset=UTF-8"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          },
+          {
+            "in": "body",
+            "name": "entity",
+            "description": "Request body",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/TransportRequestsBodyEntityImpAll2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ImportResponse2"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          },
+          "423": {
+            "description": "Locked. The import queue is locked because another import process is already running",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/nodes/{nodeId}/transportRequests/forward": {
+      "post": {
+        "tags": [
+          "Import"
+        ],
+        "summary": "Forward transport requests",
+        "description": "Forwards transport requests specified in request body. Request body must contain valid for forward transport request IDs. If one of the IDs is invalid, the operation will fail\n",
+        "operationId": "NODE_FORWARD_V2",
+        "consumes": [
+          "application/json;charset=UTF-8"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          },
+          {
+            "in": "body",
+            "name": "transportRequestsReq",
+            "description": "Request Body",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/TransportRequestsBodyEntity2"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/nodes/{nodeId}/transportRequests/reset": {
+      "post": {
+        "tags": [
+          "Import"
+        ],
+        "summary": "Reset transport requests",
+        "description": "Resets transport requests specified in request body. Request body must contain valid for reset transport request IDs. If one of the IDs is invalid, the operation will fail\n",
+        "operationId": "NODE_RESET_V2",
+        "consumes": [
+          "application/json;charset=UTF-8"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          },
+          {
+            "in": "body",
+            "name": "transportRequestsReq",
+            "description": "Request Body",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/TransportRequestsBodyEntity2"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/nodes/{nodeId}/transportRequests/remove": {
+      "post": {
+        "tags": [
+          "Import"
+        ],
+        "summary": "Remove transport requests from the import queue of the node",
+        "description": "Removes transport requests specified in request body from the import queue of the node. Request body must contain valid for remove transport request IDs. If one of the IDs is invalid, the operation will fail\n",
+        "operationId": "NODE_TRS_REMOVE_V2",
+        "consumes": [
+          "application/json;charset=UTF-8"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          },
+          {
+            "in": "body",
+            "name": "transportRequestsReq",
+            "description": "Request Body",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/TransportRequestsBodyEntity2"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/actions/{actionId}": {
+      "get": {
+        "tags": [
+          "Logging & Monitoring"
+        ],
+        "summary": "Get transport action",
+        "description": "Returns properties of an action including transport requests\n",
+        "operationId": "TRANSPORT_ACTION_GET_V2",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "actionId",
+            "in": "path",
+            "description": "Action ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 345
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ActionResponse2"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/actions/{actionId}/logs": {
+      "get": {
+        "tags": [
+          "Logging & Monitoring"
+        ],
+        "summary": "Get transport logs",
+        "description": "Returns logs for a transport action",
+        "operationId": "TRANSPORT_ACTION_LOGS_GET_V2",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "actionId",
+            "in": "path",
+            "description": "Action ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 345
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/LogsResponse2"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/nodes/{nodeId}/transportRequests/{transportRequestId}/logs": {
+      "get": {
+        "tags": [
+          "Logging & Monitoring"
+        ],
+        "summary": "Get transport request logs",
+        "description": "Returns logs for a transport request",
+        "operationId": "NODE_TR_LOG_GET",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          },
+          {
+            "name": "transportRequestId",
+            "in": "path",
+            "description": "Transport Request ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 456
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/TrLogsResponse2"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/transportRequests/{transportRequestId}/tracking": {
+      "get": {
+        "tags": [
+          "Logging & Monitoring"
+        ],
+        "summary": "Get transport request tracking information",
+        "description": "Provides information about all transport nodes that are related to the transport request",
+        "operationId": "TR_TRACKING_GET_V2",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "transportRequestId",
+            "in": "path",
+            "description": "Transport Request ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 456
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/TransportRequestTrackingResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/nodes/{nodeId}/mtaExtDescriptors": {
+      "post": {
+        "tags": [
+          "MtaExtDescriptor"
+        ],
+        "summary": "MTA extension descriptor upload",
+        "description": "Uploads an MTA extension descriptor for a node\n",
+        "operationId": "NODE_UPLOAD_MTA_EXT_DESCR",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          },
+          {
+            "in": "header",
+            "name": "tms-named-user",
+            "required": false,
+            "type": "string",
+            "maxLength": 60,
+            "description": "User displayed in Cloud Transport Management UI. If not given, the authentication user will be shown in Cloud Transport Management UI.",
+            "x-example": "USR15285"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "required": true,
+            "type": "file",
+            "description": "MTA extension descriptor file"
+          },
+          {
+            "name": "mtaVersion",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": "MTA version for which the extension descriptor will be used. You can use an asterisk (*) to accept any MTA version, or use a specific version compliant with SemVer 2.0, e.g. 1.0.0 (see semver.org).",
+            "x-example": "1.0.0"
+          },
+          {
+            "name": "description",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "maxLength": 512,
+            "description": "MTA extension descriptor description",
+            "x-example": "My descriptor"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "A new file was created",
+            "schema": {
+              "$ref": "#/definitions/MtaExtDescriptorResponse2"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Node was not found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "MtaExtDescriptor"
+        ],
+        "summary": "Get MTA extension descriptors properties for a node",
+        "description": "Returns properties of MTA extension descriptors for a node\n",
+        "operationId": "NODE_MTA_EXT_DESCR",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "mtaId",
+            "in": "query",
+            "description": "MTA ID",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "mtaVersion",
+            "in": "query",
+            "description": "MTA version for which the extension descriptor will be used. You can use an asterisk (*) to accept any MTA version, or use a specific version compliant with SemVer 2.0, e.g. 1.0.0 (see semver.org).",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/MtaExtDescriptorsResponse2"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Node was not found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/nodes/{nodeId}/mtaExtDescriptors/{mtaExtDescriptorId}": {
+      "put": {
+        "tags": [
+          "MtaExtDescriptor"
+        ],
+        "summary": "MTA extension descriptor update",
+        "description": "Updates an existing MTA extension descriptor for a node and its properties\n",
+        "operationId": "NODE_UPDATE_FULL_MTA_EXT_DESCR",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          },
+          {
+            "name": "mtaExtDescriptorId",
+            "in": "path",
+            "description": "MTA extension descriptor ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 1260
+          },
+          {
+            "in": "header",
+            "name": "tms-named-user",
+            "required": false,
+            "type": "string",
+            "maxLength": 60,
+            "description": "User displayed in Cloud Transport Management UI. If not given, the authentication user will be shown in Cloud Transport Management UI.",
+            "x-example": "USR15285"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "required": true,
+            "type": "file",
+            "description": "MTA extension descriptor file"
+          },
+          {
+            "name": "mtaVersion",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "description": "MTA version for which the extension descriptor will be used. You can use an asterisk (*) to accept any MTA version, or use a specific version compliant with SemVer 2.0, e.g. 1.0.0 (see semver.org)."
+          },
+          {
+            "name": "description",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "maxLength": 512,
+            "description": "MTA extension descriptor description"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully updated",
+            "schema": {
+              "$ref": "#/definitions/MtaExtDescriptorResponse2"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Node or MTA extension descriptor was not found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "MtaExtDescriptor"
+        ],
+        "summary": "MTA extension descriptor modify",
+        "description": "Modifies properties of an existing MTA extension descriptor for a node\n",
+        "operationId": "NODE_UPDATE_MTA_EXT_DESCR",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          },
+          {
+            "name": "mtaExtDescriptorId",
+            "in": "path",
+            "description": "MTA extension descriptor ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 1260
+          },
+          {
+            "in": "header",
+            "name": "tms-named-user",
+            "required": false,
+            "type": "string",
+            "maxLength": 60,
+            "description": "User displayed in Cloud Transport Management UI. If not given, the authentication user will be shown in Cloud Transport Management UI."
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "description": "Request body",
+            "schema": {
+              "$ref": "#/definitions/MtaExtUpdateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully updated",
+            "schema": {
+              "$ref": "#/definitions/MtaExtDescriptorResponse2"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Node or MTA extension descriptor was not found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "MtaExtDescriptor"
+        ],
+        "summary": "MTA extension descriptor deletion",
+        "description": "Deletes the spcified MTA extension descriptor for a node\n",
+        "operationId": "NODE_DELETE_MTA_EXT_DESCR",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          },
+          {
+            "name": "mtaExtDescriptorId",
+            "in": "path",
+            "description": "MTA extension descriptor ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 1260
+          },
+          {
+            "in": "header",
+            "name": "tms-named-user",
+            "required": false,
+            "type": "string",
+            "maxLength": 60,
+            "description": "User displayed in Cloud Transport Management UI. If not given, the authentication user will be shown in Cloud Transport Management UI."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully deleted"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Node or MTA extension descriptor was not found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/nodes/{nodeId}/isMtaExtDescriptorSupported": {
+      "get": {
+        "tags": [
+          "MtaExtDescriptor"
+        ],
+        "summary": "Is MTA extension descriptor supported for a node",
+        "description": "Returns information whether the MTA extension descriptor is supported for the specified node\n",
+        "operationId": "NODE_IS_MTA_EXT_DESCR_SUPPORTED",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/isMtaExtDescriptorSupportedResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Node was not found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/nodes/{nodeId}/mtaExtDescriptors/{mtaExtDescriptorId}/download": {
+      "get": {
+        "tags": [
+          "MtaExtDescriptor"
+        ],
+        "summary": "Get MTA extension descriptor",
+        "description": "Returns the spcified MTA extension descriptor for a node\n",
+        "operationId": "NODE_DOWNLOAD_MTA_EXT_DESCR",
+        "produces": [
+          "application/octet-stream"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          },
+          {
+            "name": "mtaExtDescriptorId",
+            "in": "path",
+            "description": "MTA extension descriptor ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 1260
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Node or MTA extension descriptor was not found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/nodes/{nodeId}/deployConfig": {
+      "post": {
+        "tags": [
+          "Deployment Configuration"
+        ],
+        "summary": "Deployment configuration upload",
+        "description": "Uploads a deployment configuration file for a node. If a deployment configuration already exists for the node, it is replaced.\n",
+        "operationId": "NODE_UPLOAD_DEPLOY_CONFIG",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          },
+          {
+            "in": "header",
+            "name": "tms-named-user",
+            "required": false,
+            "type": "string",
+            "maxLength": 60,
+            "description": "User displayed in Cloud Transport Management UI. If not given, the authentication user will be shown in Cloud Transport Management UI.",
+            "x-example": "USR15285"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "required": true,
+            "type": "file",
+            "description": "Deployment configuration file"
+          },
+          {
+            "name": "description",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "maxLength": 512,
+            "description": "Description of the deployment configuration",
+            "x-example": "My deployment configuration"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Deployment configuration was uploaded successfully",
+            "schema": {
+              "$ref": "#/definitions/FileInfo"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Node was not found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Deployment Configuration"
+        ],
+        "summary": "Get deployment configuration properties for a node",
+        "description": "Returns properties of the deployment configuration for a node\n",
+        "operationId": "NODE_GET_DEPLOY_CONFIG",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DeployConfigResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Node was not found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Deployment Configuration"
+        ],
+        "summary": "Deployment configuration deletion",
+        "description": "Deletes the deployment configuration for a node\n",
+        "operationId": "NODE_DELETE_DEPLOY_CONFIG",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          },
+          {
+            "in": "header",
+            "name": "tms-named-user",
+            "required": false,
+            "type": "string",
+            "maxLength": 60,
+            "description": "User displayed in Cloud Transport Management UI. If not given, the authentication user will be shown in Cloud Transport Management UI.",
+            "x-example": "USR15285"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully deleted"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Node was not found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/nodes/{nodeId}/isDeployConfigSupported": {
+      "get": {
+        "tags": [
+          "Deployment Configuration"
+        ],
+        "summary": "Is deployment configuration supported for a node",
+        "description": "Returns information whether the deployment configuration is supported for the specified node\n",
+        "operationId": "NODE_IS_DEPLOY_CONFIG_SUPPORTED",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/IsDeployConfigSupportedResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Node was not found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/nodes/{nodeId}/deployConfig/download": {
+      "get": {
+        "tags": [
+          "Deployment Configuration"
+        ],
+        "summary": "Get deployment configuration file",
+        "description": "Returns the deployment configuration file for a node\n",
+        "operationId": "NODE_DOWNLOAD_DEPLOY_CONFIG",
+        "produces": [
+          "application/octet-stream"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Node or deployment configuration was not found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/storage": {
+      "get": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Get storage information",
+        "description": "Returns storage quota information for the current tenant, including used space, total quota, and maximum allowed file size.",
+        "operationId": "STORAGE_GET_V2",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/StorageInfoResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          }
+        }
+      }
+    },
+    "/nodes": {
+      "post": {
+        "tags": [
+          "Landscape"
+        ],
+        "summary": "Create a node",
+        "description": "Creates a node",
+        "operationId": "NODE_CREATE_V2",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tms-named-user",
+            "required": false,
+            "type": "string",
+            "maxLength": 60,
+            "x-example": "USR15285",
+            "description": "User displayed in Cloud Transport Management UI. If not given, the authentication user will be shown in Cloud Transport Management UI."
+          },
+          {
+            "description": "Node to create",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NodeCreateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/NodeResponseTarget"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity, e. g. if a node with the entered name already exists",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Landscape"
+        ],
+        "summary": "Get nodes",
+        "description": "Returns all nodes",
+        "operationId": "NODES_GET_V2",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/NodesResponseTarget"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/nodes/{nodeId}": {
+      "get": {
+        "tags": [
+          "Landscape"
+        ],
+        "summary": "Get node",
+        "description": "Returns a node",
+        "operationId": "NODE_GET_V2",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/NodeResponseTarget"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Landscape"
+        ],
+        "summary": "Update node",
+        "description": "Updates a node",
+        "operationId": "NODE_UPDATE_V2",
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          },
+          {
+            "in": "header",
+            "description": "User displayed in Cloud Transport Management UI. If not given, the authentication user will be shown in Cloud Transport Management UI.",
+            "name": "tms-named-user",
+            "required": false,
+            "type": "string",
+            "maxLength": 60,
+            "x-example": "USR15285"
+          },
+          {
+            "description": "Node object with modified properties",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NodeUpdateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/NodeResponseTarget"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Landscape"
+        ],
+        "summary": "Delete node",
+        "description": "Deletes a node",
+        "operationId": "NODE_DELETE_V2",
+        "parameters": [
+          {
+            "name": "nodeId",
+            "in": "path",
+            "description": "Node ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 123
+          },
+          {
+            "in": "header",
+            "description": "User displayed in Cloud Transport Management UI. If not given, the authentication user will be shown in Cloud Transport Management UI.",
+            "name": "tms-named-user",
+            "required": false,
+            "type": "string",
+            "maxLength": 60,
+            "x-example": "USR15285"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity, e. g. if the node is still used in a route",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/routes": {
+      "post": {
+        "tags": [
+          "Landscape"
+        ],
+        "summary": "Create routes",
+        "description": "Creates a route",
+        "operationId": "ROUTE_CREATE_V2",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "description": "User displayed in Cloud Transport Management UI. If not given, the authentication user will be shown in Cloud Transport Management UI.",
+            "name": "tms-named-user",
+            "required": false,
+            "type": "string",
+            "maxLength": 60,
+            "x-example": "USR15285"
+          },
+          {
+            "description": "Route to create",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RouteCreateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/RouteResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity, e. g. if a route with the entered name already exists",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Landscape"
+        ],
+        "summary": "Get routes",
+        "description": "Returns all routes",
+        "operationId": "ROUTES_GET_V2",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/RoutesResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/routes/{routeId}": {
+      "get": {
+        "tags": [
+          "Landscape"
+        ],
+        "summary": "Get route",
+        "description": "Returns a route",
+        "operationId": "ROUTE_GET_V2",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "routeId",
+            "in": "path",
+            "description": "Route Id",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 567
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/RouteResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Landscape"
+        ],
+        "summary": "Update route",
+        "description": "Updates a route",
+        "operationId": "ROUTE_UPDATE_V2",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "routeId",
+            "in": "path",
+            "description": "Route Id",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 567
+          },
+          {
+            "in": "header",
+            "description": "User displayed in Cloud Transport Management UI. If not given, the authentication user will be shown in Cloud Transport Management UI.",
+            "name": "tms-named-user",
+            "required": false,
+            "type": "string",
+            "maxLength": 60,
+            "x-example": "USR15285"
+          },
+          {
+            "description": "Route object with modified properties",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RoutePatchRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/RouteResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Landscape"
+        ],
+        "summary": "Delete route",
+        "description": "Deletes a route",
+        "operationId": "ROUTE_DELETE_V2",
+        "parameters": [
+          {
+            "name": "routeId",
+            "in": "path",
+            "description": "route Id",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "x-example": 567
+          },
+          {
+            "in": "header",
+            "description": "User displayed in Cloud Transport Management UI. If not given, the authentication user will be shown in Cloud Transport Management UI.",
+            "name": "tms-named-user",
+            "required": false,
+            "type": "string",
+            "maxLength": 60,
+            "x-example": "USR15285"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/destinations": {
+      "get": {
+        "tags": [
+          "Landscape"
+        ],
+        "summary": "Get destinations",
+        "description": "Returns all destinations for the current subaccount",
+        "operationId": "DESTINATIONS_GET_V2",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DestinationsResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/destinations/{destinationName}": {
+      "get": {
+        "tags": [
+          "Landscape"
+        ],
+        "summary": "Get destination",
+        "description": "Returns properties of a destination specified by {destinationName}",
+        "operationId": "DESTINATION_GET_V2",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "destinationName",
+            "in": "path",
+            "description": "Destination name",
+            "required": true,
+            "type": "string",
+            "x-example": "destiantionAbc"
+          },
+          {
+            "name": "includeTenantId",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "description": "Include tenant Id in response",
+            "default": false,
+            "x-example": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DestinationExpanded"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/tmsUiUrl": {
+      "get": {
+        "tags": [
+          "Landscape"
+        ],
+        "summary": "Get URL of TMS UI",
+        "description": "Returns tenant specific URL of Cloud Transport Management UI",
+        "operationId": "UI_URL_GET_V2",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "tmsUiUrl": {
+                  "type": "string"
+                }
+              }
+            },
+            "examples": {
+              "application/json": {
+                "tmsUiUrl": "https://ctms.ts.cfapps.eu10.hana.ondemand.com/main/webapp/index.html"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    },
+    "/tmsUiUrl/transportRequestLogs": {
+      "get": {
+        "tags": [
+          "Landscape"
+        ],
+        "summary": "Get URL to reference transport request logs",
+        "description": "Returns TMS UI URL in order to reference the correct transport request logs view specified by the parameters transportRequestId and the optional nodeId.",
+        "operationId": "TR_LOGS_UI_URL_GET_V2",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "transportRequestId",
+            "in": "query",
+            "description": "When only the Transport Request ID parameter is provided, the API response returns the URL to the Transport Requests view",
+            "required": true,
+            "type": "string",
+            "x-example": 111
+          },
+          {
+            "name": "nodeId",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "description": "Adding the optional Node ID parameter leads to a response with the URL to the Import Queue Logs view",
+            "x-example": 222
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "tmsUiLogUrl": {
+                  "type": "string"
+                }
+              }
+            },
+            "examples": {
+              "application/json": {
+                "tmsUiLogUrl": "https://ctms.ts.cfapps.eu10.hana.ondemand.com/main/webapp/index.html#/importQueueLogs/222/333"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/NotAuthorizedException"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/TmsExceptionObject"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ContentType": {
+      "description": "Content type (one of MTA, XSCDU, APP)\n  * `MTA` - Multi-Target Application\n  * `XSCDU` - SAP HANA Extended Application Services Classic Model Delivery Unit\n  * `APP` - generic application specific content\n  * `BTP_ABAP` - SAP BTP, ABAP Environment\n",
+      "enum": [
+        "MTA",
+        "XSCDU",
+        "APP",
+        "BTP_ABAP"
+      ]
+    },
+    "ExceptionObject": {
+      "example": {
+        "errorType": "TsInternalServerErrorException",
+        "message": "The application has encountered an unexpected error."
+      },
+      "properties": {
+        "errorType": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "TmsExceptionObject": {
+      "properties": {
+        "errorType": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "example": {
+        "message": "Example error message text",
+        "errorType": "ExampleErrorType"
+      }
+    },
+    "ExportEntity": {
+      "properties": {
+        "queueEntries": {
+          "items": {
+            "$ref": "#/definitions/ExportQueueEntryInfo"
+          },
+          "type": "array"
+        },
+        "transportRequestDescription": {
+          "description": "Transport request description",
+          "type": "string"
+        },
+        "transportRequestId": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Transport request ID"
+        }
+      },
+      "required": [
+        "transportRequestId",
+        "transportRequestDescription",
+        "queueEntries"
+      ],
+      "example": {
+        "queueEntries": [
+          {
+            "nodeId": 226,
+            "nodeName": "PROD",
+            "queueId": 354
+          }
+        ],
+        "transportRequestDescription": "export/upload of 2 MTAs",
+        "transportRequestId": 352
+      }
+    },
+    "ExportQueueEntryInfo": {
+      "properties": {
+        "nodeId": {
+          "type": "integer",
+          "format": "int64",
+          "description": "ID of node where content was put in"
+        },
+        "nodeName": {
+          "type": "string",
+          "description": "Name of node where content was put in"
+        },
+        "queueId": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "required": [
+        "nodeId",
+        "queueId",
+        "nodeName"
+      ]
+    },
+    "FileInfo": {
+      "properties": {
+        "fileId": {
+          "type": "integer",
+          "format": "int64",
+          "description": "File ID generated by Cloud Transport Management"
+        },
+        "fileName": {
+          "type": "string",
+          "description": "File name"
+        }
+      }
+    },
+    "NodeExportBodyEntityName": {
+      "description": "Node export request",
+      "properties": {
+        "description": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "entries": {
+          "items": {
+            "$ref": "#/definitions/PostContentRef"
+          },
+          "type": "array"
+        },
+        "nodeName": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "contentType": {
+          "$ref": "#/definitions/ContentType"
+        },
+        "storageType": {
+          "$ref": "#/definitions/StorageType"
+        },
+        "namedUser": {
+          "type": "string",
+          "maxLength": 60,
+          "description": "User displayed in Cloud Transport Management UI. If not given the authentication user will be shown in Cloud Transport Management UI."
+        }
+      },
+      "required": [
+        "description",
+        "nodeName",
+        "contentType",
+        "storageType",
+        "entries"
+      ],
+      "example": {
+        "nodeName": "DEV",
+        "contentType": "MTA",
+        "storageType": "FILE",
+        "entries": [
+          {
+            "uri": "627"
+          },
+          {
+            "uri": "628"
+          }
+        ],
+        "description": "export/upload of 2 MTAs",
+        "namedUser": "UserName"
+      }
+    },
+    "NotAuthorizedException": {
+      "example": {
+        "error": "unauthorized",
+        "error_description": "Full authentication is required to access this resource"
+      },
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "error_description": {
+          "type": "string"
+        }
+      }
+    },
+    "PostContentRef": {
+      "properties": {
+        "uri": {
+          "description": "Link to content; file ID in case if storage type is FILE;",
+          "type": "string",
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "uri"
+      ]
+    },
+    "StorageType": {
+      "description": "Storage type (one of FILE, REFERENCE)\n  * `FILE` - file\n  * `REFERENCE` - content reference\n",
+      "enum": [
+        "FILE",
+        "REFERENCE"
+      ]
+    },
+    "TransportRequestsResponse2": {
+      "properties": {
+        "transportRequests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TransportRequestResponse2"
+          }
+        }
+      },
+      "example": {
+        "transportRequests": [
+          {
+            "id": 30,
+            "status": "succeeded",
+            "archived": false,
+            "isTest": false,
+            "position": 1,
+            "createdAt": "2019-07-25T08:31:10.464Z",
+            "queuedAt": "2019-07-25T09:10:00.123Z",
+            "createdBy": "d7ad0010-09a7-4916-be8d-1166c653e0c7",
+            "createdByNamedUser": "d012345",
+            "description": "TR3501",
+            "origin": "SRC_NODE_350",
+            "entries": [
+              {
+                "id": 31,
+                "storageType": "FILE",
+                "contentType": "APP",
+                "uri": "10"
+              },
+              {
+                "id": 32,
+                "storageType": "FILE",
+                "contentType": "APP",
+                "uri": "15"
+              }
+            ]
+          },
+          {
+            "id": 37,
+            "status": "succeeded",
+            "archived": false,
+            "position": 2,
+            "createdAt": "2019-07-25T08:30:10.164Z",
+            "queuedAt": "2019-07-25T09:00:00.123Z",
+            "createdBy": "d7ad0010-09a7-4916-be8d-1166c653e0c7",
+            "createdByNamedUser": "d012345",
+            "description": "TR3502",
+            "origin": "SRC_NODE_350",
+            "entries": [
+              {
+                "id": 39,
+                "storageType": "FILE",
+                "contentType": "APP",
+                "uri": "25"
+              },
+              {
+                "id": 38,
+                "storageType": "FILE",
+                "contentType": "APP",
+                "uri": "20"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "TransportRequestResponse2": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "$ref": "#/definitions/TRStatus"
+        },
+        "archived": {
+          "type": "boolean"
+        },
+        "isTest": {
+          "type": "boolean"
+        },
+        "position": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "createdByNamedUser": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "queuedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string"
+        },
+        "origin": {
+          "type": "string"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/QueueEntryEntry2"
+          }
+        }
+      }
+    },
+    "QueueEntryEntry2": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "storageType": {
+          "$ref": "#/definitions/StorageType"
+        },
+        "contentType": {
+          "$ref": "#/definitions/ContentType"
+        },
+        "uri": {
+          "type": "string"
+        }
+      }
+    },
+    "TransportRequestsBodyEntity2": {
+      "properties": {
+        "namedUser": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "transportRequests": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "required": [
+        "transportRequests"
+      ],
+      "example": {
+        "namedUser": "d012345",
+        "transportRequests": [
+          155,
+          166
+        ]
+      }
+    },
+    "TransportRequestDetailsResponse": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "$ref": "#/definitions/TRStatus"
+        },
+        "archived": {
+          "type": "boolean"
+        },
+        "isTest": {
+          "type": "boolean"
+        },
+        "position": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "createdByNamedUser": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "queuedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string"
+        },
+        "origin": {
+          "type": "string"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/QueueEntryEntryDetails"
+          }
+        }
+      },
+      "example": {
+        "id": 30,
+        "status": "succeeded",
+        "archived": false,
+        "isTest": false,
+        "position": 1,
+        "createdAt": "2019-07-25T08:31:10.464Z",
+        "queuedAt": "2019-07-25T09:10:00.123Z",
+        "createdBy": "d7ad0010-09a7-4916-be8d-1166c653e0c7",
+        "createdByNamedUser": "d012345",
+        "description": "TR3501",
+        "origin": "SRC_NODE_350",
+        "entries": [
+          {
+            "id": 31,
+            "storageType": "FILE",
+            "contentType": "APP",
+            "uri": "10",
+            "objectsMetadata": [
+              {
+                "id": "123",
+                "type": "com.sap.cpi",
+                "name": "Object 1",
+                "version": "1.2.3",
+                "attributes": [
+                  {
+                    "name": "first",
+                    "value": "firstattribute"
+                  },
+                  {
+                    "name": "second",
+                    "value": "secondattribute"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "QueueEntryEntryDetails": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "storageType": {
+          "$ref": "#/definitions/StorageType"
+        },
+        "contentType": {
+          "$ref": "#/definitions/ContentType"
+        },
+        "uri": {
+          "type": "string"
+        },
+        "objectsMetadata": {
+          "$ref": "#/definitions/ObjectsMetadataArray"
+        }
+      }
+    },
+    "ObjectsMetadataArray": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ObjectsMetadata"
+      }
+    },
+    "ObjectsMetadata": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Object ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Object name"
+        },
+        "type": {
+          "type": "string",
+          "description": "Object type"
+        },
+        "version": {
+          "type": "string",
+          "description": "Object version"
+        },
+        "parentId": {
+          "type": "string",
+          "description": "Object parent ID"
+        },
+        "attributes": {
+          "description": "Object attributes",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/NameValuePair"
+          }
+        }
+      }
+    },
+    "NameValuePair": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "maxLength": 32,
+          "type": "string",
+          "description": "Attribute name"
+        },
+        "value": {
+          "maxLength": 1024,
+          "type": "string",
+          "description": "Attribute value"
+        }
+      }
+    },
+    "TransportRequestsBodyEntityImpAll2": {
+      "properties": {
+        "namedUser": {
+          "type": "string",
+          "maxLength": 60
+        }
+      },
+      "example": {
+        "namedUser": "d012345"
+      }
+    },
+    "ImportResponse2": {
+      "type": "object",
+      "properties": {
+        "actionId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "monitoringURL": {
+          "type": "string"
+        }
+      },
+      "example": {
+        "actionId": 171,
+        "monitoringURL": "/v2/actions/171"
+      }
+    },
+    "ActionStatus": {
+      "description": "Action status\n  * `succeeded`\n  * `warning`\n  * `error`\n  * `fatal`\n  * `running`\n  * `initial`\n  * `unknown`\n",
+      "enum": [
+        "succeeded",
+        "warning",
+        "error",
+        "fatal",
+        "running",
+        "initial",
+        "unknown"
+      ]
+    },
+    "TRStatus": {
+      "description": "Transport request status\n  * `succeeded`\n  * `warning`\n  * `error`\n  * `fatal`\n  * `running`\n  * `repeat`\n  * `initial`\n  * `deleted`\n  * `unknown`\n",
+      "enum": [
+        "succeeded",
+        "warning",
+        "error",
+        "fatal",
+        "running",
+        "repeat",
+        "initial",
+        "deleted",
+        "unknown"
+      ]
+    },
+    "ActionResponse2": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "type": {
+          "$ref": "#/definitions/TransportActionType"
+        },
+        "status": {
+          "$ref": "#/definitions/ActionStatus"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "triggeredBy": {
+          "type": "string"
+        },
+        "triggeredByNamedUser": {
+          "type": "string"
+        },
+        "nodeName": {
+          "type": "string"
+        },
+        "transportRequests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionTRStatusResponse2"
+          }
+        }
+      },
+      "example": {
+        "id": 43,
+        "type": "I",
+        "status": "succeeded",
+        "startedAt": "2019-05-07T06:40:48.0725+0000",
+        "endedAt": "2019-05-07T06:40:54.0971+0000",
+        "triggeredBy": "d7ad0010-09a7-4916-be8d-1166c653e0c7",
+        "triggeredByNamedUser": "d012345",
+        "nodeName": "SRC_NODE_350",
+        "transportRequests": [
+          {
+            "id": 30,
+            "status": "succeeded",
+            "entities": [
+              {
+                "id": 32,
+                "fileName": "file1.zip",
+                "uri": "15",
+                "status": "succeeded"
+              },
+              {
+                "id": 31,
+                "fileName": "file2.zip",
+                "uri": "10",
+                "status": "succeeded"
+              }
+            ]
+          },
+          {
+            "id": 37,
+            "status": "succeeded",
+            "entities": [
+              {
+                "id": 38,
+                "fileName": "file3.zip",
+                "uri": "20",
+                "status": "succeeded"
+              },
+              {
+                "id": 39,
+                "fileName": "file4.zip",
+                "uri": "25",
+                "status": "succeeded"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "LogsResponse2": {
+      "properties": {
+        "logs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LogResponse2"
+          }
+        }
+      },
+      "example": {
+        "logs": [
+          {
+            "transportRequestId": 30,
+            "status": "succeeded",
+            "messages": [
+              {
+                "id": 82,
+                "messageId": "TRANSPORTREQUEST_END",
+                "severity": "I",
+                "message": "Import ended for transport request 'TR3501' (id: 30) with status 'Success', at May-07-2019 06:40:54 GMT",
+                "createdAt": "2019-05-07T06:40:54.0958+0000"
+              },
+              {
+                "id": 46,
+                "messageId": "TRANSPORTREQUEST_START",
+                "severity": "I",
+                "message": "Import (selected) started for transport request 'TR3501' (id: 30), at May-07-2019 06:40:48 GMT",
+                "createdAt": "2019-05-07T06:40:48.0752+0000"
+              }
+            ],
+            "entities": [
+              {
+                "id": 32,
+                "uri": "15",
+                "fileName": "file1.zip",
+                "status": "succeeded",
+                "messages": [
+                  {
+                    "id": 77,
+                    "messageId": " ",
+                    "severity": "I",
+                    "message": "Deploy of content reference 982f7a9a-e9d3-411a-888d-da347c8f02f1 finished successfully",
+                    "createdAt": "2019-05-07T06:40:53.0371+0000"
+                  },
+                  {
+                    "id": 74,
+                    "messageId": " ",
+                    "severity": "I",
+                    "message": "Deploy of content reference 63103e7f-11de-4b39-bdd2-e429f3f24549 finished successfully",
+                    "createdAt": "2019-05-07T06:40:53.0370+0000"
+                  }
+                ]
+              },
+              {
+                "id": 31,
+                "uri": "10",
+                "fileName": "file2.zip",
+                "status": "succeeded",
+                "messages": [
+                  {
+                    "id": 77,
+                    "messageId": " ",
+                    "severity": "I",
+                    "message": "Deploy of content reference 982f7a9a-e9d3-411a-888d-da347c8f02f1 finished successfully",
+                    "createdAt": "2019-05-07T06:40:53.0371+0000"
+                  },
+                  {
+                    "id": 74,
+                    "messageId": " ",
+                    "severity": "I",
+                    "message": "Deploy of content reference 63103e7f-11de-4b39-bdd2-e429f3f24549 finished successfully",
+                    "createdAt": "2019-05-07T06:40:53.0370+0000"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "transportRequestId": 37,
+            "status": "succeeded",
+            "messages": [
+              {
+                "id": 81,
+                "messageId": "TRANSPORTREQUEST_END",
+                "severity": "I",
+                "message": "Import ended for transport request 'TR3502' (id: 37) with status 'Success', at May-07-2019 06:40:54 GMT",
+                "createdAt": "2019-05-07T06:40:54.0954+0000"
+              },
+              {
+                "id": 47,
+                "messageId": "TRANSPORTREQUEST_START",
+                "severity": "I",
+                "message": "Import (selected) started for transport request 'TR3502' (id: 37), at May-07-2019 06:40:48 GMT",
+                "createdAt": "2019-05-07T06:40:48.0758+0000"
+              }
+            ],
+            "entities": [
+              {
+                "id": 38,
+                "uri": "20",
+                "fileName": "file3.zip",
+                "status": "succeeded",
+                "messages": [
+                  {
+                    "id": 80,
+                    "messageId": " ",
+                    "severity": "I",
+                    "message": "Deploy of content reference c952da44-3f83-49a3-8e0d-ff9fff0a110b finished successfully",
+                    "createdAt": "2019-05-07T06:40:53.0372+0000"
+                  },
+                  {
+                    "id": 71,
+                    "messageId": " ",
+                    "severity": "I",
+                    "message": "Deploy of content reference 9ea0e65e-2e51-4e54-aa45-e87444467fdc finished successfully",
+                    "createdAt": "2019-05-07T06:40:53.0370+0000"
+                  }
+                ]
+              },
+              {
+                "id": 39,
+                "uri": "25",
+                "fileName": "file4.zip",
+                "status": "succeeded",
+                "messages": [
+                  {
+                    "id": 80,
+                    "messageId": " ",
+                    "severity": "I",
+                    "message": "Deploy of content reference c952da44-3f83-49a3-8e0d-ff9fff0a110b finished successfully",
+                    "createdAt": "2019-05-07T06:40:53.0372+0000"
+                  },
+                  {
+                    "id": 71,
+                    "messageId": " ",
+                    "severity": "I",
+                    "message": "Deploy of content reference 9ea0e65e-2e51-4e54-aa45-e87444467fdc finished successfully",
+                    "createdAt": "2019-05-07T06:40:53.0370+0000"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "TrLogsResponse2": {
+      "type": "object",
+      "properties": {
+        "logs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TrLogResponse2"
+          }
+        }
+      },
+      "example": {
+        "logs": [
+          {
+            "actionId": 28,
+            "actionType": "I",
+            "status": "succeeded",
+            "actionStartedAt": "2019-07-22T12:30:10.175Z",
+            "actionTriggeredBy": "d7ad0010-09a7-4916-be8d-1166c653e0c7",
+            "actionTriggeredByNamedUser": "d012345",
+            "messages": [
+              {
+                "id": 54,
+                "messageId": "TRANSPORTREQUEST_END",
+                "severity": "I",
+                "message": "Import ended for transport request 'TR3401' (id: 13) with status 'Success', at Jul-22-2019 12:30:16 GMT",
+                "createdAt": "2019-07-22T12:30:16.400Z"
+              },
+              {
+                "id": 41,
+                "messageId": "DEPLOYMENT_STARTED",
+                "severity": "I",
+                "message": "Deployment started. Process ID: dc93855f-53dd-4df5-8083-4c43db6a98e4",
+                "createdAt": "2019-07-22T12:30:10.760Z"
+              }
+            ],
+            "entities": [
+              {
+                "id": 14,
+                "uri": "9",
+                "status": "succeeded",
+                "fileName": "small_com.sap.sl.ts.demo.ypa.mtar",
+                "messages": [
+                  {
+                    "id": 52,
+                    "messageId": " ",
+                    "severity": "I",
+                    "message": "Deploy of content reference 3277104e-70c4-4742-80b1-209f1d553f18 finished successfully",
+                    "createdAt": "2019-07-22T12:30:14.748Z"
+                  },
+                  {
+                    "id": 51,
+                    "messageId": " ",
+                    "severity": "I",
+                    "message": "Deploy of file aca6420c-1aaf-4c94-a543-64ca3bbe8576 finished successfully",
+                    "createdAt": "2019-07-22T12:30:14.748Z"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "TrLogResponse2": {
+      "type": "object",
+      "properties": {
+        "actionId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "actionStartedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "actionTriggeredBy": {
+          "type": "string"
+        },
+        "actionTriggeredByNamedUser": {
+          "type": "string"
+        },
+        "actionType": {
+          "$ref": "#/definitions/TransportActionType"
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LogEntityResponse2"
+          }
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LogMessageResponse2"
+          }
+        },
+        "status": {
+          "$ref": "#/definitions/ActionStatus"
+        }
+      }
+    },
+    "ActionTRStatusResponse2": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "$ref": "#/definitions/ActionStatus"
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ActionTREntityStatusResponse2"
+          }
+        }
+      }
+    },
+    "ActionTREntityStatusResponse2": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "uri": {
+          "type": "string"
+        },
+        "fileName": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/ActionStatus"
+        }
+      }
+    },
+    "LogResponse2": {
+      "properties": {
+        "transportRequestId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "$ref": "#/definitions/ActionStatus"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LogMessageResponse2"
+          }
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LogEntityResponse2"
+          }
+        }
+      }
+    },
+    "LogMessageResponse2": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "messageId": {
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/definitions/LogSeverity"
+        },
+        "message": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "LogEntityResponse2": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "uri": {
+          "type": "string"
+        },
+        "fileName": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/ActionStatus"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LogMessageResponse2"
+          }
+        }
+      }
+    },
+    "TransportRequestTrackingResponse": {
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "description": "Nodes related to transport request",
+          "items": {
+            "$ref": "#/definitions/TransportRequestTrackingNode"
+          }
+        }
+      },
+      "example": {
+        "nodes": [
+          {
+            "id": 30,
+            "name": "TAR_NODE_350",
+            "transportRequestInfo": {
+              "position": 1,
+              "queuedAt": "2019-07-25T09:10:00.123Z",
+              "status": "succeeded",
+              "archived": false,
+              "test": false
+            }
+          }
+        ]
+      }
+    },
+    "TransportRequestTrackingNode": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true,
+          "description": "Node ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Node name"
+        },
+        "transportRequestInfo": {
+          "$ref": "#/definitions/TransportRequestTrackingTRInfo"
+        }
+      }
+    },
+    "TransportRequestTrackingTRInfo": {
+      "properties": {
+        "position": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Position in the import queue"
+        },
+        "queuedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date and time when transport request was added to the node import queue"
+        },
+        "status": {
+          "$ref": "#/definitions/TRStatus",
+          "description": "Status of the transport request"
+        },
+        "archived": {
+          "type": "boolean",
+          "description": "Is archived"
+        },
+        "test": {
+          "type": "boolean",
+          "description": "Is test transport"
+        }
+      }
+    },
+    "MtaExtDescriptorResponse2": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "description": {
+          "type": "string"
+        },
+        "mtaId": {
+          "type": "string"
+        },
+        "mtaExtId": {
+          "type": "string"
+        },
+        "mtaVersion": {
+          "type": "string"
+        },
+        "lastChangedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "example": {
+        "id": 1260,
+        "description": "test",
+        "mtaId": "com.sap.sl4cloud",
+        "mtaExtId": "com.sap.sl4cloud-config",
+        "mtaVersion": "*",
+        "lastChangedAt": "2020-05-28T11:36:50.242Z"
+      }
+    },
+    "MtaExtDescriptorsResponse2": {
+      "type": "object",
+      "properties": {
+        "mtaExtDescriptors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MtaExtDescriptorResponse2"
+          }
+        }
+      }
+    },
+    "MtaExtUpdateRequest": {
+      "type": "object",
+      "properties": {
+        "mtaVersion": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "example": {
+        "mtaVersion": "1.2.4",
+        "description": "test"
+      }
+    },
+    "isMtaExtDescriptorSupportedResponse": {
+      "type": "object",
+      "properties": {
+        "isMtaExtDescriptorSupported": {
+          "type": "boolean"
+        }
+      }
+    },
+    "DeployConfigResponse": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        }
+      },
+      "example": {
+        "description": "My deployment configuration was last submitted at: 2024-04-20 10:30:45"
+      }
+    },
+    "IsDeployConfigSupportedResponse": {
+      "type": "object",
+      "properties": {
+        "isDeployConfigSupported": {
+          "type": "boolean"
+        }
+      }
+    },
+    "TransportActionType": {
+      "description": "Action type:\n  * `FU` - File upload\n  * `NE` - Node export\n  * `NU` - Node upload\n  * `I` - Import\n  * `DQ` - Delete queue entry\n  * `RQ` - Reset queue entry\n  * `CQ` - Cleanup queue entry\n  * `FQ` - Forward queue entry\n  * `AQ` - Add queue entry\n",
+      "enum": [
+        "FU",
+        "NE",
+        "NU",
+        "I",
+        "DQ",
+        "RQ",
+        "CQ",
+        "FQ",
+        "AQ"
+      ]
+    },
+    "LogSeverity": {
+      "description": "Log message severity:\n  * `F` - Fatal\n  * `E` - Error\n  * `W` - Warning\n  * `I` - Info\n",
+      "enum": [
+        "F",
+        "E",
+        "W",
+        "I"
+      ]
+    },
+    "StorageInfoResponse": {
+      "properties": {
+        "spaceUsed": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Bytes of storage currently used by the tenant"
+        },
+        "spaceQuota": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Total storage quota allocated to the tenant in bytes"
+        },
+        "maxFileSize": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Maximum allowed size for a single uploaded file in bytes"
+        }
+      },
+      "example": {
+        "spaceUsed": 104857600,
+        "spaceQuota": 1073741824,
+        "maxFileSize": 10485760
+      }
+    },
+    "NodeBase": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Node description"
+        },
+        "uploadAllowed": {
+          "type": "boolean",
+          "default": false,
+          "description": "Upload to node is allowed"
+        },
+        "forwardMode": {
+          "$ref": "#/definitions/ForwardMode",
+          "default": "AUTO",
+          "description": "Forward mode"
+        },
+        "controlledBy": {
+          "$ref": "#/definitions/ControlledBy"
+        },
+        "notificationEnabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Notification is enabled"
+        },
+        "importDisabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Import is disabled for the node"
+        },
+        "importDisabledReason": {
+          "type": "string",
+          "description": "Reason for disable import"
+        },
+        "virtual": {
+          "type": "boolean",
+          "default": false,
+          "description": "Node is virtual"
+        },
+        "autoImport": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatic import is enabled"
+        }
+      }
+    },
+    "NodeCreateRequest": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/NodeBase"
+        },
+        {
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Node name, must be unique"
+            },
+            "targets": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DeployTarget",
+                "description": "Deploy target"
+              }
+            }
+          }
+        },
+        {
+          "required": [
+            "name"
+          ]
+        }
+      ],
+      "example": {
+        "name": "TEST",
+        "description": "Test system",
+        "uploadAllowed": false,
+        "forwardMode": "AUTO",
+        "notificationEnabled": false,
+        "virtual": false,
+        "autoImport": false,
+        "targets": [
+          {
+            "contentType": "APP",
+            "destinationName": "GACD_REF_APP",
+            "importOptions": {
+              "strategy": "default"
+            }
+          }
+        ]
+      }
+    },
+    "NodeUpdateRequest": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/NodeBase"
+        },
+        {
+          "properties": {
+            "targets": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DeployTarget"
+              }
+            }
+          }
+        }
+      ],
+      "example": {
+        "uploadAllowed": true
+      }
+    },
+    "NodeResponseBase": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/NodeBase"
+        },
+        {
+          "properties": {
+            "id": {
+              "type": "integer",
+              "format": "int64",
+              "readOnly": true,
+              "description": "Node ID"
+            },
+            "name": {
+              "type": "string",
+              "description": "Node name"
+            },
+            "jobId": {
+              "type": "integer",
+              "format": "int64",
+              "readOnly": true,
+              "description": "Import Scheduler job ID"
+            }
+          }
+        }
+      ]
+    },
+    "NodeResponseTarget": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/NodeResponseBase"
+        },
+        {
+          "properties": {
+            "targets": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DeployTarget"
+              }
+            }
+          }
+        }
+      ],
+      "example": {
+        "id": 12345,
+        "name": "TEST",
+        "description": "Test system",
+        "uploadAllowed": false,
+        "forwardMode": "AUTO",
+        "jobId": 5434,
+        "notificationEnabled": false,
+        "importDisabled": false,
+        "importDisabledReason": "",
+        "virtual": false,
+        "autoImport": false,
+        "targets": [
+          {
+            "contentType": "MTA",
+            "destinationName": "CF_TARGET_DESTINATION",
+            "importOptions": {
+              "strategy": "default"
+            }
+          }
+        ]
+      }
+    },
+    "NodesResponseTarget": {
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/NodeResponseTarget"
+          }
+        }
+      },
+      "example": {
+        "nodes": [
+          {
+            "id": 2,
+            "name": "SRC_NODE_350",
+            "description": "Source node",
+            "uploadAllowed": true,
+            "forwardMode": "MANUAL",
+            "notificationEnabled": false,
+            "virtual": false,
+            "autoImport": false
+          },
+          {
+            "id": 6,
+            "name": "TARGET_NODE_350",
+            "description": "Target node",
+            "uploadAllowed": true,
+            "forwardMode": "AUTO",
+            "jobId": 123,
+            "controlledBy": "CHARM",
+            "notificationEnabled": false,
+            "importDisabled": false,
+            "importDisabledReason": "",
+            "virtual": false,
+            "autoImport": false,
+            "targets": [
+              {
+                "contentType": "MTA",
+                "destinationName": "CF_TARGET_DESTINATION",
+                "importOptions": {
+                  "strategy": "blue-green"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "RouteBase": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Route description"
+        },
+        "name": {
+          "type": "string",
+          "description": "Route name"
+        },
+        "sourceNodeId": {
+          "type": "integer",
+          "format": "int64",
+          "description": "ID of the source node"
+        },
+        "targetNodeId": {
+          "type": "integer",
+          "format": "int64",
+          "description": "ID of the target node"
+        }
+      }
+    },
+    "RouteCreateRequest": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/RouteBase"
+        }
+      ],
+      "required": [
+        "name",
+        "sourceNodeId",
+        "targetNodeId"
+      ],
+      "example": {
+        "description": "Test route",
+        "name": "Test",
+        "sourceNodeId": "107",
+        "targetNodeId": "116"
+      }
+    },
+    "RoutePatchRequest": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/RouteBase"
+        }
+      ],
+      "example": {
+        "description": "New route description"
+      }
+    },
+    "RouteResponse": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/definitions/RouteBase"
+        }
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Route ID"
+        }
+      },
+      "example": {
+        "id": 119,
+        "name": "Test",
+        "description": "Dev. to Test",
+        "sourceNodeId": 107,
+        "targetNodeId": 116
+      }
+    },
+    "RoutesResponse": {
+      "properties": {
+        "routes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RouteResponse"
+          }
+        }
+      }
+    },
+    "DestinationBase": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Destination name"
+        },
+        "url": {
+          "type": "string",
+          "description": "Destination URL"
+        },
+        "description": {
+          "type": "string",
+          "description": "Destination description"
+        },
+        "platformTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Platform types. Used for special integration scenarios"
+        },
+        "application": {
+          "type": "string",
+          "description": "Application name, provided for a limited set of destinations"
+        },
+        "dataCenter": {
+          "type": "string",
+          "description": "Data center, provided for a limited set of destinations"
+        }
+      }
+    },
+    "DestinationExpanded": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/DestinationBase"
+        },
+        {
+          "properties": {
+            "tenantId": {
+              "type": "string",
+              "description": "Tenant ID"
+            }
+          }
+        }
+      ],
+      "example": {
+        "name": "DESTINATION_TENANT_ID",
+        "url": "http://ec2-55-777-23-34.eu-central-1.compute.amazonaws.com:8384",
+        "description": "Test",
+        "platformTypes": [
+          "ACN_NEO"
+        ],
+        "tenantId": "123456gertv5q23vrvt2q37"
+      }
+    },
+    "DestinationsResponse": {
+      "properties": {
+        "destinations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DestinationBase"
+          }
+        }
+      },
+      "example": {
+        "destinations": [
+          {
+            "name": "DESTINATION_TENANT_ID",
+            "url": "http://ec2-55-777-23-34.eu-central-1.compute.amazonaws.com:8384",
+            "description": "Test",
+            "platformTypes": [
+              "ACN_NEO"
+            ]
+          },
+          {
+            "name": "GACD_REF_APP",
+            "url": "https://gacd-ref-app-stg.cfapps.sap.hana.ondemand.com",
+            "description": "Generic Application Content Deployment reference application"
+          }
+        ]
+      }
+    },
+    "DeployTarget": {
+      "type": "object",
+      "properties": {
+        "contentType": {
+          "$ref": "#/definitions/ContentType",
+          "description": "Content type for the deploy target"
+        },
+        "destinationName": {
+          "type": "string",
+          "description": "Destination name for the deploy target"
+        },
+        "importOptions": {
+          "$ref": "#/definitions/ImportOptions"
+        }
+      },
+      "required": [
+        "contentType",
+        "destinationName"
+      ]
+    },
+    "ForwardMode": {
+      "description": "Forward mode:\n  * `AUTO` - Pre-Import\n  * `POST_IMPORT` - Post-Import\n  * `ON_SUCCESS` - On Success\n  * `MANUAL` - Manual\n",
+      "enum": [
+        "AUTO",
+        "POST_IMPORT",
+        "ON_SUCCESS",
+        "MANUAL"
+      ]
+    },
+    "ControlledBy": {
+      "description": "Technical name of application which controlls queue operations:\n  * `NONE` - None, node is not under control by any application\n  * `CHARM` - SAP Solution Manager\n",
+      "enum": [
+        "CHARM"
+      ]
+    },
+    "ImportOptions": {
+      "type": "object",
+      "properties": {
+        "strategy": {
+          "$ref": "#/definitions/Strategy"
+        }
+      }
+    },
+    "Strategy": {
+      "description": "Deploy strategy (one of 'default', 'blue-green')\n  * `default` - default deployment strategy\n  * `blue-green` - blue-green strategy available only for SAP CF deployment\n",
+      "enum": [
+        "default",
+        "blue-green"
+      ]
+    }
+  },
+  "tags": [
+    {
+      "description": "Operations with files",
+      "name": "Files"
+    },
+    {
+      "description": "Content export operations",
+      "name": "Export & Upload"
+    },
+    {
+      "name": "Import",
+      "description": "Import, forward and reset transport requests"
+    },
+    {
+      "name": "Logging & Monitoring",
+      "description": "Logging and monitoring of transport requests"
+    },
+    {
+      "name": "MtaExtDescriptor",
+      "description": "MTA Extension descriptor related operations"
+    },
+    {
+      "name": "Deployment Configuration",
+      "description": "Deployment configuration related operations"
+    },
+    {
+      "name": "Storage",
+      "description": "Storage quota information"
+    },
+    {
+      "name": "Landscape",
+      "description": "Landscape information and configuration"
+    }
+  ]
+}

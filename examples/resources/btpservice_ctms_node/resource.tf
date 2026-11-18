@@ -10,9 +10,8 @@ resource "btpservice_ctms_node" "source" {
 }
 
 resource "btpservice_ctms_node" "target" {
-  name            = "QUALITY"
-  import_disabled = true
-  auto_import     = false
+  name        = "QUALITY"
+  auto_import = false
 
   targets = [{
     content_type     = "MTA"

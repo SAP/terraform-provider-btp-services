@@ -2,6 +2,7 @@ package ctmsnodes
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -50,7 +51,14 @@ func (r *nodeResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"description": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Node description. Omit to leave it managed by CTMS.",
+				MarkdownDescription: "Node description, up to 512 characters. Supports Latin letters, numbers, spaces, and -._~:\\/?#[]@!$&()*+,;=%. An empty string clears the description using API null. Omit to leave it managed by CTMS.",
+				Validators: []validator.String{
+					stringvalidator.LengthAtMost(512),
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[A-Za-z0-9 ._~:/?#\[\]@!$&()*+,;=%\\-]*$`),
+						"Only Latin letters, numbers, spaces and the following characters are allowed: -._~:\\/?#[]@!$&()*+,;=%",
+					),
+				},
 			},
 			"upload_allowed": schema.BoolAttribute{
 				Optional:            true,
@@ -68,16 +76,6 @@ func (r *nodeResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				Computed:            true,
 				MarkdownDescription: "Enable notifications. Requires an Alert Notification subscription and configuration in the subaccount.",
 			},
-			"import_disabled": schema.BoolAttribute{
-				Optional:            true,
-				Computed:            true,
-				MarkdownDescription: "Disable imports, including scheduled and automatic imports; forwarding can still occur.",
-			},
-			"import_disabled_reason": schema.StringAttribute{
-				Optional:            true,
-				Computed:            true,
-				MarkdownDescription: "Optional reason for disabling imports.",
-			},
 			"virtual": schema.BoolAttribute{
 				Optional:            true,
 				Computed:            true,
@@ -87,8 +85,7 @@ func (r *nodeResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				Optional: true,
 				Computed: true,
 				MarkdownDescription: "Automatically import eligible requests. Enabling this can immediately import queued requests and " +
-					"deactivate existing schedules. It can coexist with import_disabled; imports resume when that flag is " +
-					"cleared.",
+					"deactivate existing schedules.",
 			},
 			"controlled_by": schema.StringAttribute{
 				Computed:            true,
@@ -159,16 +156,14 @@ func (r *nodeResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 	request := ctmsmodels.NodeCreateRequest{
-		Name:                 plan.Name.ValueString(),
-		Targets:              targets,
-		Description:          utils.StringPointer[string](plan.Description),
-		UploadAllowed:        utils.BoolPointer(plan.UploadAllowed),
-		ForwardMode:          utils.StringPointer[ctmsmodels.ForwardMode](plan.ForwardMode),
-		NotificationEnabled:  utils.BoolPointer(plan.NotificationEnabled),
-		ImportDisabled:       utils.BoolPointer(plan.ImportDisabled),
-		ImportDisabledReason: utils.StringPointer[string](plan.ImportDisabledReason),
-		Virtual:              utils.BoolPointer(plan.Virtual),
-		AutoImport:           utils.BoolPointer(plan.AutoImport),
+		Name:                plan.Name.ValueString(),
+		Targets:             targets,
+		Description:         utils.StringPointer[string](plan.Description),
+		UploadAllowed:       utils.BoolPointer(plan.UploadAllowed),
+		ForwardMode:         utils.StringPointer[ctmsmodels.ForwardMode](plan.ForwardMode),
+		NotificationEnabled: utils.BoolPointer(plan.NotificationEnabled),
+		Virtual:             utils.BoolPointer(plan.Virtual),
+		AutoImport:          utils.BoolPointer(plan.AutoImport),
 	}
 	result, err := r.Client.Nodes.Create(ctx, request)
 	if err != nil {
@@ -238,12 +233,6 @@ func (r *nodeResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 	if !config.NotificationEnabled.IsNull() && !plan.NotificationEnabled.Equal(state.NotificationEnabled) {
 		request.NotificationEnabled = utils.BoolPointer(plan.NotificationEnabled)
-	}
-	if !config.ImportDisabled.IsNull() && !plan.ImportDisabled.Equal(state.ImportDisabled) {
-		request.ImportDisabled = utils.BoolPointer(plan.ImportDisabled)
-	}
-	if !config.ImportDisabledReason.IsNull() && !plan.ImportDisabledReason.Equal(state.ImportDisabledReason) {
-		request.ImportDisabledReason = utils.StringPointer[string](plan.ImportDisabledReason)
 	}
 	if !config.Virtual.IsNull() && !plan.Virtual.Equal(state.Virtual) {
 		request.Virtual = utils.BoolPointer(plan.Virtual)
