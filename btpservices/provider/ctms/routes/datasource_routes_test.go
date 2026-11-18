@@ -4,31 +4,16 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
 	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/ctms/testutils"
 )
 
 func TestDataSourceCTMSRoutes(t *testing.T) {
 	rec := testutils.SetupVCR(t, "datasource_routes")
-	config := `
-resource "btpservice_ctms_node" "source" {
-  name = "tf-ctms-ds-routes-source"
-}
-
-resource "btpservice_ctms_node" "target" {
-  name = "tf-ctms-ds-routes-target"
-}
-
-resource "btpservice_ctms_route" "test" {
-  name           = "tf-ctms-ds-routes"
-  source_node_id = btpservice_ctms_node.source.id
-  target_node_id = btpservice_ctms_node.target.id
-}
-
-data "btpservice_ctms_routes" "all" {
-  depends_on = [btpservice_ctms_route.test]
-}
-`
+	config := testDataSourceCTMSRoutesConfig()
 
 	resource.Test(
 		t,
@@ -36,6 +21,12 @@ data "btpservice_ctms_routes" "all" {
 			resource.TestStep{
 				Config: config,
 				Check:  resource.TestCheckResourceAttrSet("data.btpservice_ctms_routes.all", "values.#"),
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownValue("data.btpservice_ctms_routes.all", tfjsonpath.New("values"), knownvalue.SetPartial([]knownvalue.Check{
+						knownvalue.ObjectExact(testDevelopmentToQualityRouteValues()),
+						knownvalue.ObjectExact(testTestToProductionRouteValues()),
+					})),
+				},
 			},
 			resource.TestStep{
 				Config:   config,
@@ -43,4 +34,8 @@ data "btpservice_ctms_routes" "all" {
 			},
 		),
 	)
+}
+
+func testDataSourceCTMSRoutesConfig() string {
+	return `data "btpservice_ctms_routes" "all" {}`
 }

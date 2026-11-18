@@ -2,6 +2,7 @@ package ctmsroutes
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -9,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/ctms/utils"
 	ctmsmodels "github.com/SAP/terraform-provider-btp-services/internal/ctms/models"
@@ -46,7 +48,14 @@ func (r *routeResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 			"description": schema.StringAttribute{
 				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Route description. Omit to leave it managed by CTMS.",
+				MarkdownDescription: "Route description, up to 512 characters. Supports Latin letters, numbers, spaces, and -._~:\\/?#[]@!$&()*+,;=%. Empty descriptions are sent as JSON null. Omit to leave it managed by CTMS.",
+				Validators: []validator.String{
+					stringvalidator.LengthAtMost(512),
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[A-Za-z0-9 ._~:/?#\[\]@!$&()*+,;=%\\-]*$`),
+						"Only Latin letters, numbers, spaces and the following characters are allowed: -._~:\\/?#[]@!$&()*+,;=%",
+					),
+				},
 			},
 			"source_node_id": schema.StringAttribute{
 				Required:            true,
@@ -113,6 +122,7 @@ func (r *routeResource) Create(ctx context.Context, req resource.CreateRequest, 
 	// Preserve the assigned identity even if the response is incomplete.
 	resp.Diagnostics.Append(resp.State.Set(ctx, model)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, r.Identity(model.ID))...)
+	resp.Diagnostics.Append(routeDescriptionResetDiagnostics(types.StringPointerValue(request.Description), model.Description)...)
 }
 
 func (r *routeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -211,6 +221,7 @@ func (r *routeResource) Update(ctx context.Context, req resource.UpdateRequest, 
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, model)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, r.Identity(model.ID))...)
+	resp.Diagnostics.Append(routeDescriptionResetDiagnostics(types.StringPointerValue(request.Description), model.Description)...)
 }
 
 func (r *routeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
