@@ -11,8 +11,13 @@ Manages resources across SAP Business Technology Platform services.
 
 ## Example Usage
 
+Configure a service block for each service you use. The example below enables both
+CI/CD and Cloud Transport Management; omit either block if you do not use that service.
+
 ```terraform
 terraform {
+  required_version = ">= 1.14.0"
+
   required_providers {
     btpservice = {
       source  = "sap/btp-services"
@@ -27,6 +32,13 @@ provider "btpservice" {
     token_url     = "https://your-subaccount.authentication.us10.hana.ondemand.com/oauth/token"
     client_id     = "sb-clone-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx!b12345|cicd-service!b6789"
     client_secret = "your-client-secret-value-here="
+  }
+
+  ctms {
+    endpoint      = "https://transport-service-app-backend.ts.cfapps.landscape.hana.ondemand.com"
+    token_url     = "https://your-subaccount.authentication.us10.hana.ondemand.com/oauth/token"
+    client_id     = "your-ctms-client-id"
+    client_secret = "your-ctms-client-secret"
   }
 }
 ```
@@ -74,9 +86,9 @@ Optional:
 ## Authentication
 
 The provider uses OAuth2 client credentials flow to authenticate against SAP BTP services.
-Each service block (e.g. `cicd`) requires its own credentials obtained from a **service key** on a BTP service instance.
+Each service block (`cicd` or `ctms`) requires its own credentials obtained from a **service key** on a BTP service instance.
 
-For a step-by-step walkthrough — including how to entitle your subaccount, create the service instance, generate the service key, and map the JSON fields to provider attributes — see the [Quick Start Guide](../guides/QUICKSTART.md).
+For a step-by-step CI/CD walkthrough — including how to entitle your subaccount, create the service instance, generate the service key, and map the JSON fields to provider attributes — see the [Quick Start Guide](../guides/QUICKSTART.md).
 
 ### CI/CD service key field mapping
 
@@ -96,6 +108,19 @@ We recommend sourcing credentials via environment variables rather than hardcodi
 ### Cloud Transport Management
 
 Configure a `ctms` block to use CTMS nodes, routes, destination metadata, and UI links.
-CTMS requires Terraform 1.14 or later. The optional `timeout` defaults to 60 seconds
-per HTTP request. See the [CTMS guide](../guides/CTMS.md) for environment variables,
-ephemeral credentials, scoped imports, ownership semantics, and discovery.
+CTMS requires Terraform 1.14 or later. Configure these attributes using credentials
+from your Cloud Transport Management service key, or set the corresponding environment variables:
+
+| Provider attribute | Environment variable     | Value                                              |
+|--------------------|--------------------------|----------------------------------------------------|
+| `endpoint`         | `BTP_CTMS_ENDPOINT`       | CTMS service root URL without `/v2`                 |
+| `token_url`        | `BTP_CTMS_TOKEN_URL`      | Complete OAuth token endpoint ending in `/oauth/token` |
+| `client_id`        | `BTP_CTMS_CLIENT_ID`      | OAuth client ID                                    |
+| `client_secret`    | `BTP_CTMS_CLIENT_SECRET`  | OAuth client secret                                |
+
+When all four environment variables are set, an empty `ctms {}` block enables the
+service. Explicit attribute values override environment variables. Use an ephemeral
+variable for `client_secret` if you supply it through Terraform configuration.
+
+The optional `timeout` defaults to 60 seconds per HTTP request. Each provider alias
+has its own CTMS client and landscape scope.
