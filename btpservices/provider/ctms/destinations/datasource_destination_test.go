@@ -1,49 +1,47 @@
 package ctmsdestinations_test
 
 import (
-	"fmt"
 	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
 	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/ctms/testutils"
 )
 
 func TestDataSourceCTMSDestination(t *testing.T) {
-	rec := testutils.SetupVCR(t, "datasource_destination", "test_destination")
-	config := func(include bool) string {
-		return fmt.Sprintf(
-			`
-data "btpservice_ctms_destination" "test" {
-  name              = %q
-  include_tenant_id = %t
-}
-`,
-			rec.Values["test_destination"],
-			include,
-		)
+	rec := testutils.SetupVCR(t, "datasource_destination")
+	config := testDataSourceCTMSDestinationConfig()
+	var checks []statecheck.StateCheck
+	for attribute, value := range testDestinationSummaryValues("ctms-deployer-dev") {
+		checks = append(checks, statecheck.ExpectKnownValue("data.btpservice_ctms_destination.test", tfjsonpath.New(attribute), value))
 	}
 
 	resource.Test(
 		t,
 		rec.TestCase(
 			resource.TestStep{
-				Config: config(false),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("data.btpservice_ctms_destination.test", "name", rec.Values["test_destination"]),
-					resource.TestCheckResourceAttr("data.btpservice_ctms_destination.test", "include_tenant_id", "false"),
-				),
+				Config:            config,
+				Check:             resource.TestCheckResourceAttr("data.btpservice_ctms_destination.test", "include_tenant_id", "false"),
+				ConfigStateChecks: checks,
 			},
 			resource.TestStep{
-				Config: config(true),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("data.btpservice_ctms_destination.test", "name", rec.Values["test_destination"]),
-					resource.TestCheckResourceAttr("data.btpservice_ctms_destination.test", "include_tenant_id", "true"),
-				),
+				Config:   config,
+				PlanOnly: true,
 			},
 		),
 	)
+}
+
+func testDataSourceCTMSDestinationConfig() string {
+	return `
+data "btpservice_ctms_destination" "test" {
+  name              = "ctms-deployer-dev"
+  include_tenant_id = false
+}
+`
 }
 
 func TestDataSourceCTMSDestinationMissing(t *testing.T) {
