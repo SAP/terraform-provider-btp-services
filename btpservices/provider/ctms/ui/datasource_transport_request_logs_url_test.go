@@ -22,7 +22,7 @@ func TestDataSourceCTMSTransportRequestLogsURL(t *testing.T) {
 			resource.TestStep{
 				Config: config,
 				ConfigStateChecks: []statecheck.StateCheck{
-					statecheck.ExpectKnownValue("data.btpservice_ctms_transport_request_logs_url.request", tfjsonpath.New("transport_request_id"), knownvalue.StringExact("201")),
+					statecheck.ExpectKnownValue("data.btpservice_ctms_transport_request_logs_url.request", tfjsonpath.New("transport_request_id"), knownvalue.StringExact("210")),
 					statecheck.ExpectKnownValue("data.btpservice_ctms_transport_request_logs_url.request", tfjsonpath.New("node_id"), knownvalue.Null()),
 					statecheck.ExpectKnownValue("data.btpservice_ctms_transport_request_logs_url.request", tfjsonpath.New("url"), knownvalue.StringRegexp(regexp.MustCompile(`^https://.+`))),
 				},
@@ -35,6 +35,7 @@ func TestDataSourceCTMSTransportRequestLogsURL(t *testing.T) {
 	)
 }
 
+/* No Test Data Available
 func TestDataSourceCTMSTransportRequestLogsURLWithNode(t *testing.T) {
 	rec := testutils.SetupVCR(t, "datasource_transport_request_logs_url_with_node")
 	config := testDataSourceCTMSTransportRequestLogsURLWithNodeConfig()
@@ -57,15 +58,17 @@ func TestDataSourceCTMSTransportRequestLogsURLWithNode(t *testing.T) {
 		),
 	)
 }
+*/
 
 func testDataSourceCTMSTransportRequestLogsURLConfig() string {
 	return `
 data "btpservice_ctms_transport_request_logs_url" "request" {
-  transport_request_id = "201"
+  transport_request_id = "210"
 }
 `
 }
 
+/*
 func testDataSourceCTMSTransportRequestLogsURLWithNodeConfig() string {
 	return `
 data "btpservice_ctms_transport_request_logs_url" "node" {
@@ -74,3 +77,4 @@ data "btpservice_ctms_transport_request_logs_url" "node" {
 }
 `
 }
+*/

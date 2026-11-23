@@ -8,10 +8,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 
-	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/ctms/destinations"
-	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/ctms/nodes"
-	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/ctms/routes"
-	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/ctms/ui"
+	ctmsdestinations "github.com/SAP/terraform-provider-btp-services/btpservices/provider/ctms/destinations"
+	ctmsnodes "github.com/SAP/terraform-provider-btp-services/btpservices/provider/ctms/nodes"
+	ctmsroutes "github.com/SAP/terraform-provider-btp-services/btpservices/provider/ctms/routes"
+	ctmsui "github.com/SAP/terraform-provider-btp-services/btpservices/provider/ctms/ui"
 )
 
 // ServicePackage registers the landscape operations exposed by the CTMS client.
