@@ -62,6 +62,14 @@ func (d *nodeDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 				Computed:            true,
 				MarkdownDescription: "Enable notifications. Requires an Alert Notification subscription and configuration in the subaccount.",
 			},
+			"import_disabled": schema.BoolAttribute{
+				Computed:            true,
+				MarkdownDescription: "Whether import is disabled for the node.",
+			},
+			"import_disabled_reason": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Reason import is disabled for the node.",
+			},
 			"virtual": schema.BoolAttribute{
 				Computed:            true,
 				MarkdownDescription: "Virtual nodes cannot have deployment targets.",
@@ -115,7 +123,7 @@ func (d *nodeDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 }
 
 func (d *nodeDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var config nodeModel
+	var config nodeDataSourceModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
@@ -152,7 +160,7 @@ func (d *nodeDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	model, diags := nodeValueFrom(ctx, *result)
+	model, diags := nodeDataSourceValueFrom(ctx, *result)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

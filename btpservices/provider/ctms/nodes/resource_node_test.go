@@ -330,13 +330,6 @@ resource "btpservice_ctms_node" "test" {
 	return fmt.Sprintf(base, targets)
 }
 
-func testResourceCTMSNodeDriftConfig() string {
-	return `resource "btpservice_ctms_node" "test" {
- name = "tf-ctms-node-drift"
- description = "managed"
-}`
-}
-
 func testResourceCTMSNodeAttributesConfig(attributes string) string {
 	return fmt.Sprintf("resource \"btpservice_ctms_node\" \"test\" {\n%s\n}\n", attributes)
 }

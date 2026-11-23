@@ -32,6 +32,8 @@ Read-Only:
 - `description` (String) Node description. Omit to leave it managed by CTMS.
 - `forward_mode` (String) Forwarding mode: AUTO (pre-import), POST_IMPORT, ON_SUCCESS, or MANUAL.
 - `id` (String) Decimal node ID assigned by CTMS.
+- `import_disabled` (Boolean) Whether import is disabled for the node.
+- `import_disabled_reason` (String) Reason import is disabled for the node.
 - `job_id` (Number) Import scheduler job ID, if present.
 - `name` (String) Case-sensitive node name. Changing it replaces the node.
 - `notification_enabled` (Boolean) Enable notifications. Requires an Alert Notification subscription and configuration in the subaccount.

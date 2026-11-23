@@ -60,6 +60,14 @@ func (d *nodesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 							Computed:            true,
 							MarkdownDescription: "Enable notifications. Requires an Alert Notification subscription and configuration in the subaccount.",
 						},
+						"import_disabled": schema.BoolAttribute{
+							Computed:            true,
+							MarkdownDescription: "Whether import is disabled for the node.",
+						},
+						"import_disabled_reason": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "Reason import is disabled for the node.",
+						},
 						"virtual": schema.BoolAttribute{
 							Computed:            true,
 							MarkdownDescription: "Virtual nodes cannot have deployment targets.",
@@ -125,9 +133,9 @@ func (d *nodesDataSource) Read(ctx context.Context, _ datasource.ReadRequest, re
 		return cmp.Compare(*a.Id, *b.Id)
 	})
 
-	models := make([]nodeModel, 0, len(items))
+	models := make([]nodeDataSourceModel, 0, len(items))
 	for _, item := range items {
-		model, diags := nodeValueFrom(ctx, item)
+		model, diags := nodeDataSourceValueFrom(ctx, item)
 		resp.Diagnostics.Append(diags...)
 		models = append(models, model)
 	}
@@ -136,7 +144,7 @@ func (d *nodesDataSource) Read(ctx context.Context, _ datasource.ReadRequest, re
 		return
 	}
 
-	values, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: nodeAttrTypes}, models)
+	values, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: nodeDataSourceAttrTypes}, models)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

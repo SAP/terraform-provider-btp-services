@@ -94,8 +94,29 @@ func TestListResourceCTMSNodeQueryConfig(t *testing.T) {
 			if includeResource {
 				checks = append(checks, querycheck.ExpectResourceKnownValues(
 					"btpservice_ctms_node.nodes", nil, []querycheck.KnownValueCheck{
-						{Path: tfjsonpath.New("id"), KnownValue: knownvalue.StringExact("183")},
-						{Path: tfjsonpath.New("name"), KnownValue: knownvalue.StringExact("Terraform_dev")},
+						// LIST output follows the managed resource schema, even when the API
+						// includes additional fields exposed only by data sources.
+						{Path: tfjsonpath.Path{}, KnownValue: knownvalue.ObjectExact(map[string]knownvalue.Check{
+							"id":                   knownvalue.StringExact("183"),
+							"name":                 knownvalue.StringExact("Terraform_dev"),
+							"description":          knownvalue.StringExact("Development Space"),
+							"upload_allowed":       knownvalue.Bool(true),
+							"forward_mode":         knownvalue.StringExact("AUTO"),
+							"notification_enabled": knownvalue.Bool(true),
+							"auto_import":          knownvalue.Bool(false),
+							"virtual":              knownvalue.Bool(false),
+							"controlled_by":        knownvalue.StringExact("CHARM"),
+							"job_id":               knownvalue.Int64Exact(5434),
+							"targets": knownvalue.ListExact([]knownvalue.Check{
+								knownvalue.ObjectExact(map[string]knownvalue.Check{
+									"content_type":     knownvalue.StringExact("MTA"),
+									"destination_name": knownvalue.StringExact("CF_TARGET_DESTINATION"),
+									"import_options": knownvalue.ObjectExact(map[string]knownvalue.Check{
+										"strategy": knownvalue.StringExact("blue-green"),
+									}),
+								}),
+							}),
+						})},
 					},
 				))
 			}
@@ -114,7 +135,7 @@ func (transport nodeListQueryTransport) RoundTrip(req *http.Request) (*http.Resp
 	case req.Method == http.MethodPost && req.URL.String() == "https://auth.example/oauth/token":
 		body = `{"access_token":"test-token","expires_in":3600}`
 	case req.Method == http.MethodGet && req.URL.String() == "https://ctms.example/v2/nodes":
-		body = `{"nodes":[{"id":183,"name":"Terraform_dev","description":"Development Space","uploadAllowed":true,"forwardMode":"AUTO","notificationEnabled":true,"autoImport":false,"virtual":false,"targets":[]}]}`
+		body = `{"nodes":[{"id":183,"name":"Terraform_dev","description":"Development Space","uploadAllowed":true,"forwardMode":"AUTO","notificationEnabled":true,"autoImport":false,"virtual":false,"controlledBy":"CHARM","jobId":5434,"importDisabled":true,"importDisabledReason":"Maintenance","targets":[{"contentType":"MTA","destinationName":"CF_TARGET_DESTINATION","importOptions":{"strategy":"blue-green"}}]}]}`
 	default:
 		transport.t.Errorf("unexpected HTTP request during local query test: %s %s", req.Method, req.URL)
 		return nil, fmt.Errorf("unexpected local query request")

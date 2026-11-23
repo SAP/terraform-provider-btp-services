@@ -17,16 +17,18 @@ func TestDataSourceCTMSNode(t *testing.T) {
 	rec := testutils.SetupVCR(t, "datasource_node")
 	config := testDataSourceCTMSNodeConfig()
 	expected := map[string]knownvalue.Check{
-		"id":                   knownvalue.StringExact("183"),
-		"name":                 knownvalue.StringExact("Terraform_dev"),
-		"description":          knownvalue.StringExact("Development Space"),
-		"forward_mode":         knownvalue.StringExact("AUTO"),
-		"upload_allowed":       knownvalue.Bool(true),
-		"notification_enabled": knownvalue.Bool(true),
-		"auto_import":          knownvalue.Bool(false),
-		"virtual":              knownvalue.Bool(false),
-		"controlled_by":        knownvalue.Null(),
-		"job_id":               knownvalue.Null(),
+		"id":                     knownvalue.StringExact("183"),
+		"name":                   knownvalue.StringExact("Terraform_dev"),
+		"description":            knownvalue.StringExact("Development Space"),
+		"forward_mode":           knownvalue.StringExact("AUTO"),
+		"upload_allowed":         knownvalue.Bool(true),
+		"notification_enabled":   knownvalue.Bool(true),
+		"import_disabled":        knownvalue.Bool(false),
+		"import_disabled_reason": knownvalue.StringExact(""),
+		"auto_import":            knownvalue.Bool(false),
+		"virtual":                knownvalue.Bool(false),
+		"controlled_by":          knownvalue.Null(),
+		"job_id":                 knownvalue.Null(),
 		"targets": knownvalue.ListExact([]knownvalue.Check{
 			knownvalue.ObjectExact(map[string]knownvalue.Check{
 				"content_type":     knownvalue.StringExact("MTA"),

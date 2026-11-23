@@ -33,7 +33,7 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 97.826792ms
+        duration: 103.100584ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -56,12 +56,12 @@ interactions:
         proto_minor: 0
         transfer_encoding: []
         trailer: {}
-        content_length: 364
+        content_length: 445
         uncompressed: false
-        body: '{"routes":[{"description":"Route from Development to Test Space","id":192,"name":"Terraform_DEV_TO_TEST","sourceNodeId":183,"targetNodeId":184},{"description":"Route from Test to Production Space","id":204,"name":"Terraform_TEST_TO_PROD","sourceNodeId":184,"targetNodeId":201},{"description":null,"id":342,"name":"dev-prod","sourceNodeId":183,"targetNodeId":201}]}'
+        body: '{"routes":[{"description":"Route from Development to Test Space","id":192,"name":"Terraform_DEV_TO_TEST","sourceNodeId":183,"targetNodeId":184},{"description":"Route from Test to Production Space","id":204,"name":"Terraform_TEST_TO_PROD","sourceNodeId":184,"targetNodeId":201},{"description":null,"id":342,"name":"dev-prod","sourceNodeId":183,"targetNodeId":201},{"description":" ","id":465,"name":"Test","sourceNodeId":183,"targetNodeId":201}]}'
         headers:
             Content-Type:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 714.56525ms
+        duration: 161.1705ms
