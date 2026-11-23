@@ -2,26 +2,26 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths-ignore:
-      - '*.md'
-      - '*.md.tmpl'
-      - '*.tf'
+      - "*.md"
+      - "*.md.tmpl"
+      - "*.tf"
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
     types:
       - opened
       - reopened
       - synchronize
       - ready_for_review
     paths-ignore:
-      - '*.md'
-      - '*.md.tmpl'
-      - '*.tf'
+      - "*.md"
+      - "*.md.tmpl"
+      - "*.tf"
   schedule:
-    - cron: '30 4 * * 0'
+    - cron: "30 4 * * 0"
   workflow_dispatch:
-    
+
 jobs:
   analyze:
     if: github.event.pull_request.draft == false
@@ -35,21 +35,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'go' ]
+        language: ["go"]
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v7
+      - name: Checkout repository
+        uses: actions/checkout@v7
 
-    # Manually install the right version of Go
-    # See https://github.com/github/codeql-action/issues/1842 and https://github.com/github/codeql/issues/13992
-    - name: Setup Go
-      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v6.2.0
-      with:
-        go-version-file: "go.mod"
-        # not needed but gets rid of warnings
-        cache: false
- 
+      # Manually install the right version of Go
+      # See https://github.com/github/codeql-action/issues/1842 and https://github.com/github/codeql/issues/13992
+      - name: Setup Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v6.2.0
+        with:
+          go-version-file: "go.mod"
+          # not needed but gets rid of warnings
+          cache: false
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -60,8 +59,8 @@ jobs:
         # By default, queries listed here will override any specified in a config file.
         # Prefix the list here with "+" to use these queries and those in the config file.
 
-        # Details on CodeQL's query packs refer to : https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
-        # queries: security-extended,security-and-quality
+          # Details on CodeQL's query packs refer to : https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
+          # queries: security-extended,security-and-quality
 
 
     # Autobuild attempts to build any compiled languages  (C/C++, C#, Go, or Java).
@@ -69,17 +68,17 @@ jobs:
     - name: Autobuild
       uses: github/codeql-action/autobuild@v4.39.4
 
-    # ℹ️ Command-line programs to run using the OS shell.
-    # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
+      # ℹ️ Command-line programs to run using the OS shell.
+      # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
 
-    #   If the Autobuild fails above, remove it and uncomment the following three lines.
-    #   modify them (or add more) to build your code if your project, please refer to the EXAMPLE below for guidance.
+      #   If the Autobuild fails above, remove it and uncomment the following three lines.
+      #   modify them (or add more) to build your code if your project, please refer to the EXAMPLE below for guidance.
 
-    # - run: |
-    #   echo "Run, Build Application using script"
-    #   ./location_of_script_within_repo/buildscript.sh
+      # - run: |
+      #   echo "Run, Build Application using script"
+      #   ./location_of_script_within_repo/buildscript.sh
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v4.39.4
+      uses: github/codeql-action/analyze@v4.39.3
       with:
         category: "/language:${{matrix.language}}"

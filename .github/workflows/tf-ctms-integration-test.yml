@@ -5,7 +5,7 @@ on:
   workflow_call:
 
 env:
-  PATH_TO_TFSCRIPT: "tests/integration"
+  PATH_TO_TFSCRIPT: "tests/integration_ctms"
   DEV_OVERRIDE: "assets/provider-config-ghaction.txt"
 
 permissions:
@@ -19,6 +19,10 @@ jobs:
 
     environment:
       name: btp-services
+
+    concurrency:
+      group: ctms-integration-btp-services
+      cancel-in-progress: false
 
     steps:
       - name: Check out Git repository
@@ -53,34 +57,29 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: |
-          terraform -chdir=${{ env.PATH_TO_TFSCRIPT }} plan \
+          plan_exit=0
+          terraform -chdir="$PATH_TO_TFSCRIPT" plan \
             -out=plan.tfplan \
             -no-color \
-            -detailed-exitcode
-          echo "exitcode=$?" >> $GITHUB_OUTPUT
+            -detailed-exitcode || plan_exit=$?
+          echo "exitcode=$plan_exit" >> "$GITHUB_OUTPUT"
+          case "$plan_exit" in
+            0|2) ;;
+            *) exit "$plan_exit" ;;
+          esac
         env:
           BTP_CTMS_ENDPOINT: ${{ secrets.BTP_CTMS_ENDPOINT }}
           BTP_CTMS_TOKEN_URL: ${{ secrets.BTP_CTMS_TOKEN_URL }}
           BTP_CTMS_CLIENT_ID: ${{ secrets.BTP_CTMS_CLIENT_ID }}
           BTP_CTMS_CLIENT_SECRET: ${{ secrets.BTP_CTMS_CLIENT_SECRET }}
-        continue-on-error: true
-
-      - name: Fail on plan error
-        if: steps.plan.outputs.exitcode == '1'
-        run: exit 1
 
       - name: Terraform Apply
         id: apply
         if: steps.plan.outputs.exitcode == '0' || steps.plan.outputs.exitcode == '2'
         run: |
-          for i in 1 2 3; do
-            echo "Apply attempt $i..."
-            terraform -chdir=${{ env.PATH_TO_TFSCRIPT }} apply \
-              -auto-approve \
-              -no-color && exit 0
-            [ $i -lt 3 ] && sleep 10
-          done
-          exit 1
+          terraform -chdir="$PATH_TO_TFSCRIPT" apply \
+            -no-color \
+            plan.tfplan
         env:
           BTP_CTMS_ENDPOINT: ${{ secrets.BTP_CTMS_ENDPOINT }}
           BTP_CTMS_TOKEN_URL: ${{ secrets.BTP_CTMS_TOKEN_URL }}
