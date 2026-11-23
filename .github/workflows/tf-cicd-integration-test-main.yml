@@ -1,11 +1,11 @@
-name: CICD Integration Test (Main) - Terraform Provider
+name: CICD Integration Test - Terraform Provider
 
 on:
   workflow_dispatch:
   workflow_call:
 
 env:
-  PATH_TO_TFSCRIPT: "tests/integration"
+  PATH_TO_TFSCRIPT: "tests/integration_cicd"
   DEV_OVERRIDE: "assets/provider-config-ghaction.txt"
 
 permissions:
@@ -13,7 +13,7 @@ permissions:
   issues: write
 
 jobs:
-  integration-test-main:
+  integration-test-cicd:
     name: CICD Integration Test with local provider
     runs-on: ubuntu-latest
 

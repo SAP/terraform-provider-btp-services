@@ -12,3 +12,8 @@ jobs:
     name: CICD Integration Test
     uses: ./.github/workflows/tf-cicd-integration-test-main.yml
     secrets: inherit
+
+ CTMS-integration-test:
+    name: CTMS Integration Test
+    uses: ./.github/workflows/tf-ctms-integration-test-main.yml
+    secrets: inherit
