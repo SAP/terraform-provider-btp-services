@@ -42,11 +42,11 @@ func (d *routesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 						},
 						"name": schema.StringAttribute{
 							Computed:            true,
-							MarkdownDescription: "Route name. Supports in-place updates.",
+							MarkdownDescription: "Route name returned by CTMS.",
 						},
 						"description": schema.StringAttribute{
 							Computed:            true,
-							MarkdownDescription: "Route description. Omit to leave it managed by CTMS.",
+							MarkdownDescription: "Route description returned by CTMS.",
 						},
 						"source_node_id": schema.StringAttribute{
 							Computed:            true,

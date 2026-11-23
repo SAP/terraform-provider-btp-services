@@ -27,8 +27,8 @@ data "btpservice_ctms_routes" "example" {}
 
 Read-Only:
 
-- `description` (String) Route description. Omit to leave it managed by CTMS.
+- `description` (String) Route description returned by CTMS.
 - `id` (String) Decimal route ID assigned by CTMS.
-- `name` (String) Route name. Supports in-place updates.
+- `name` (String) Route name returned by CTMS.
 - `source_node_id` (String) Decimal source node ID. A source can have multiple outgoing routes.
 - `target_node_id` (String) Decimal target node ID. A node can be the target of only one route.

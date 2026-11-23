@@ -33,7 +33,7 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 106.283333ms
+        duration: 230.471417ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -64,7 +64,7 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 152.777833ms
+        duration: 168.93ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -95,7 +95,7 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 161.6085ms
+        duration: 169.221792ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -128,39 +128,8 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 44.270584ms
+        duration: 53.6545ms
     - id: 4
-      request:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: 0
-        transfer_encoding: []
-        trailer: {}
-        host: redacted-api.example
-        remote_addr: ""
-        request_uri: ""
-        body: ""
-        form: {}
-        headers: {}
-        url: https://redacted-api.example/v2/routes
-        method: GET
-      response:
-        proto: HTTP/2.0
-        proto_major: 2
-        proto_minor: 0
-        transfer_encoding: []
-        trailer: {}
-        content_length: 445
-        uncompressed: false
-        body: '{"routes":[{"description":"Route from Development to Test Space","id":192,"name":"Terraform_DEV_TO_TEST","sourceNodeId":183,"targetNodeId":184},{"description":"Route from Test to Production Space","id":204,"name":"Terraform_TEST_TO_PROD","sourceNodeId":184,"targetNodeId":201},{"description":null,"id":342,"name":"dev-prod","sourceNodeId":183,"targetNodeId":201},{"description":" ","id":465,"name":"Test","sourceNodeId":183,"targetNodeId":201}]}'
-        headers:
-            Content-Type:
-                - application/json
-        status: 200 OK
-        code: 200
-        duration: 92.313417ms
-    - id: 5
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -190,7 +159,38 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 92.3205ms
+        duration: 93.703584ms
+    - id: 5
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/routes
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 445
+        uncompressed: false
+        body: '{"routes":[{"description":"Route from Development to Test Space","id":192,"name":"Terraform_DEV_TO_TEST","sourceNodeId":183,"targetNodeId":184},{"description":"Route from Test to Production Space","id":204,"name":"Terraform_TEST_TO_PROD","sourceNodeId":184,"targetNodeId":201},{"description":null,"id":342,"name":"dev-prod","sourceNodeId":183,"targetNodeId":201},{"description":" ","id":465,"name":"Test","sourceNodeId":183,"targetNodeId":201}]}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 98.809709ms
     - id: 6
       request:
         proto: HTTP/1.1
@@ -223,39 +223,8 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 37.74775ms
+        duration: 164.885834ms
     - id: 7
-      request:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: 0
-        transfer_encoding: []
-        trailer: {}
-        host: redacted-api.example
-        remote_addr: ""
-        request_uri: ""
-        body: ""
-        form: {}
-        headers: {}
-        url: https://redacted-api.example/v2/routes/192
-        method: GET
-      response:
-        proto: HTTP/2.0
-        proto_major: 2
-        proto_minor: 0
-        transfer_encoding: []
-        trailer: {}
-        content_length: 132
-        uncompressed: false
-        body: '{"description":"Route from Development to Test Space","id":192,"name":"Terraform_DEV_TO_TEST","sourceNodeId":183,"targetNodeId":184}'
-        headers:
-            Content-Type:
-                - application/json
-        status: 200 OK
-        code: 200
-        duration: 91.594ms
-    - id: 8
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -285,7 +254,38 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 99.11025ms
+        duration: 85.118875ms
+    - id: 8
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/routes/192
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 132
+        uncompressed: false
+        body: '{"description":"Route from Development to Test Space","id":192,"name":"Terraform_DEV_TO_TEST","sourceNodeId":183,"targetNodeId":184}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 85.970917ms
     - id: 9
       request:
         proto: HTTP/1.1
@@ -318,39 +318,8 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 36.641334ms
+        duration: 48.955417ms
     - id: 10
-      request:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: 0
-        transfer_encoding: []
-        trailer: {}
-        host: redacted-api.example
-        remote_addr: ""
-        request_uri: ""
-        body: ""
-        form: {}
-        headers: {}
-        url: https://redacted-api.example/v2/routes/192
-        method: GET
-      response:
-        proto: HTTP/2.0
-        proto_major: 2
-        proto_minor: 0
-        transfer_encoding: []
-        trailer: {}
-        content_length: 132
-        uncompressed: false
-        body: '{"description":"Route from Development to Test Space","id":192,"name":"Terraform_DEV_TO_TEST","sourceNodeId":183,"targetNodeId":184}'
-        headers:
-            Content-Type:
-                - application/json
-        status: 200 OK
-        code: 200
-        duration: 84.070792ms
-    - id: 11
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -380,7 +349,38 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 94.907583ms
+        duration: 78.123625ms
+    - id: 11
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: redacted-api.example
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://redacted-api.example/v2/routes/192
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 132
+        uncompressed: false
+        body: '{"description":"Route from Development to Test Space","id":192,"name":"Terraform_DEV_TO_TEST","sourceNodeId":183,"targetNodeId":184}'
+        headers:
+            Content-Type:
+                - application/json
+        status: 200 OK
+        code: 200
+        duration: 87.015083ms
     - id: 12
       request:
         proto: HTTP/1.1
@@ -413,7 +413,7 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 43.80425ms
+        duration: 169.845708ms
     - id: 13
       request:
         proto: HTTP/1.1
@@ -444,7 +444,7 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 89.683167ms
+        duration: 84.626459ms
     - id: 14
       request:
         proto: HTTP/1.1
@@ -475,4 +475,4 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 89.703958ms
+        duration: 94.063417ms

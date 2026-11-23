@@ -20,4 +20,8 @@ resource "btpservice_ctms_node" "target" {
       strategy = "default"
     }
   }]
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }

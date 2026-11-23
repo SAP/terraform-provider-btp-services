@@ -34,9 +34,9 @@ When you view the service key in the BTP Cockpit or via the CLI you receive a JS
 | Provider attribute | Environment variable      | Service key JSON field     | Notes                                     |
 |--------------------|---------------------------|----------------------------|-------------------------------------------|
 | `endpoint`         | `BTP_CICD_ENDPOINT`       | `api`                      | Copy the value directly                   |
-| `client_id`        | `BTP_CICD_TOKEN_URL`      | `uaa.clientid`             | Copy the value directly                   |
-| `client_secret`    | `BTP_CICD_CLIENT_ID`      | `uaa.clientsecret`         | Copy the value directly                   |
-| `token_url`        | `BTP_CICD_CLIENT_SECRET`  | `uaa.url`                  | Append `/oauth/token` to the value        |
+| `client_id`        | `BTP_CICD_CLIENT_ID`      | `uaa.clientid`             | Copy the value directly                   |
+| `client_secret`    | `BTP_CICD_CLIENT_SECRET`  | `uaa.clientsecret`         | Copy the value directly                   |
+| `token_url`        | `BTP_CICD_TOKEN_URL`      | `uaa.url`                  | Append `/oauth/token` to the value        |
 
 We recommend sourcing credentials via environment variables rather than hardcoding them in Terraform configuration files.
 
@@ -49,12 +49,19 @@ from your Cloud Transport Management service key, or set the corresponding envir
 | Provider attribute | Environment variable      | Service key JSON field     | Value                                              |
 |--------------------|---------------------------|----------------------------|----------------------------------------------------|
 | `endpoint`         | `BTP_CTMS_ENDPOINT`       | `api`                      | CTMS service root URL without `/v2`                 |
-| `token_url`        | `BTP_CTMS_TOKEN_URL`      | `uaa.clientid`             | Complete OAuth token endpoint ending in `/oauth/token` |
-| `client_id`        | `BTP_CTMS_CLIENT_ID`      | `uaa.clientsecret`         | OAuth client ID                                    |
-| `client_secret`    | `BTP_CTMS_CLIENT_SECRET`  | `uaa.url`                  | OAuth client secret                                |
+| `token_url`        | `BTP_CTMS_TOKEN_URL`      | `uaa.url`                  | Append `/oauth/token` to the value                  |
+| `client_id`        | `BTP_CTMS_CLIENT_ID`      | `uaa.clientid`             | Copy the value directly                            |
+| `client_secret`    | `BTP_CTMS_CLIENT_SECRET`  | `uaa.clientsecret`         | Copy the value directly                            |
 
 When all four environment variables are set, an empty `ctms {}` block enables the service. Explicit attribute values override environment variables. Use an ephemeral
 variable for `client_secret` if you supply it through Terraform configuration.
 
 The optional `timeout` defaults to 60 seconds per HTTP request. Each provider alias
 has its own CTMS client and landscape scope.
+
+Both CTMS URLs must use HTTPS. The default CTMS client also rejects redirects to HTTP.
+
+CTMS reads, deletes, and OAuth token requests are retried up to three times for HTTP 429
+and 5xx responses. Node and route creates and updates are not automatically retried.
+If a create fails after the server may have applied it, inspect the landscape and
+import the created object by ID before retrying the apply.

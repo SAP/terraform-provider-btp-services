@@ -301,6 +301,20 @@ func TestProvider_CTMSConfiguration(t *testing.T) {
 	}{
 		{name: "optional timeout omitted"},
 		{
+			name: "HTTP service endpoint",
+			edit: func(c *ctmsProviderModel) {
+				c.Endpoint = types.StringValue("http://ctms.example")
+			},
+			wantError: true,
+		},
+		{
+			name: "HTTP token endpoint",
+			edit: func(c *ctmsProviderModel) {
+				c.TokenURL = types.StringValue("http://auth.example/oauth/token")
+			},
+			wantError: true,
+		},
+		{
 			name: "custom timeout",
 			edit: func(c *ctmsProviderModel) {
 				c.Timeout = types.Int64Value(120)

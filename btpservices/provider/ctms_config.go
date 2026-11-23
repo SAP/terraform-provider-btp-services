@@ -34,11 +34,11 @@ func ctmsProviderBlock() schema.SingleNestedBlock {
 		Attributes: map[string]schema.Attribute{
 			"endpoint": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "CTMS service root without /v2. Maps to the `api` field in the service key JSON. Env: `BTP_CTMS_ENDPOINT`.",
+				MarkdownDescription: "CTMS HTTPS service root without /v2. Maps to the `api` field in the service key JSON. Env: `BTP_CTMS_ENDPOINT`.",
 			},
 			"token_url": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Complete OAuth token endpoint. Construct by appending `/oauth/token` to the `uaa.url` field in the service key JSON. Env: `BTP_CTMS_TOKEN_URL`.",
+				MarkdownDescription: "Complete HTTPS OAuth token endpoint. Construct by appending `/oauth/token` to the `uaa.url` field in the service key JSON. Env: `BTP_CTMS_TOKEN_URL`.",
 			},
 			"client_id": schema.StringAttribute{
 				Optional:            true,
@@ -102,11 +102,11 @@ func configureCTMS(_ context.Context, data *ctmsProviderModel, terraformVersion 
 		"token_url": cfg.TokenURL,
 	} {
 		u, err := url.Parse(value)
-		if err != nil || u.Host == "" || (u.Scheme != "https" && u.Scheme != "http") || u.User != nil || u.RawQuery != "" || u.Fragment != "" {
+		if err != nil || u.Host == "" || u.Scheme != "https" || u.User != nil || u.RawQuery != "" || u.Fragment != "" {
 			diags.AddAttributeError(
 				path.Root("ctms").AtName(name),
 				"Invalid CTMS URL",
-				"Use an absolute HTTP(S) URL without embedded credentials, a query, or a fragment.",
+				"Use an absolute HTTPS URL without embedded credentials, a query, or a fragment.",
 			)
 		} else if name == "endpoint" && strings.HasSuffix(u.Path, "/v2") {
 			diags.AddAttributeError(

@@ -48,7 +48,7 @@ func (d *routeDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 			},
 			"description": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Route description. Omit to leave it managed by CTMS.",
+				MarkdownDescription: "Route description returned by CTMS.",
 			},
 			"source_node_id": schema.StringAttribute{
 				Computed:            true,

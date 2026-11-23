@@ -33,7 +33,7 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 96.957625ms
+        duration: 107.154667ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -64,7 +64,7 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 207.92175ms
+        duration: 222.2055ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -97,7 +97,7 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 41.704042ms
+        duration: 40.471084ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -128,7 +128,7 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 240.183916ms
+        duration: 150.298584ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -161,7 +161,7 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 60.174ms
+        duration: 41.614625ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -192,7 +192,7 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 154.640542ms
+        duration: 175.70675ms
     - id: 6
       request:
         proto: HTTP/1.1
@@ -225,7 +225,7 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 37.661458ms
+        duration: 40.660541ms
     - id: 7
       request:
         proto: HTTP/1.1
@@ -256,7 +256,7 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 158.491667ms
+        duration: 223.058292ms
     - id: 8
       request:
         proto: HTTP/1.1
@@ -289,7 +289,7 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 43.082208ms
+        duration: 42.007584ms
     - id: 9
       request:
         proto: HTTP/1.1
@@ -320,4 +320,4 @@ interactions:
                 - application/json
         status: 200 OK
         code: 200
-        duration: 239.350834ms
+        duration: 149.813ms

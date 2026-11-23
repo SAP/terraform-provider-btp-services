@@ -37,7 +37,8 @@ func newCtmsHTTPClient(cfg CtmsClientConfig) *ctmsHTTPClient {
 	}
 	return &ctmsHTTPClient{
 		httpClient: &http.Client{
-			Timeout: timeout,
+			Timeout:       timeout,
+			CheckRedirect: checkHTTPSRedirect,
 			Transport: &retryTransport{
 				wrapped:    http.DefaultTransport,
 				maxRetries: 3,
@@ -58,6 +59,21 @@ func newCtmsHTTPClientWithHTTP(cfg CtmsClientConfig, client *http.Client) *ctmsH
 	return hc
 }
 
+// checkHTTPSRedirect prevents credentials from being sent over an unencrypted
+// redirect and preserves net/http's default limit of ten requests.
+func checkHTTPSRedirect(req *http.Request, via []*http.Request) error {
+	if req.URL.Scheme != "https" {
+		return fmt.Errorf("CTMS redirects must use HTTPS")
+	}
+	if len(via) >= 10 {
+		return fmt.Errorf("stopped after 10 redirects")
+	}
+	return nil
+}
+
+// tokenRetryKey marks only OAuth token requests as safe to retry with POST.
+type tokenRetryKey struct{}
+
 // bearerToken caches tokens and refreshes within 30 seconds of expiry, as CI/CD does.
 func (c *ctmsHTTPClient) bearerToken(ctx context.Context) (string, error) {
 	c.mu.Lock()
@@ -69,7 +85,8 @@ func (c *ctmsHTTPClient) bearerToken(ctx context.Context) (string, error) {
 		return c.token, nil
 	}
 	data := url.Values{"grant_type": {"client_credentials"}}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.tokenURL, strings.NewReader(data.Encode()))
+	tokenContext := context.WithValue(ctx, tokenRetryKey{}, true)
+	req, err := http.NewRequestWithContext(tokenContext, http.MethodPost, c.tokenURL, strings.NewReader(data.Encode()))
 	if err != nil {
 		return "", fmt.Errorf("build token request: %w", err)
 	}
@@ -167,8 +184,9 @@ func (c *ctmsHTTPClient) do(ctx context.Context, method, path string, body, out 
 	return nil
 }
 
-// retryTransport matches CI/CD's policy: three retries for 429/5xx on every
-// method, including creates. It does not guarantee exactly-once mutations.
+// retryTransport retries GET, DELETE, and explicitly marked OAuth token POSTs
+// on 429/5xx. Resource POSTs and PATCHes are never automatically retried: a
+// failed response does not establish that the server rejected the mutation.
 type retryTransport struct {
 	wrapped    http.RoundTripper
 	maxRetries int
@@ -176,10 +194,12 @@ type retryTransport struct {
 }
 
 func (t *retryTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	canRetry := req.Method == http.MethodGet || req.Method == http.MethodDelete ||
+		(req.Method == http.MethodPost && req.Context().Value(tokenRetryKey{}) == true)
 	current := req
 	for attempt := 0; ; attempt++ {
 		resp, err := t.wrapped.RoundTrip(current)
-		if err != nil || !isRetryable(resp) || attempt >= t.maxRetries {
+		if err != nil || !canRetry || !isRetryable(resp) || attempt >= t.maxRetries {
 			return resp, err
 		}
 		// All client-generated bodies are replayable. Do not resend an exhausted

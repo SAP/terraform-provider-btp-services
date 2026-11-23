@@ -105,7 +105,7 @@ func (r *nodeResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 						"content_type": schema.StringAttribute{
 							Required:            true,
 							Validators:          []validator.String{stringvalidator.OneOf("MTA", "XSCDU", "APP", "BTP_ABAP")},
-							MarkdownDescription: "Content type.",
+							MarkdownDescription: "Content type: MTA, XSCDU, APP, or BTP_ABAP.",
 						},
 						"destination_name": schema.StringAttribute{
 							Required:            true,

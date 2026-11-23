@@ -27,30 +27,30 @@ data "btpservice_ctms_node" "example" {
 
 ### Read-Only
 
-- `auto_import` (Boolean) Automatically import eligible requests. Enabling this can immediately import queued requests and deactivate existing schedules.
-- `controlled_by` (String) Application controlling the node. Read-only until the API reset contract is confirmed.
-- `description` (String) Node description. Omit to leave it managed by CTMS.
+- `auto_import` (Boolean) Whether automatic import is enabled for the node.
+- `controlled_by` (String) Application controlling the node, if returned by CTMS.
+- `description` (String) Node description returned by CTMS.
 - `forward_mode` (String) Forwarding mode: AUTO (pre-import), POST_IMPORT, ON_SUCCESS, or MANUAL.
 - `import_disabled` (Boolean) Whether import is disabled for the node.
 - `import_disabled_reason` (String) Reason import is disabled for the node.
 - `job_id` (Number) Import scheduler job ID, if present.
-- `notification_enabled` (Boolean) Enable notifications. Requires an Alert Notification subscription and configuration in the subaccount.
-- `targets` (Attributes List) Deployment targets in API order. Omit to leave targets managed by CTMS; an explicit empty list requests clearing them. Virtual nodes cannot have targets. (see [below for nested schema](#nestedatt--targets))
-- `upload_allowed` (Boolean) Allow file uploads to this node.
-- `virtual` (Boolean) Virtual nodes cannot have deployment targets.
+- `notification_enabled` (Boolean) Whether notifications are enabled for the node.
+- `targets` (Attributes List) Deployment targets returned by CTMS, in API order. (see [below for nested schema](#nestedatt--targets))
+- `upload_allowed` (Boolean) Whether file uploads to this node are allowed.
+- `virtual` (Boolean) Whether the node is virtual. Virtual nodes cannot have deployment targets.
 
 <a id="nestedatt--targets"></a>
 ### Nested Schema for `targets`
 
 Read-Only:
 
-- `content_type` (String) Content type.
-- `destination_name` (String) Name of an existing transport destination.
-- `import_options` (Attributes) MTA deployment options. The destination must address Cloud Foundry. (see [below for nested schema](#nestedatt--targets--import_options))
+- `content_type` (String) Content type: MTA, XSCDU, APP, or BTP_ABAP.
+- `destination_name` (String) Transport destination name returned by CTMS.
+- `import_options` (Attributes) Deployment import options returned by CTMS, if present. (see [below for nested schema](#nestedatt--targets--import_options))
 
 <a id="nestedatt--targets--import_options"></a>
 ### Nested Schema for `targets.import_options`
 
 Read-Only:
 
-- `strategy` (String) Deployment strategy: default or blue-green. Only for MTA deployment to Cloud Foundry.
+- `strategy` (String) Deployment strategy returned by CTMS: default or blue-green.

@@ -15,6 +15,13 @@ description: |-
 {{tffile .ExampleFile}}
 {{- end }}
 
+## Renaming connected nodes
+
+Changing a node's name replaces it. CTMS rejects deletion while a route still references the node. Set `lifecycle { create_before_destroy = true }` on connected nodes and use resource references for the node IDs in managed routes.
+Terraform can then create the node with its new name, update the routes to its new ID, and delete the original node.
+
+The replacement name must be unique. Forcing replacement while retaining the same name can fail because CTMS does not allow two nodes with that name. Routes managed outside this Terraform configuration must be removed or rewired separately before the original node can be deleted.
+
 {{ .SchemaMarkdown | trimspace }}
 
 {{ if .HasImport -}}
@@ -25,12 +32,30 @@ Import is supported using the following syntax:
 {{tffile .ImportFile}}
 {{- end }}
 
+Alternatively, use a structured identity in an `import` block with Terraform 1.14 or later:
+
+```terraform
+import {
+  to       = btpservice_ctms_node.source
+  provider = btpservice.landscape
+  identity = {
+    endpoint = "https://transport-service-app-backend.ts.cfapps.eu10.hana.ondemand.com"
+    id       = "12345"
+  }
+}
+```
+
+Configure the `btpservice.landscape` provider alias with credentials for the intended CTMS landscape and set `provider = btpservice.landscape` on the destination resource block as well.
+Set the identity's `endpoint` to that provider's CTMS service root without `/v2` or a trailing slash.
+The regional endpoint may be shared by tenants; the credentials select the landscape.
+
 ## Restriction
 
 ### Labels of Nodes
 
 The current version of the V2 API for cTMS landscape management (status: 23.11.2026) does not support the creation or modification of labels. Consequently the resource does not comprise these attributes.
 
-### Import Settings of Nodes
+### Import-disabled attributes
 
-The current version of the V2 API for cTMS landscape management (status: 23.11.2026) does not support the creation or modification of import settings. Consequently the resource does not comprise these attributes.
+The managed node resource omits `import_disabled` and `import_disabled_reason` because of gaps in the V2 API's create/update behavior (status: 23.11.2026).
+The `btpservice_ctms_node` and `btpservice_ctms_nodes` data sources expose these attributes as read-only values when returned by the API. Other import-related settings, including `auto_import` and deployment `import_options`, remain available on the managed resource.

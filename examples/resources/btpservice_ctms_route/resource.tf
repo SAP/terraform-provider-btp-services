@@ -1,11 +1,19 @@
 resource "btpservice_ctms_node" "source" {
   name    = "DEVELOPMENT"
   virtual = true
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "btpservice_ctms_node" "target" {
   name    = "QUALITY"
   virtual = true
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "btpservice_ctms_route" "development_to_quality" {

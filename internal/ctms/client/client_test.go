@@ -193,7 +193,7 @@ func TestRetryPolicyAndBodyReplay(t *testing.T) {
 				resp, err := transport.RoundTrip(req)
 				require.NoError(t, err)
 				expected := 1
-				if status == 429 || status >= 500 {
+				if (method == http.MethodGet || method == http.MethodDelete) && (status == 429 || status >= 500) {
 					expected = 4
 				}
 				require.Equal(t, expected, calls)
@@ -293,6 +293,98 @@ func TestTokenRetriesReplayCredentials(t *testing.T) {
 	_, err := c.Nodes.Get(context.Background(), 1)
 	require.NoError(t, err)
 	require.Equal(t, 2, tokens)
+}
+
+func TestResourceMutationsAreNotRetried(t *testing.T) {
+	for _, method := range []string{http.MethodPost, http.MethodPatch} {
+		t.Run(method, func(t *testing.T) {
+			mutations := 0
+			transport := &retryTransport{
+				maxRetries: 3,
+				wrapped: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+					if r.URL.Host == "auth.test" {
+						return response(200, `{"access_token":"token","expires_in":3600}`), nil
+					}
+					assert.Equal(t, method, r.Method)
+					mutations++
+					// The server committed the first mutation before returning 503.
+					if mutations == 1 {
+						return response(503, `{"message":"response unavailable after commit"}`), nil
+					}
+					return response(422, `{"message":"mutation submitted again"}`), nil
+				}),
+			}
+			c := NewCtmsClientFacadeWithHTTP(CtmsClientConfig{
+				Endpoint: "https://api.test", TokenURL: "https://auth.test/token",
+			}, &http.Client{Transport: transport})
+			var err error
+			if method == http.MethodPost {
+				_, err = c.Nodes.Create(context.Background(), ctmsmodels.NodeCreateRequest{Name: "node"})
+			} else {
+				_, err = c.Nodes.Update(context.Background(), 1, ctmsmodels.NodeUpdateRequest{AutoImport: new(true)})
+			}
+			var apiErr *ctmsmodels.APIError
+			require.ErrorAs(t, err, &apiErr)
+			require.Equal(t, http.StatusServiceUnavailable, apiErr.StatusCode)
+			require.Equal(t, 1, mutations)
+		})
+	}
+}
+
+func TestProductionClientRedirectPolicy(t *testing.T) {
+	for _, phase := range []string{"token", "api"} {
+		for _, tc := range []struct {
+			name      string
+			scheme    string
+			loop      bool
+			wantError string
+			wantCalls int
+		}{
+			{name: "HTTPS redirect", scheme: "https", wantCalls: 2},
+			{name: "HTTP downgrade", scheme: "http", wantError: "CTMS redirects must use HTTPS", wantCalls: 1},
+			{name: "redirect limit", scheme: "https", loop: true, wantError: "stopped after 10 redirects", wantCalls: 10},
+		} {
+			t.Run(phase+"/"+tc.name, func(t *testing.T) {
+				c := NewCtmsClientFacade(CtmsClientConfig{
+					Endpoint: "https://api.test", TokenURL: "https://auth.test/token",
+					ClientID: "id", ClientSecret: "secret",
+				})
+				redirectCalls := 0
+				transport := c.httpClient.httpClient.Transport.(*retryTransport)
+				transport.wrapped = roundTripFunc(func(r *http.Request) (*http.Response, error) {
+					assert.Equal(t, "https", r.URL.Scheme, "no request may reach an HTTP redirect target")
+					isToken := r.URL.Host == "auth.test"
+					if isToken {
+						id, secret, ok := r.BasicAuth()
+						assert.True(t, ok)
+						assert.Equal(t, "id", id)
+						assert.Equal(t, "secret", secret)
+					} else {
+						assert.Equal(t, "Bearer token", r.Header.Get("Authorization"))
+					}
+					if isToken == (phase == "token") {
+						redirectCalls++
+						if tc.loop || r.URL.Path != "/redirected" {
+							redirect := response(http.StatusTemporaryRedirect, "")
+							redirect.Header.Set("Location", tc.scheme+"://"+r.URL.Host+"/redirected")
+							return redirect, nil
+						}
+					}
+					if isToken {
+						return response(200, `{"access_token":"token","expires_in":3600}`), nil
+					}
+					return response(200, `{"id":1}`), nil
+				})
+				_, err := c.Nodes.Get(context.Background(), 1)
+				if tc.wantError != "" {
+					require.ErrorContains(t, err, tc.wantError)
+				} else {
+					require.NoError(t, err)
+				}
+				require.Equal(t, tc.wantCalls, redirectCalls)
+			})
+		}
+	}
 }
 
 func TestTokenWithoutLifetimeIsNotReused(t *testing.T) {

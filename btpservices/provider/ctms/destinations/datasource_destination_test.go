@@ -56,10 +56,14 @@ data "btpservice_ctms_destination" "missing" {
   name = "tf-ctms-deliberately-missing-object"
 }
 `,
-				// Require a 404 for the requested destination path.
+				// CTMS can return 404 or the observed TsGenericException (500)
+				// for a missing destination. Match the requested path in both cases.
 				ExpectError: regexp.MustCompile(
-					`(?s)Error Reading CTMS Destination.*CTMS API error 404 for\s+` +
-						`/v2/destinations/tf-ctms-deliberately-missing-object\b`,
+					`(?s)Error Reading CTMS Destination.*CTMS API error (?:` +
+						`404 for\s+/v2/destinations/tf-ctms-deliberately-missing-object\b|` +
+						`500 for\s+/v2/destinations/tf-ctms-deliberately-missing-object:\s+` +
+						`com\.sap\.lm\.sl\.alm\.ts\.core\.exception\.service\.TsGenericException:\s+` +
+						`Service\s+request\s+failed\.)`,
 				),
 			},
 		),

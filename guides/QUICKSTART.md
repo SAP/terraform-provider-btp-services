@@ -121,6 +121,7 @@ CI/CD and cTMS both use the **OAuth2 client credentials** flow. Each service blo
 For example, `uaa.url` value `https://my-subaccount.authentication.eu10.hana.ondemand.com` becomes token URL `https://my-subaccount.authentication.eu10.hana.ondemand.com/oauth/token`.
 
 For **cTMS**, set `endpoint` to the service root **without `/v2`**; the provider adds the API version.
+Both the cTMS service endpoint and token URL must use HTTPS. Redirects to HTTP are rejected by the default cTMS client.
 
 As support for more services is added, use the same setup flow and consult the [provider documentation](https://registry.terraform.io/providers/SAP/btp-services/latest/docs) for each new service's block name, authentication requirements, and credential mapping.
 

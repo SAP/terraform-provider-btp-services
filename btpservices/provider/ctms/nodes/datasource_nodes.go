@@ -42,15 +42,15 @@ func (d *nodesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 						},
 						"name": schema.StringAttribute{
 							Computed:            true,
-							MarkdownDescription: "Case-sensitive node name. Changing it replaces the node.",
+							MarkdownDescription: "Case-sensitive node name returned by CTMS.",
 						},
 						"description": schema.StringAttribute{
 							Computed:            true,
-							MarkdownDescription: "Node description. Omit to leave it managed by CTMS.",
+							MarkdownDescription: "Node description returned by CTMS.",
 						},
 						"upload_allowed": schema.BoolAttribute{
 							Computed:            true,
-							MarkdownDescription: "Allow file uploads to this node.",
+							MarkdownDescription: "Whether file uploads to this node are allowed.",
 						},
 						"forward_mode": schema.StringAttribute{
 							Computed:            true,
@@ -58,7 +58,7 @@ func (d *nodesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 						},
 						"notification_enabled": schema.BoolAttribute{
 							Computed:            true,
-							MarkdownDescription: "Enable notifications. Requires an Alert Notification subscription and configuration in the subaccount.",
+							MarkdownDescription: "Whether notifications are enabled for the node.",
 						},
 						"import_disabled": schema.BoolAttribute{
 							Computed:            true,
@@ -70,42 +70,40 @@ func (d *nodesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, 
 						},
 						"virtual": schema.BoolAttribute{
 							Computed:            true,
-							MarkdownDescription: "Virtual nodes cannot have deployment targets.",
+							MarkdownDescription: "Whether the node is virtual. Virtual nodes cannot have deployment targets.",
 						},
 						"auto_import": schema.BoolAttribute{
-							Computed: true,
-							MarkdownDescription: "Automatically import eligible requests. Enabling this can immediately import queued requests and " +
-								"deactivate existing schedules.",
+							Computed:            true,
+							MarkdownDescription: "Whether automatic import is enabled for the node.",
 						},
 						"controlled_by": schema.StringAttribute{
 							Computed:            true,
-							MarkdownDescription: "Application controlling the node. Read-only until the API reset contract is confirmed.",
+							MarkdownDescription: "Application controlling the node, if returned by CTMS.",
 						},
 						"job_id": schema.Int64Attribute{
 							Computed:            true,
 							MarkdownDescription: "Import scheduler job ID, if present.",
 						},
 						"targets": schema.ListNestedAttribute{
-							Computed: true,
-							MarkdownDescription: "Deployment targets in API order. Omit to leave targets managed by CTMS; an explicit empty list " +
-								"requests clearing them. Virtual nodes cannot have targets.",
+							Computed:            true,
+							MarkdownDescription: "Deployment targets returned by CTMS, in API order.",
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 									"content_type": schema.StringAttribute{
 										Computed:            true,
-										MarkdownDescription: "Content type.",
+										MarkdownDescription: "Content type: MTA, XSCDU, APP, or BTP_ABAP.",
 									},
 									"destination_name": schema.StringAttribute{
 										Computed:            true,
-										MarkdownDescription: "Name of an existing transport destination.",
+										MarkdownDescription: "Transport destination name returned by CTMS.",
 									},
 									"import_options": schema.SingleNestedAttribute{
 										Computed:            true,
-										MarkdownDescription: "MTA deployment options. The destination must address Cloud Foundry.",
+										MarkdownDescription: "Deployment import options returned by CTMS, if present.",
 										Attributes: map[string]schema.Attribute{
 											"strategy": schema.StringAttribute{
 												Computed:            true,
-												MarkdownDescription: "Deployment strategy: default or blue-green. Only for MTA deployment to Cloud Foundry.",
+												MarkdownDescription: "Deployment strategy returned by CTMS: default or blue-green.",
 											},
 										},
 									},

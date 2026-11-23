@@ -1,0 +1,48 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.RenderedProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+{{ if .HasExample -}}
+## Example Usage
+
+{{tffile .ExampleFile}}
+{{- end }}
+
+## Replacing connected nodes
+
+Node names require replacement when changed. Use `create_before_destroy` on both connected nodes, as shown above, and reference their IDs in the route. Terraform can then create a node with its new name, update this route in place, and delete the original node. CTMS rejects deletion of a node while any route still references it.
+
+The replacement node name must be unique; forcing replacement with the same name can fail. Routes managed outside this Terraform configuration must be removed or rewired separately before the original node can be deleted.
+
+{{ .SchemaMarkdown | trimspace }}
+
+{{ if .HasImport -}}
+## Import
+
+Import is supported using the following syntax:
+
+{{tffile .ImportFile}}
+{{- end }}
+
+Alternatively, use a structured identity in an `import` block with Terraform 1.14 or later:
+
+```terraform
+import {
+  to       = btpservice_ctms_route.development_to_quality
+  provider = btpservice.landscape
+  identity = {
+    endpoint = "https://transport-service-app-backend.ts.cfapps.eu10.hana.ondemand.com"
+    id       = "12345"
+  }
+}
+```
+
+Configure the `btpservice.landscape` provider alias with credentials for the intended CTMS landscape and set `provider = btpservice.landscape` on the destination resource block as well. Set the identity's `endpoint` to that provider's CTMS service root without `/v2` or a trailing slash.
+The regional endpoint may be shared by tenants; the credentials select the landscape.
