@@ -56,7 +56,7 @@ func TestNodesFacade_Create(t *testing.T) {
 		require.Nil(t, got)
 	})
 
-	t.Run("does not adopt an existing resource after an uncertain create", func(t *testing.T) {
+	t.Run("does not retry an uncertain create", func(t *testing.T) {
 		calls := 0
 		transport := &retryTransport{
 			maxRetries: 3,
@@ -76,10 +76,10 @@ func TestNodesFacade_Create(t *testing.T) {
 		c := NewCtmsClientFacadeWithHTTP(cfg, &http.Client{Transport: transport})
 		node, err := c.Nodes.Create(context.Background(), ctmsmodels.NodeCreateRequest{Name: "node"})
 		require.Nil(t, node)
-		require.Equal(t, 2, calls)
+		require.Equal(t, 1, calls)
 		var api *ctmsmodels.APIError
 		require.ErrorAs(t, err, &api)
-		require.Equal(t, 422, api.StatusCode)
+		require.Equal(t, http.StatusInternalServerError, api.StatusCode)
 	})
 }
 
