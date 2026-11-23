@@ -61,5 +61,3 @@ examples/resources/**/*.tf
 *.env
 
 .claude
-
-TEST_DO_NOT_COMMIT

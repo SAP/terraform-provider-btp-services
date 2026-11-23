@@ -10,7 +10,9 @@ To get a quick overview of the resources and if they support the import function
 
 ## Resource Overview
 
-The following list provides an overview of the resources and their support for the import functionality (state: 01.01.2026)
+### CICD Service
+
+The following list provides an overview of the resources and their support for the import functionality (state: 23.11.2026)
 
 | Resource                                                   | Import Support
 |---                                                         |---
@@ -27,3 +29,13 @@ The following list provides an overview of the resources and their support for t
 | btpservice_cicd_job                                        | Yes
 | btpservice_cicd_repository                                 | Yes
 | btpservice_cicd_trigger                                    | Yes
+
+
+### CTMS Service
+
+The following list provides an overview of the resources and their support for the import functionality (state: 23.11.2026)
+
+| Resource                                                   | Import Support
+|---                                                         |---
+| btpservice_ctms_node                                       | Yes
+| btpservice_ctms_route                                      | Yes

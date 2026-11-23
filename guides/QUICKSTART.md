@@ -2,244 +2,207 @@
 
 ## Introduction
 
-The Terraform provider for SAP BTP Services enables you to automate the provisioning, management, and configuration of resources across [SAP Business Technology Platform](https://account.hana.ondemand.com/) services.
+The Terraform provider for SAP BTP Services enables you to automate the management and configuration of resources across [SAP Business Technology Platform](https://account.hana.ondemand.com/) services.
 
-The following services are currently supported:
-
-| Service           | Description                                                      |
-|-------------------|------------------------------------------------------------------|
-| **CI/CD Service** | Manage credentials, repositories, jobs, and triggers as code     |
+The setup follows the same flow for each service: assign an entitlement, create a service instance and service key, then configure the corresponding provider block. Repeat the flow for each service you want to manage. If you already have an instance and service key, start with the credential mapping in Step 4.
 
 ## Prerequisites
 
-- Access to an [SAP BTP account](https://account.hana.ondemand.com/)
-- Credentials for the service(s) you want to manage — see the service-specific sections below
+- Access to an SAP BTP subaccount and permissions to manage entitlements, service instances, and service keys
+- Terraform installed; use version 1.14 or later for the examples in this guide (required for cTMS)
+- A service plan available in your subaccount and region
 
-## Authentication
+## Step 1 — Choose your service and assign an entitlement
 
-Each service block in the provider requires its own credentials. The authentication mechanism depends on the service. We strongly recommend providing credentials via environment variables rather than hardcoding them in Terraform configuration files.
+Use the table below to identify the service and its provider configuration. The shared steps cover both services; service-specific values and exceptions are listed here and in the credential mapping.
 
-## Example configuration
+| Service | Service Marketplace name | Provider block | Environment variable prefix | Managed resources |
+|---------|--------------------------|----------------|-----------------------------|-------------------|
+| SAP Continuous Integration and Delivery (CI/CD) | Continuous Integration & Delivery | `cicd` | `BTP_CICD_` | Credentials, repositories, jobs, and triggers |
+| SAP Cloud Transport Management (cTMS) | Cloud Transport Management | `ctms` | `BTP_CTMS_` | Nodes and routes |
+
+1. Open the [SAP BTP Cockpit](https://cockpit.btp.cloud.sap) and navigate to your **global account**.
+2. Go to **Entitlements → Subaccount Assignments**.
+3. Select your subaccount, click **Configure Entitlements**, then **Add Service Plans**.
+4. Find your service, select the service plan you need, and save.
+
+If the required entitlement is already assigned, continue to Step 2. Plan names and availability depend on the service and region; use the service instance plan offered for your subaccount.
+
+The provider uses the service API. If you also need the service's web UI, follow that service's instructions for application subscriptions and role assignments.
+
+## Step 2 — Create a service instance
+
+Create an instance of the selected service using one of the following options. Use a descriptive name, such as `my-cicd-instance` or `my-ctms-instance`.
+
+### Option A — BTP Cockpit
+
+1. In your subaccount, go to **Services → Service Marketplace** and open the service from the table above.
+2. Click **Create** and choose a **service instance**, where prompted.
+3. Select the service plan and runtime environment supported by the service, enter an instance name, and complete the creation dialog.
+4. Wait until the instance is ready.
+
+### Option B — Cloud Foundry CLI
+
+If you use a Cloud Foundry environment, target the appropriate organization and space. Run `cf marketplace` to find the offering and plan names, then replace the placeholders below:
+
+```bash
+cf create-service <service-offering> <service-plan> <instance-name>
+```
+
+### Option C — SAP BTP Terraform Provider
+
+You can also provision the instance using the [SAP BTP Terraform Provider](https://registry.terraform.io/providers/SAP/btp/latest/docs). Configure that provider separately with access to your subaccount, then use its [`btp_subaccount_service_instance`](https://registry.terraform.io/providers/SAP/btp/latest/docs/resources/subaccount_service_instance) resource:
+
+```terraform
+
+resource "btp_subaccount_service_instance" "service" {
+  subaccount_id         = "<subaccount-id>"
+  service_offering_name = "<service-offering>"
+  serviceplan_name      = "<service-plan>"
+  name                  = "<instance-name>"
+}
+```
+
+Use the technical offering and plan names from your subaccount's service marketplace. For example, CI/CD uses offering `continuous-integration-and-delivery` with an available plan such as `default` or `free`.
+
+## Step 3 — Create and read a service key
+
+A service key provides the credential JSON needed to authenticate the provider. Create a key on each service instance you want to use.
+
+### Option A — BTP Cockpit
+
+1. Go to **Services → Instances and Subscriptions** and open your service instance.
+2. Under **Service Keys**, choose **Create**, enter a name such as `terraform-key`, and confirm. Supply any service-specific parameters requested by the creation dialog.
+3. Open the new service key and view its JSON credentials.
+
+### Option B — Cloud Foundry CLI
+
+```bash
+cf create-service-key <instance-name> terraform-key
+cf service-key <instance-name> terraform-key
+```
+
+### Option C — SAP BTP Terraform Provider
+
+Use the [`btp_subaccount_service_binding`](https://registry.terraform.io/providers/SAP/btp/latest/docs/resources/subaccount_service_binding) resource with the instance from Step 2:
+
+```terraform
+resource "btp_subaccount_service_binding" "service" {
+  subaccount_id       = "<subaccount-id>"
+  service_instance_id = btp_subaccount_service_instance.service.id
+  name                = "terraform-key"
+}
+```
+
+The binding exposes the service key JSON in its `credentials` attribute. Apply this provisioning configuration before using the credentials to configure the SAP BTP Services provider; cTMS requires its configuration values to be known before making API requests. The provisioning state contains these credentials and should be stored securely.
+
+## Step 4 — Map credentials to provider settings
+
+CI/CD and cTMS both use the **OAuth2 client credentials** flow. Each service block needs credentials from its own service key. The relevant fields have the following structure (other fields are omitted):
+
+```json
+{
+  "api": "https://<service-api-host>",
+  "uaa": {
+    "clientid": "<client-id>",
+    "clientsecret": "<client-secret>",
+    "url": "https://<authentication-host>"
+  }
+}
+```
+
+| Provider attribute | Service key value | CI/CD environment variable | cTMS environment variable |
+|--------------------|-------------------|----------------------------|---------------------------|
+| `endpoint` | `api` | `BTP_CICD_ENDPOINT` | `BTP_CTMS_ENDPOINT` |
+| `client_id` | `uaa.clientid` | `BTP_CICD_CLIENT_ID` | `BTP_CTMS_CLIENT_ID` |
+| `client_secret` | `uaa.clientsecret` | `BTP_CICD_CLIENT_SECRET` | `BTP_CTMS_CLIENT_SECRET` |
+| `token_url` | `uaa.url` with `/oauth/token` appended | `BTP_CICD_TOKEN_URL` | `BTP_CTMS_TOKEN_URL` |
+
+For example, `uaa.url` value `https://my-subaccount.authentication.eu10.hana.ondemand.com` becomes token URL `https://my-subaccount.authentication.eu10.hana.ondemand.com/oauth/token`.
+
+For **cTMS**, set `endpoint` to the service root **without `/v2`**; the provider adds the API version.
+
+As support for more services is added, use the same setup flow and consult the [provider documentation](https://registry.terraform.io/providers/SAP/btp-services/latest/docs) for each new service's block name, authentication requirements, and credential mapping.
+
+## Step 5 — Supply credentials
+
+We recommend supplying credentials through environment variables rather than hardcoding them in Terraform files. Set all four variables for each service you enable, using the mapping above.
+
+### macOS / Linux
+
+For CI/CD:
+
+```bash
+export BTP_CICD_ENDPOINT="<api>"
+export BTP_CICD_TOKEN_URL="<uaa.url>/oauth/token"
+export BTP_CICD_CLIENT_ID="<uaa.clientid>"
+export BTP_CICD_CLIENT_SECRET="<uaa.clientsecret>"
+```
+
+For cTMS, use values from your cTMS service key:
+
+```bash
+export BTP_CTMS_ENDPOINT="<api-without-/v2>"
+export BTP_CTMS_TOKEN_URL="<uaa.url>/oauth/token"
+export BTP_CTMS_CLIENT_ID="<uaa.clientid>"
+export BTP_CTMS_CLIENT_SECRET="<uaa.clientsecret>"
+```
+
+### Windows
+
+In PowerShell, use `$Env:NAME = "value"`; in CMD, use `set "NAME=value"`. For example:
+
+```powershell
+$Env:BTP_CTMS_ENDPOINT = "<api-without-/v2>"
+```
+
+```shell
+set "BTP_CTMS_ENDPOINT=<api-without-/v2>"
+```
+
+Set the remaining variables using the same syntax and the names in Step 4.
+
+## Step 6 — Configure the provider and run Terraform
+
+Create a Terraform configuration with a block for each service you want to use. This example enables both CI/CD and cTMS; remove any service block you do not need. An empty block enables the service and reads its credentials from the environment. Explicit attribute values override environment variables.
 
 ```terraform
 terraform {
+  required_version = ">= 1.14.0"
+
   required_providers {
     btpservice = {
       source  = "SAP/btp-services"
-      version = "<latest>" # Replace <latest> with the latest provider version available on the Terraform Registry.
+      version = "<latest>" # Replace with a published version from the Terraform Registry.
     }
   }
 }
 
 provider "btpservice" {
   cicd {
-    # Credentials are read from BTP_CICD_* environment variables
+    # Credentials are read from BTP_CICD_* environment variables.
+  }
+
+  ctms {
+    # Credentials are read from BTP_CTMS_* environment variables.
   }
 }
 ```
 
-## Service-specific setup
-
-### CI/CD Service
-
-The CI/CD service uses the **OAuth2 client credentials** flow. The four credentials the provider needs (`endpoint`, `token_url`, `client_id`, `client_secret`) all come from a **service key** that you create on a CI/CD service instance in your BTP subaccount. The steps below walk you through the entire process.
-
-#### Step 1 — Entitle your subaccount
-
-Before you can create a CI/CD service instance your subaccount must have an entitlement for the service.
-
-1. Open the [SAP BTP Cockpit](https://cockpit.btp.cloud.sap) and navigate to your **global account**.
-2. Go to **Entitlements → Subaccount Assignments**.
-3. Select your subaccount, click **Configure Entitlements**, then **Add Service Plans**.
-4. Search for **Continuous Integration & Delivery**, select the plan you want (e.g. `default` or `free`), and save.
-
-> If the entitlement already appears under your subaccount you can skip this step.
-
-#### Step 2 — Subscribe to the CI/CD application *(optional — for the UI)*
-
-The CI/CD service offers both a web UI and an API. The Terraform provider only uses the API, but if you also want to manage pipelines through the browser you need a subscription.
-
-1. In the BTP Cockpit, navigate to your **subaccount**.
-2. Go to **Services → Service Marketplace** and find **Continuous Integration & Delivery**.
-3. Click the tile and choose **Create** with application plan **`default`**.
-
-#### Step 3 — Create a service instance
-
-This step creates the API-accessible instance that backs the service key.
-
-**Option A — BTP Cockpit**
-
-1. In your subaccount, go to **Services → Service Marketplace → Continuous Integration & Delivery**.
-2. Click **Create**.
-3. Choose the **`default`** (or `free`) plan, give the instance a name (e.g. `my-cicd-instance`), and click **Create**.
-
-**Option B — BTP CLI**
-
-```bash
-btp create services/instance \
-  --offering-name continuous-integration-and-delivery \
-  --plan-name default \
-  --name my-cicd-instance \
-  --subaccount <subaccount-id>
-```
-
-**Option C — Cloud Foundry CLI** *(if your subaccount has a CF environment)*
-
-```bash
-cf create-service continuous-integration-and-delivery default my-cicd-instance
-```
-
-**Option D — SAP BTP Terraform Provider**
-
-Use the [`btp_subaccount_service_plan`](https://registry.terraform.io/providers/SAP/btp/latest/docs/data-sources/subaccount_service_plan) data source and [`btp_subaccount_service_instance`](https://registry.terraform.io/providers/SAP/btp/latest/docs/resources/subaccount_service_instance) resource from the [SAP BTP Terraform Provider](https://registry.terraform.io/providers/SAP/btp/latest/docs):
+Add the resources or data sources you need from the [examples](../examples/) or the [provider documentation](https://registry.terraform.io/providers/SAP/btp-services/latest/docs). For a first read of existing service configuration, use either or both of these data sources, keeping only those for your enabled services:
 
 ```terraform
-data "btp_subaccount_service_plan" "cicd" {
-  subaccount_id = "<subaccount-id>"
-  offering_name = "continuous-integration-and-delivery"
-  name          = "default"
-}
+data "btpservice_cicd_repositories" "all" {}
 
-resource "btp_subaccount_service_instance" "cicd" {
-  subaccount_id  = "<subaccount-id>"
-  serviceplan_id = data.btp_subaccount_service_plan.cicd.id
-  name           = "my-cicd-instance"
-}
+data "btpservice_ctms_nodes" "all" {}
 ```
 
-#### Step 4 — Create a service key
-
-A service key (or service binding) generates the credential JSON you will use in the next step.
-
-**Option A — BTP Cockpit**
-
-1. Open the service instance you created in Step 3 (**Services → Instances → my-cicd-instance**).
-2. Click **Create Service Key** (or **Service Keys → Create**), give it a name (e.g. `terraform-key`), and confirm.
-
-**Option B — BTP CLI**
+Run Terraform from the directory containing your configuration, in the environment where you set the credentials:
 
 ```bash
-btp create services/key \
-  --name terraform-key \
-  --instance-name my-cicd-instance \
-  --subaccount <subaccount-id>
+terraform init
+terraform plan
+terraform apply
 ```
 
-**Option C — Cloud Foundry CLI**
-
-```bash
-cf create-service-key my-cicd-instance terraform-key
-```
-
-**Option D — SAP BTP Terraform Provider**
-
-Use the [`btp_subaccount_service_binding`](https://registry.terraform.io/providers/SAP/btp/latest/docs/resources/subaccount_service_binding) resource. The credential JSON is exposed in the `credentials` attribute and can be decoded directly to configure this provider:
-
-```terraform
-resource "btp_subaccount_service_binding" "cicd" {
-  subaccount_id       = "<subaccount-id>"
-  service_instance_id = btp_subaccount_service_instance.cicd.id
-  name                = "terraform-key"
-}
-
-locals {
-  cicd_creds = jsondecode(btp_subaccount_service_binding.cicd.credentials)
-}
-
-provider "btpservice" {
-  cicd {
-    endpoint      = local.cicd_creds.api
-    client_id     = local.cicd_creds.uaa.clientid
-    client_secret = local.cicd_creds.uaa.clientsecret
-    token_url     = "${local.cicd_creds.uaa.url}/oauth/token"
-  }
-}
-```
-
-#### Step 5 — Read the service key JSON
-
-1. In the BTP Cockpit, open the service key you just created and click **View**.
-2. You will see a JSON document similar to the following:
-
-```json
-{
-  "api": "https://cicd.cfapps.<region>.hana.ondemand.com",
-  "uaa": {
-    "clientid": "sb-clone-xxxx!bXXXX|cicd-service!bXXXX",
-    "clientsecret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=",
-    "url": "https://<subaccount-id>.authentication.<region>.hana.ondemand.com",
-    ...
-  }
-}
-```
-
-With the BTP CLI:
-
-```bash
-btp get services/key terraform-key \
-  --instance-name my-cicd-instance \
-  --subaccount <subaccount-id>
-```
-
-With the CF CLI:
-
-```bash
-cf service-key my-cicd-instance terraform-key
-```
-
-#### Step 6 — Map the service key fields to provider attributes
-
-Use the following table to convert the service key JSON into the provider values:
-
-| Provider attribute / environment variable              | Service key JSON field     | How to derive it                                |
-|--------------------------------------------------------|----------------------------|-------------------------------------------------|
-| `endpoint` / `BTP_CICD_ENDPOINT`                       | `api`                      | Copy the value directly                         |
-| `client_id` / `BTP_CICD_CLIENT_ID`                     | `uaa.clientid`             | Copy the value directly                         |
-| `client_secret` / `BTP_CICD_CLIENT_SECRET`             | `uaa.clientsecret`         | Copy the value directly                         |
-| `token_url` / `BTP_CICD_TOKEN_URL`                     | `uaa.url`                  | Append `/oauth/token` to the value              |
-
-For example, if `uaa.url` is `https://my-subaccount.authentication.eu10.hana.ondemand.com`, then `token_url` is `https://my-subaccount.authentication.eu10.hana.ondemand.com/oauth/token`.
-
-#### Step 7 — Export the environment variables
-
-We strongly recommend supplying credentials via environment variables rather than hardcoding them in Terraform files.
-
-**Mac / Linux**
-
-```bash
-export BTP_CICD_ENDPOINT="https://cicd.cfapps.<region>.hana.ondemand.com"
-export BTP_CICD_TOKEN_URL="https://<subaccount-id>.authentication.<region>.hana.ondemand.com/oauth/token"
-export BTP_CICD_CLIENT_ID="sb-clone-xxxx!bXXXX|cicd-service!bXXXX"
-export BTP_CICD_CLIENT_SECRET="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx="
-```
-
-**Windows (CMD)**
-
-```shell
-set BTP_CICD_ENDPOINT=https://cicd.cfapps.<region>.hana.ondemand.com
-set BTP_CICD_TOKEN_URL=https://<subaccount-id>.authentication.<region>.hana.ondemand.com/oauth/token
-set BTP_CICD_CLIENT_ID=sb-clone-xxxx!bXXXX|cicd-service!bXXXX
-set BTP_CICD_CLIENT_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=
-```
-
-**Windows (PowerShell)**
-
-```shell
-$Env:BTP_CICD_ENDPOINT = "https://cicd.cfapps.<region>.hana.ondemand.com"
-$Env:BTP_CICD_TOKEN_URL = "https://<subaccount-id>.authentication.<region>.hana.ondemand.com/oauth/token"
-$Env:BTP_CICD_CLIENT_ID = "sb-clone-xxxx!bXXXX|cicd-service!bXXXX"
-$Env:BTP_CICD_CLIENT_SECRET = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx="
-```
-
-The supported environment variables are:
-
-| Environment Variable     | Description                        |
-|--------------------------|------------------------------------|
-| `BTP_CICD_ENDPOINT`      | CI/CD service base URL             |
-| `BTP_CICD_TOKEN_URL`     | OAuth2 token endpoint              |
-| `BTP_CICD_CLIENT_ID`     | OAuth2 client ID                   |
-| `BTP_CICD_CLIENT_SECRET` | OAuth2 client secret *(sensitive)* |
-
-## Documentation
-
-Terraform Provider for SAP BTP Services [Documentation](https://registry.terraform.io/providers/SAP/btp-services/latest/docs)
+Review the plan before confirming the apply. Repeat the same setup for another service instance when you expand your configuration.

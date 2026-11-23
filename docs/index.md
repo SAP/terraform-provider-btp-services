@@ -68,7 +68,7 @@ Optional:
 - `client_id` (String) The OAuth2 client ID. Maps to the `uaa.clientid` field in the service key JSON. Env: `BTP_CICD_CLIENT_ID`.
 - `client_secret` (String, Sensitive) The OAuth2 client secret. Maps to the `uaa.clientsecret` field in the service key JSON. Env: `BTP_CICD_CLIENT_SECRET`.
 - `endpoint` (String) The CI/CD service base URL. Maps to the `api` field in the service key JSON. Env: `BTP_CICD_ENDPOINT`.
-- `timeout` (Number) HTTP request timeout in seconds. Defaults to 60.
+- `timeout` (Number) Optional HTTP request timeout in seconds. Defaults to 60. This limits requests, not the overall Terraform resource operation.
 - `token_url` (String) The OAuth2 token endpoint. Construct by appending `/oauth/token` to the `uaa.url` field in the service key JSON. Env: `BTP_CICD_TOKEN_URL`.
 
 
@@ -77,31 +77,29 @@ Optional:
 
 Optional:
 
-- `client_id` (String) OAuth client ID. Env: BTP_CTMS_CLIENT_ID.
-- `client_secret` (String, Sensitive) OAuth client secret. Use an ephemeral variable or BTP_CTMS_CLIENT_SECRET to avoid persisting the input in a saved plan.
-- `endpoint` (String) CTMS service root without /v2. Env: BTP_CTMS_ENDPOINT.
+- `client_id` (String) OAuth client ID. Maps to the `uaa.clientid` field in the service key JSON. Env: `BTP_CTMS_CLIENT_ID`.
+- `client_secret` (String, Sensitive) OAuth client secret. Maps to the `uaa.clientsecret` field in the service key JSON. Env: `BTP_CTMS_CLIENT_SECRET`.
+- `endpoint` (String) CTMS service root without /v2. Maps to the `api` field in the service key JSON. Env: `BTP_CTMS_ENDPOINT`.
 - `timeout` (Number) Optional HTTP request timeout in seconds. Defaults to 60. This limits requests, not the overall Terraform resource operation.
-- `token_url` (String) Complete OAuth token endpoint. Env: BTP_CTMS_TOKEN_URL.
+- `token_url` (String) Complete OAuth token endpoint. Construct by appending `/oauth/token` to the `uaa.url` field in the service key JSON. Env: `BTP_CTMS_TOKEN_URL`.
 
 ## Authentication
 
 The provider uses OAuth2 client credentials flow to authenticate against SAP BTP services.
 Each service block (`cicd` or `ctms`) requires its own credentials obtained from a **service key** on a BTP service instance.
 
-For a step-by-step CI/CD walkthrough — including how to entitle your subaccount, create the service instance, generate the service key, and map the JSON fields to provider attributes — see the [Quick Start Guide](../guides/QUICKSTART.md).
+For a step-by-step walkthrough — including how to entitle your subaccount, create the service instance, generate the service key, and map the JSON fields to provider attributes — see the [Quick Start Guide](https://github.com/SAP/terraform-provider-btp-services/blob/main/guides/QUICKSTART.md).
 
 ### CI/CD service key field mapping
 
 When you view the service key in the BTP Cockpit or via the CLI you receive a JSON document. Map its fields to provider attributes as follows:
 
-| Provider attribute | Service key JSON field     | Notes                                     |
-|--------------------|----------------------------|-------------------------------------------|
-| `endpoint`         | `api`                      | Copy the value directly                   |
-| `client_id`        | `uaa.clientid`             | Copy the value directly                   |
-| `client_secret`    | `uaa.clientsecret`         | Copy the value directly                   |
-| `token_url`        | `uaa.url`                  | Append `/oauth/token` to the value        |
-
-All four attributes can also be supplied via environment variables (`BTP_CICD_ENDPOINT`, `BTP_CICD_TOKEN_URL`, `BTP_CICD_CLIENT_ID`, `BTP_CICD_CLIENT_SECRET`).
+| Provider attribute | Environment variable      | Service key JSON field     | Notes                                     |
+|--------------------|---------------------------|----------------------------|-------------------------------------------|
+| `endpoint`         | `BTP_CICD_ENDPOINT`       | `api`                      | Copy the value directly                   |
+| `client_id`        | `BTP_CICD_TOKEN_URL`      | `uaa.clientid`             | Copy the value directly                   |
+| `client_secret`    | `BTP_CICD_CLIENT_ID`      | `uaa.clientsecret`         | Copy the value directly                   |
+| `token_url`        | `BTP_CICD_CLIENT_SECRET`  | `uaa.url`                  | Append `/oauth/token` to the value        |
 
 We recommend sourcing credentials via environment variables rather than hardcoding them in Terraform configuration files.
 
@@ -111,15 +109,14 @@ Configure a `ctms` block to use CTMS nodes, routes, destination metadata, and UI
 CTMS requires Terraform 1.14 or later. Configure these attributes using credentials
 from your Cloud Transport Management service key, or set the corresponding environment variables:
 
-| Provider attribute | Environment variable     | Value                                              |
-|--------------------|--------------------------|----------------------------------------------------|
-| `endpoint`         | `BTP_CTMS_ENDPOINT`       | CTMS service root URL without `/v2`                 |
-| `token_url`        | `BTP_CTMS_TOKEN_URL`      | Complete OAuth token endpoint ending in `/oauth/token` |
-| `client_id`        | `BTP_CTMS_CLIENT_ID`      | OAuth client ID                                    |
-| `client_secret`    | `BTP_CTMS_CLIENT_SECRET`  | OAuth client secret                                |
+| Provider attribute | Environment variable      | Service key JSON field     | Value                                              |
+|--------------------|---------------------------|----------------------------|----------------------------------------------------|
+| `endpoint`         | `BTP_CTMS_ENDPOINT`       | `api`                      | CTMS service root URL without `/v2`                 |
+| `token_url`        | `BTP_CTMS_TOKEN_URL`      | `uaa.clientid`             | Complete OAuth token endpoint ending in `/oauth/token` |
+| `client_id`        | `BTP_CTMS_CLIENT_ID`      | `uaa.clientsecret`         | OAuth client ID                                    |
+| `client_secret`    | `BTP_CTMS_CLIENT_SECRET`  | `uaa.url`                  | OAuth client secret                                |
 
-When all four environment variables are set, an empty `ctms {}` block enables the
-service. Explicit attribute values override environment variables. Use an ephemeral
+When all four environment variables are set, an empty `ctms {}` block enables the service. Explicit attribute values override environment variables. Use an ephemeral
 variable for `client_secret` if you supply it through Terraform configuration.
 
 The optional `timeout` defaults to 60 seconds per HTTP request. Each provider alias

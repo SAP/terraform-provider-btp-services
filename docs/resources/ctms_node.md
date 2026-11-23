@@ -87,3 +87,13 @@ Import is supported using the following syntax:
 # Use the provider configuration for the original CTMS landscape.
 terraform import btpservice_ctms_node.source "12345"
 ```
+
+## Restriction
+
+### Labels of Nodes
+
+The current version of the V2 API for cTMS landscape management (status: 23.11.2026) does not support the creation or modification of labels. Consequently the resource does not comprise these attributes.
+
+### Import Settings of Nodes
+
+The current version of the V2 API for cTMS landscape management (status: 23.11.2026) does not support the creation or modification of import settings. Consequently the resource does not comprise these attributes.

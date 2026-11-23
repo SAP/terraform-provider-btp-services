@@ -34,20 +34,20 @@ func ctmsProviderBlock() schema.SingleNestedBlock {
 		Attributes: map[string]schema.Attribute{
 			"endpoint": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "CTMS service root without /v2. Env: BTP_CTMS_ENDPOINT.",
+				MarkdownDescription: "CTMS service root without /v2. Maps to the `api` field in the service key JSON. Env: `BTP_CTMS_ENDPOINT`.",
 			},
 			"token_url": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Complete OAuth token endpoint. Env: BTP_CTMS_TOKEN_URL.",
+				MarkdownDescription: "Complete OAuth token endpoint. Construct by appending `/oauth/token` to the `uaa.url` field in the service key JSON. Env: `BTP_CTMS_TOKEN_URL`.",
 			},
 			"client_id": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "OAuth client ID. Env: BTP_CTMS_CLIENT_ID.",
+				MarkdownDescription: "OAuth client ID. Maps to the `uaa.clientid` field in the service key JSON. Env: `BTP_CTMS_CLIENT_ID`.",
 			},
 			"client_secret": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
-				MarkdownDescription: "OAuth client secret. Use an ephemeral variable or BTP_CTMS_CLIENT_SECRET to avoid persisting the input in a saved plan.",
+				MarkdownDescription: "OAuth client secret. Maps to the `uaa.clientsecret` field in the service key JSON. Env: `BTP_CTMS_CLIENT_SECRET`.",
 			},
 			"timeout": schema.Int64Attribute{
 				Optional:            true,

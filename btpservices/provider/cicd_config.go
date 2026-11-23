@@ -51,7 +51,7 @@ func cicdProviderBlock() schema.SingleNestedBlock {
 				Sensitive:           true,
 			},
 			"timeout": schema.Int64Attribute{
-				MarkdownDescription: "HTTP request timeout in seconds. Defaults to 60.",
+				MarkdownDescription: "Optional HTTP request timeout in seconds. Defaults to 60. This limits requests, not the overall Terraform resource operation.",
 				Optional:            true,
 			},
 		},
