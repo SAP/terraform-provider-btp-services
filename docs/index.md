@@ -11,8 +11,13 @@ Manages resources across SAP Business Technology Platform services.
 
 ## Example Usage
 
+Configure a service block for each service you use. The example below enables both
+CI/CD and Cloud Transport Management; omit either block if you do not use that service.
+
 ```terraform
 terraform {
+  required_version = ">= 1.14.0"
+
   required_providers {
     btpservice = {
       source  = "sap/btp-services"
@@ -27,6 +32,13 @@ provider "btpservice" {
     token_url     = "https://your-subaccount.authentication.us10.hana.ondemand.com/oauth/token"
     client_id     = "sb-clone-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx!b12345|cicd-service!b6789"
     client_secret = "your-client-secret-value-here="
+  }
+
+  ctms {
+    endpoint      = "https://transport-service-app-backend.ts.cfapps.landscape.hana.ondemand.com"
+    token_url     = "https://your-subaccount.authentication.us10.hana.ondemand.com/oauth/token"
+    client_id     = "your-ctms-client-id"
+    client_secret = "your-ctms-client-secret"
   }
 }
 ```
@@ -46,6 +58,7 @@ Before configuring this block you need:
 3. A service key on that instance — the JSON it returns maps to the attributes below. You can create one with the [`btp_subaccount_service_binding`](https://registry.terraform.io/providers/SAP/btp/latest/docs/resources/subaccount_service_binding) resource.
 
 See the Quick Start Guide for step-by-step instructions. (see [below for nested schema](#nestedblock--cicd))
+- `ctms` (Block, Optional) Configuration for SAP Cloud Transport Management. Requires Terraform 1.14 or later. Configure this block (which may be empty when using environment variables) to enable CTMS. Each provider alias has its own client and landscape scope. (see [below for nested schema](#nestedblock--ctms))
 
 <a id="nestedblock--cicd"></a>
 ### Nested Schema for `cicd`
@@ -55,27 +68,63 @@ Optional:
 - `client_id` (String) The OAuth2 client ID. Maps to the `uaa.clientid` field in the service key JSON. Env: `BTP_CICD_CLIENT_ID`.
 - `client_secret` (String, Sensitive) The OAuth2 client secret. Maps to the `uaa.clientsecret` field in the service key JSON. Env: `BTP_CICD_CLIENT_SECRET`.
 - `endpoint` (String) The CI/CD service base URL. Maps to the `api` field in the service key JSON. Env: `BTP_CICD_ENDPOINT`.
-- `timeout` (Number) HTTP request timeout in seconds. Defaults to 60.
+- `timeout` (Number) Optional HTTP request timeout in seconds. Defaults to 60. This limits requests, not the overall Terraform resource operation.
 - `token_url` (String) The OAuth2 token endpoint. Construct by appending `/oauth/token` to the `uaa.url` field in the service key JSON. Env: `BTP_CICD_TOKEN_URL`.
+
+
+<a id="nestedblock--ctms"></a>
+### Nested Schema for `ctms`
+
+Optional:
+
+- `client_id` (String) OAuth client ID. Maps to the `uaa.clientid` field in the service key JSON. Env: `BTP_CTMS_CLIENT_ID`.
+- `client_secret` (String, Sensitive) OAuth client secret. Maps to the `uaa.clientsecret` field in the service key JSON. Env: `BTP_CTMS_CLIENT_SECRET`.
+- `endpoint` (String) CTMS HTTPS service root without /v2. Maps to the `api` field in the service key JSON. Env: `BTP_CTMS_ENDPOINT`.
+- `timeout` (Number) Optional HTTP request timeout in seconds. Defaults to 60. This limits requests, not the overall Terraform resource operation.
+- `token_url` (String) Complete HTTPS OAuth token endpoint. Construct by appending `/oauth/token` to the `uaa.url` field in the service key JSON. Env: `BTP_CTMS_TOKEN_URL`.
 
 ## Authentication
 
 The provider uses OAuth2 client credentials flow to authenticate against SAP BTP services.
-Each service block (e.g. `cicd`) requires its own credentials obtained from a **service key** on a BTP service instance.
+Each service block (`cicd` or `ctms`) requires its own credentials obtained from a **service key** on a BTP service instance.
 
-For a step-by-step walkthrough — including how to entitle your subaccount, create the service instance, generate the service key, and map the JSON fields to provider attributes — see the [Quick Start Guide](../guides/QUICKSTART.md).
+For a step-by-step walkthrough — including how to entitle your subaccount, create the service instance, generate the service key, and map the JSON fields to provider attributes — see the [Quick Start Guide](https://github.com/SAP/terraform-provider-btp-services/blob/main/guides/QUICKSTART.md).
 
 ### CI/CD service key field mapping
 
 When you view the service key in the BTP Cockpit or via the CLI you receive a JSON document. Map its fields to provider attributes as follows:
 
-| Provider attribute | Service key JSON field     | Notes                                     |
-|--------------------|----------------------------|-------------------------------------------|
-| `endpoint`         | `api`                      | Copy the value directly                   |
-| `client_id`        | `uaa.clientid`             | Copy the value directly                   |
-| `client_secret`    | `uaa.clientsecret`         | Copy the value directly                   |
-| `token_url`        | `uaa.url`                  | Append `/oauth/token` to the value        |
-
-All four attributes can also be supplied via environment variables (`BTP_CICD_ENDPOINT`, `BTP_CICD_TOKEN_URL`, `BTP_CICD_CLIENT_ID`, `BTP_CICD_CLIENT_SECRET`).
+| Provider attribute | Environment variable      | Service key JSON field     | Notes                                     |
+|--------------------|---------------------------|----------------------------|-------------------------------------------|
+| `endpoint`         | `BTP_CICD_ENDPOINT`       | `api`                      | Copy the value directly                   |
+| `client_id`        | `BTP_CICD_CLIENT_ID`      | `uaa.clientid`             | Copy the value directly                   |
+| `client_secret`    | `BTP_CICD_CLIENT_SECRET`  | `uaa.clientsecret`         | Copy the value directly                   |
+| `token_url`        | `BTP_CICD_TOKEN_URL`      | `uaa.url`                  | Append `/oauth/token` to the value        |
 
 We recommend sourcing credentials via environment variables rather than hardcoding them in Terraform configuration files.
+
+### Cloud Transport Management
+
+Configure a `ctms` block to use CTMS nodes, routes, destination metadata, and UI links.
+CTMS requires Terraform 1.14 or later. Configure these attributes using credentials
+from your Cloud Transport Management service key, or set the corresponding environment variables:
+
+| Provider attribute | Environment variable      | Service key JSON field     | Value                                              |
+|--------------------|---------------------------|----------------------------|----------------------------------------------------|
+| `endpoint`         | `BTP_CTMS_ENDPOINT`       | `api`                      | CTMS service root URL without `/v2`                 |
+| `token_url`        | `BTP_CTMS_TOKEN_URL`      | `uaa.url`                  | Append `/oauth/token` to the value                  |
+| `client_id`        | `BTP_CTMS_CLIENT_ID`      | `uaa.clientid`             | Copy the value directly                            |
+| `client_secret`    | `BTP_CTMS_CLIENT_SECRET`  | `uaa.clientsecret`         | Copy the value directly                            |
+
+When all four environment variables are set, an empty `ctms {}` block enables the service. Explicit attribute values override environment variables. Use an ephemeral
+variable for `client_secret` if you supply it through Terraform configuration.
+
+The optional `timeout` defaults to 60 seconds per HTTP request. Each provider alias
+has its own CTMS client and landscape scope.
+
+Both CTMS URLs must use HTTPS. The default CTMS client also rejects redirects to HTTP.
+
+CTMS reads, deletes, and OAuth token requests are retried up to three times for HTTP 429
+and 5xx responses. Node and route creates and updates are not automatically retried.
+If a create fails after the server may have applied it, inspect the landscape and
+import the created object by ID before retrying the apply.

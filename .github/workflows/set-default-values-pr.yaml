@@ -15,7 +15,7 @@ permissions:
 jobs:
   set-default-values:
     runs-on: ubuntu-latest
-    environment: 
+    environment:
       name: btp-services
     steps:
       - name: Add PR to default project

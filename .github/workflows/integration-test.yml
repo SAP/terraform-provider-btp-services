@@ -10,5 +10,10 @@ permissions:
 jobs:
   CICD-integration-test:
     name: CICD Integration Test
-    uses: ./.github/workflows/tf-cicd-integration-test-main.yml
+    uses: ./.github/workflows/tf-cicd-integration-test.yml
+    secrets: inherit
+
+  CTMS-integration-test:
+    name: CTMS Integration Test
+    uses: ./.github/workflows/tf-ctms-integration-test.yml
     secrets: inherit
