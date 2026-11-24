@@ -59,13 +59,12 @@ func TestNodeResourceDescriptionReset(t *testing.T) {
 							Body: io.NopCloser(strings.NewReader(body)), Request: req,
 						}, nil
 					})
-					r := &nodeResource{Connection: utils.Connection{
+					r := &nodeResource{
 						Client: ctmsclient.NewCtmsClientFacadeWithHTTP(ctmsclient.CtmsClientConfig{
 							Endpoint: "https://ctms.example", TokenURL: "https://auth.example/oauth/token",
 							ClientID: "test-client", ClientSecret: "test-secret",
 						}, &http.Client{Transport: transport}),
-						Scope: shared.CtmsScope{Endpoint: "https://ctms.example"},
-					}}
+						Scope: shared.CtmsScope{Endpoint: "https://ctms.example"}}
 					var schema resource.SchemaResponse
 					r.Schema(ctx, resource.SchemaRequest{}, &schema)
 					initial, diagnostics := nodeValueFrom(ctx, ctmsmodels.NodeResponseTarget{
