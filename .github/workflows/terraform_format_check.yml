@@ -22,11 +22,13 @@ jobs:
           with:
             terraform_wrapper: false
 
-      - name: Validate Terraform format
-        shell: bash
-        run: |
-          EXIT_CODE=0
-          echo "Checking format of $file with terraform fmt"
-          terraform -chdir='./examples' fmt -check -recursive -no-color || EXIT_CODE=$?
-          echo "Result is $EXIT_CODE"
-          exit $EXIT_CODE
+        - name: Validate Terraform format
+          shell: bash
+          run: |
+            EXIT_CODE=0
+            for file in $(find ./examples -name "*.tf"); do
+              echo "Checking format of $file with terraform fmt"
+              terraform -chdir='./examples' fmt -check -recursive -no-color || EXIT_CODE=$?
+              echo "Result is $EXIT_CODE"
+            done
+            exit $EXIT_CODE
