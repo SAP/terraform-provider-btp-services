@@ -66,6 +66,7 @@ func configureCTMS(_ context.Context, data *ctmsProviderModel, terraformVersion 
 		}
 	}
 
+	resolved := make(map[string]bool)
 	resolve := func(name string, value types.String) string {
 		p := path.Root("ctms").AtName(name)
 		if value.IsUnknown() {
@@ -80,8 +81,10 @@ func configureCTMS(_ context.Context, data *ctmsProviderModel, terraformVersion 
 
 		if strings.TrimSpace(result) == "" {
 			diags.AddAttributeError(p, "Missing CTMS Configuration", fmt.Sprintf("Set %s or BTP_CTMS_%s.", name, strings.ToUpper(name)))
+			return result
 		}
 
+		resolved[name] = true
 		return result
 	}
 
@@ -101,6 +104,9 @@ func configureCTMS(_ context.Context, data *ctmsProviderModel, terraformVersion 
 		"endpoint":  cfg.Endpoint,
 		"token_url": cfg.TokenURL,
 	} {
+		if !resolved[name] {
+			continue
+		}
 		u, err := url.Parse(value)
 		if err != nil || u.Host == "" || u.Scheme != "https" || u.User != nil || u.RawQuery != "" || u.Fragment != "" {
 			diags.AddAttributeError(

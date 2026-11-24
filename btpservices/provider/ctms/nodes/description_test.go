@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -48,6 +49,32 @@ func TestNodeDescriptionValidation(t *testing.T) {
 				}, &result)
 			}
 			require.Equal(t, !tc.valid, result.Diagnostics.HasError(), result.Diagnostics)
+		})
+	}
+}
+
+func TestNodeDescriptionResetDiagnostics(t *testing.T) {
+	for _, tc := range []struct {
+		name                string
+		requested, returned types.String
+		wantError           bool
+	}{
+		{"reset confirmed", types.StringValue(""), types.StringValue(""), false},
+		{"old description returned", types.StringValue(""), types.StringValue("initial"), true},
+		{"omitted description", types.StringNull(), types.StringValue("initial"), false},
+		{"unknown description", types.StringUnknown(), types.StringValue("initial"), false},
+		{"non-empty description", types.StringValue("updated"), types.StringValue("updated"), false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			diagnostics := nodeDescriptionResetDiagnostics(tc.requested, tc.returned)
+			if !tc.wantError {
+				require.Empty(t, diagnostics)
+				return
+			}
+			require.Len(t, diagnostics, 1)
+			require.Equal(t, diag.SeverityError, diagnostics[0].Severity())
+			require.Equal(t, "CTMS Node Description Reset Failed", diagnostics[0].Summary())
+			require.Equal(t, path.Root("description"), diagnostics[0].(diag.DiagnosticWithPath).Path())
 		})
 	}
 }

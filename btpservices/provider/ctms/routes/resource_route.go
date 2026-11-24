@@ -240,6 +240,6 @@ func (r *routeResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 	}
 
 	if err := r.Client.Routes.Delete(ctx, id); err != nil && !ctmsmodels.IsNotFound(err) {
-		resp.Diagnostics.AddError("Error Deleting CTMS Route", err.Error()+"")
+		resp.Diagnostics.AddError("Error Deleting CTMS Route", err.Error())
 	}
 }

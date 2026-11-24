@@ -175,6 +175,7 @@ func (r *nodeResource) Create(ctx context.Context, req resource.CreateRequest, r
 	// Preserve the assigned identity even if the response is incomplete.
 	resp.Diagnostics.Append(resp.State.Set(ctx, model)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, r.Identity(model.ID))...)
+	resp.Diagnostics.Append(nodeDescriptionResetDiagnostics(types.StringPointerValue(request.Description), model.Description)...)
 }
 
 func (r *nodeResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -260,6 +261,7 @@ func (r *nodeResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, model)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, r.Identity(model.ID))...)
+	resp.Diagnostics.Append(nodeDescriptionResetDiagnostics(types.StringPointerValue(request.Description), model.Description)...)
 }
 
 func (r *nodeResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

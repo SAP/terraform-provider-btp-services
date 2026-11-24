@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/SAP/terraform-provider-btp-services/btpservices/provider/ctms/utils"
@@ -70,6 +71,17 @@ func nodeValueFrom(ctx context.Context, v ctmsmodels.NodeResponseTarget) (nodeMo
 	m.Targets, d = targetsValueFrom(ctx, v.Targets)
 	diags.Append(d...)
 	return m, diags
+}
+
+// Report an ignored reset while preserving the description returned by CTMS.
+func nodeDescriptionResetDiagnostics(requested, returned types.String) diag.Diagnostics {
+	var diags diag.Diagnostics
+	if requested.Equal(types.StringValue("")) && returned.ValueString() != "" {
+		diags.AddAttributeError(path.Root("description"), "CTMS Node Description Reset Failed",
+			"CTMS returned a non-empty description after receiving description: null. "+
+				"The API did not confirm the reset. The returned description and node identity have been retained in state.")
+	}
+	return diags
 }
 
 var importOptionsType = types.ObjectType{AttrTypes: map[string]attr.Type{"strategy": types.StringType}}
