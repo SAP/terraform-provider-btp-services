@@ -38,23 +38,23 @@ jobs:
         language: ["go"]
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
+    - name: Checkout repository
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # Manually install the right version of Go
       # See https://github.com/github/codeql-action/issues/1842 and https://github.com/github/codeql/issues/13992
-      - name: Setup Go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v6.2.0
-        with:
-          go-version-file: "go.mod"
-          # not needed but gets rid of warnings
-          cache: false
+    - name: Setup Go
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v6.2.0
+      with:
+        go-version-file: "go.mod"
+        # not needed but gets rid of warnings
+        cache: false
 
-      # Initializes the CodeQL tools for scanning.
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4.39.4
-        with:
-          languages: ${{ matrix.language }}
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@38112626f97ac1fd7acf3df7ebca51f4677c1b38 # codeql-bundle-v2.27.6
+      with:
+        languages: ${{ matrix.language }}
         # If you wish to specify custom queries, you can do so here or in a config file.
         # By default, queries listed here will override any specified in a config file.
         # Prefix the list here with "+" to use these queries and those in the config file.
@@ -62,10 +62,11 @@ jobs:
         # Details on CodeQL's query packs refer to : https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
         # queries: security-extended,security-and-quality
 
-      # Autobuild attempts to build any compiled languages  (C/C++, C#, Go, or Java).
-      # If this step fails, then you should remove it and run the build manually (see below)
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v4.39.4
+
+    # Autobuild attempts to build any compiled languages  (C/C++, C#, Go, or Java).
+    # If this step fails, then you should remove it and run the build manually (see below)
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@38112626f97ac1fd7acf3df7ebca51f4677c1b38 # codeql-bundle-v2.27.6
 
       # ℹ️ Command-line programs to run using the OS shell.
       # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
@@ -77,7 +78,7 @@ jobs:
       #   echo "Run, Build Application using script"
       #   ./location_of_script_within_repo/buildscript.sh
 
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4.39.4
-        with:
-          category: "/language:${{matrix.language}}"
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v4.39.4
+      with:
+        category: "/language:${{matrix.language}}"
