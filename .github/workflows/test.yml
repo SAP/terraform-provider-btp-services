@@ -82,9 +82,9 @@ jobs:
           git diff --compact-summary --exit-code || \
             (echo; echo "Unexpected difference in directories after running 'go fix'. Run 'go fix ./...' command and commit."; exit 1)
 
-  fixtureDriftDetect:
+  cicdFixtureDriftDetect:
     if: github.event.pull_request.draft == false
-    name: Fixture Drift Detection
+    name: CICD Fixture Drift Detection
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
